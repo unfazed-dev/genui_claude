@@ -4,12 +4,7 @@ version: 1.0.0
 publish_to: 'none'
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
-
-# Workspace configuration for Dart 3.5+
-workspace:
-  - packages/anthropic_a2ui
-  - packages/genui_anthropic
+  sdk: ^3.5.0
 
 dev_dependencies:
   melos: ^6.0.0

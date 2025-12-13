@@ -4,13 +4,14 @@ version: 0.1.0
 publish_to: 'none'
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
-  flutter: '>=3.10.0'
+  sdk: ^3.5.0
+  flutter: '>=3.22.0'
 
 dependencies:
   flutter:
     sdk: flutter
   # Reference to sibling package using path dependency
+  # Melos will manage this during bootstrap
   anthropic_a2ui:
     path: ../anthropic_a2ui
 
