@@ -1,7 +1,11 @@
 name: genui_anthropic
-description: GenUI Anthropic Flutter package for the anthropic_genui monorepo.
+description: >-
+  Flutter ContentGenerator implementation for Anthropic's Claude AI,
+  enabling Claude-powered generative UI with the GenUI SDK.
 version: 0.1.0
 publish_to: 'none'
+repository: https://github.com/unfazed-dev/anthropic_genui
+issue_tracker: https://github.com/unfazed-dev/anthropic_genui/issues
 
 environment:
   sdk: ^3.5.0
@@ -10,6 +14,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  genui: ^0.5.1
   # Reference to sibling package using path dependency
   # Melos will manage this during bootstrap
   anthropic_a2ui:
@@ -19,5 +24,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  mockito: ^5.4.0
+  build_runner: ^2.4.0
 
 flutter:

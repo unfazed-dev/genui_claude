@@ -1,6 +1,6 @@
 # TRACKER: anthropic_a2ui Package Implementation
 
-## Status: PLANNING
+## Status: IN_PROGRESS
 
 ## Overview
 
@@ -11,65 +11,65 @@ Pure Dart package for converting between Anthropic's Claude API responses and A2
 ## Tasks
 
 ### Phase 1: Package Infrastructure
-- [ ] Convert pubspec.yaml to pure Dart (remove Flutter SDK dependency)
-- [ ] Add runtime dependencies:
-  - [ ] anthropic_sdk_dart: ^0.9.0
-  - [ ] json_annotation: ^4.8.0
-  - [ ] meta: ^1.9.0
-  - [ ] collection: ^1.18.0
-- [ ] Add dev dependencies:
-  - [ ] test: ^1.24.0
-  - [ ] mockito: ^5.4.0
-  - [ ] build_runner: ^2.4.0
-  - [ ] json_serializable: ^6.7.0
-  - [ ] coverage: ^1.6.0
-- [ ] Update SDK constraint to `>=3.0.0 <4.0.0`
-- [ ] Create package directory structure per spec
+- [x] Convert pubspec.yaml to pure Dart (remove Flutter SDK dependency)
+- [x] Add runtime dependencies:
+  - [x] anthropic_sdk_dart: ^0.3.0
+  - [x] json_annotation: ^4.8.0
+  - [x] meta: ^1.9.0
+  - [x] collection: ^1.18.0
+- [x] Add dev dependencies:
+  - [x] test: ^1.24.0
+  - [x] mockito: ^5.4.0
+  - [x] build_runner: ^2.4.0
+  - [x] json_serializable: ^6.7.0
+  - [x] coverage: ^1.6.0
+- [x] Update SDK constraint to `>=3.0.0 <4.0.0`
+- [x] Create package directory structure per spec
 
 ### Phase 2: Data Models
-- [ ] Create `lib/src/models/` directory
-- [ ] Implement A2uiMessageData sealed class hierarchy
-- [ ] Implement BeginRenderingData
-- [ ] Implement SurfaceUpdateData
-- [ ] Implement DataModelUpdateData
-- [ ] Implement DeleteSurfaceData
-- [ ] Implement WidgetNode model
-- [ ] Implement A2uiToolSchema
-- [ ] Implement StreamEvent types
-- [ ] Implement ParseResult
-- [ ] Add JSON serialization with json_serializable
+- [x] Create `lib/src/models/` directory
+- [x] Implement A2uiMessageData sealed class hierarchy
+- [x] Implement BeginRenderingData
+- [x] Implement SurfaceUpdateData
+- [x] Implement DataModelUpdateData
+- [x] Implement DeleteSurfaceData
+- [x] Implement WidgetNode model
+- [x] Implement A2uiToolSchema
+- [x] Implement StreamEvent types
+- [x] Implement ParseResult
+- [ ] Add JSON serialization with json_serializable (manual JSON for now)
 
 ### Phase 3: Core Components
-- [ ] Create A2uiToolConverter (lib/src/converter/)
-  - [ ] toClaudeTools() method
-  - [ ] generateToolInstructions() method
-  - [ ] validateToolInput() method
-  - [ ] Schema mapping utilities
-- [ ] Create ClaudeA2uiParser (lib/src/parser/)
-  - [ ] parseToolUse() method
-  - [ ] parseMessage() method
-  - [ ] parseStream() method
-  - [ ] Block handlers for each content type
-- [ ] Create ClaudeStreamHandler (lib/src/stream/)
-  - [ ] streamRequest() method
-  - [ ] StreamConfig class
-  - [ ] Retry policy implementation
-  - [ ] Rate limiter
+- [x] Create A2uiToolConverter (lib/src/converter/)
+  - [x] toClaudeTools() method
+  - [x] generateToolInstructions() method
+  - [x] validateToolInput() method
+  - [x] Schema mapping utilities
+- [x] Create ClaudeA2uiParser (lib/src/parser/)
+  - [x] parseToolUse() method
+  - [x] parseMessage() method
+  - [x] parseStream() method
+  - [x] Block handlers for each content type
+- [x] Create ClaudeStreamHandler (lib/src/stream/)
+  - [x] streamRequest() method
+  - [x] StreamConfig class
+  - [x] Retry policy implementation
+  - [x] Rate limiter
 
 ### Phase 4: Error Handling
-- [ ] Create exception hierarchy (lib/src/exceptions/)
-  - [ ] A2uiException sealed class
-  - [ ] ToolConversionException
-  - [ ] MessageParseException
-  - [ ] StreamException
-  - [ ] ValidationException
+- [x] Create exception hierarchy (lib/src/exceptions/)
+  - [x] A2uiException sealed class
+  - [x] ToolConversionException
+  - [x] MessageParseException
+  - [x] StreamException
+  - [x] ValidationException
 - [ ] Implement error recovery strategies
-- [ ] Add validation utilities
+- [x] Add validation utilities
 
 ### Phase 5: Public API
-- [ ] Update lib/anthropic_a2ui.dart exports
-- [ ] Ensure all public types are exported
-- [ ] Add library-level documentation
+- [x] Update lib/anthropic_a2ui.dart exports
+- [x] Ensure all public types are exported
+- [x] Add library-level documentation
 
 ### Phase 6: Testing
 - [ ] Unit tests for A2uiToolConverter
