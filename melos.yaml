@@ -1,0 +1,95 @@
+name: anthropic_genui
+
+packages:
+  - packages/**
+
+command:
+  version:
+    # Generate commit links in package changelogs
+    linkToCommits: true
+    # Only allow versioning to happen on main branch
+    branch: main
+    # Additionally build a changelog at the root of the workspace
+    workspaceChangelog: true
+
+  bootstrap:
+    # It seems so that running "pub get" in parallel has some issues (dart/pub/issues/3404)
+    # Disable this if your bootstrap fails intermittently
+    runPubGetInParallel: true
+    # Set to false if you don't want to use Flutter's built-in pubspec overrides
+    usePubspecOverrides: true
+
+scripts:
+  # Bootstrap all packages
+  bootstrap:
+    run: melos bootstrap
+    description: Bootstrap all packages in the workspace
+
+  # Clean all packages
+  clean:
+    run: melos clean
+    description: Clean all packages in the workspace
+
+  # Run dart analyze in all packages
+  analyze:
+    run: melos exec -- dart analyze --fatal-infos
+    description: Run dart analyze in all packages
+
+  # Run dart format check
+  format:
+    run: melos exec -- dart format --set-exit-if-changed .
+    description: Check formatting in all packages
+
+  # Apply dart format
+  format:fix:
+    run: melos exec -- dart format .
+    description: Apply dart format in all packages
+
+  # Run tests in all packages
+  test:
+    run: melos exec -- flutter test
+    description: Run tests in all packages
+    packageFilters:
+      dirExists: test
+
+  # Run tests with coverage
+  test:coverage:
+    run: melos exec -- flutter test --coverage
+    description: Run tests with coverage in all packages
+    packageFilters:
+      dirExists: test
+
+  # Build runner for all packages
+  build:runner:
+    run: melos exec -- dart run build_runner build --delete-conflicting-outputs
+    description: Run build_runner in all packages
+    packageFilters:
+      dependsOn: build_runner
+
+  # Watch build runner for all packages
+  build:watch:
+    run: melos exec -- dart run build_runner watch --delete-conflicting-outputs
+    description: Watch build_runner in all packages
+    packageFilters:
+      dependsOn: build_runner
+
+  # Get dependencies for all packages
+  get:
+    run: melos exec -- flutter pub get
+    description: Get dependencies for all packages
+
+  # Upgrade dependencies for all packages
+  upgrade:
+    run: melos exec -- flutter pub upgrade
+    description: Upgrade dependencies for all packages
+
+  # Check outdated dependencies
+  outdated:
+    run: melos exec -- flutter pub outdated
+    description: Check outdated dependencies in all packages
+
+ide:
+  intellij:
+    enabled: true
+  vscode:
+    enabled: true
