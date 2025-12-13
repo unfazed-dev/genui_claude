@@ -40,6 +40,10 @@ Before creating a tracker:
 2. If not, create the directory: `mkdir -p docs/trackers`
 3. Then create the tracker file in that location
 
+### Single Tracker (Simple Features)
+
+For simple features with a single tracker file:
+
 ```
 project-root/
 ├── docs/
@@ -50,6 +54,35 @@ project-root/
 ├── lib/
 └── ...
 ```
+
+### Multiple Trackers (Complex Features/Packages)
+
+**When creating 2+ related tracker files, create a subfolder for organization:**
+
+```
+project-root/
+├── docs/
+│   └── trackers/
+│       ├── package-name/                    # Subfolder for related trackers
+│       │   ├── TRACKER-package-main.md      # Main/overview tracker
+│       │   ├── TRACKER-data-models.md       # Component tracker
+│       │   ├── TRACKER-core-apis.md         # Component tracker
+│       │   └── TRACKER-testing.md           # Testing tracker
+│       ├── another-feature/
+│       │   ├── TRACKER-feature-main.md
+│       │   └── TRACKER-feature-testing.md
+│       └── TRACKER-simple-feature.md        # Single tracker stays at root
+├── lib/
+└── ...
+```
+
+**Subfolder naming:** Use kebab-case matching the feature/package name.
+
+**When to use subfolders:**
+- Package implementations with multiple components
+- Large features spanning multiple phases
+- Spec-driven implementations with separate concerns
+- Any time you create 2+ related tracker files
 
 ## Workflow
 
@@ -132,6 +165,21 @@ When user says "track [feature]" or "create tracker for [feature]":
 4. Identify likely affected files
 5. Generate `docs/trackers/TRACKER-[feature-name].md`
 
+### Create Multiple Trackers (Package/Complex Feature)
+
+When user says "create trackers for [package/spec]" or feature requires multiple tracker files:
+
+1. Check if `docs/trackers/` exists, create if missing
+2. Create subfolder: `mkdir -p docs/trackers/[feature-name]/`
+3. Analyze requirements and identify logical groupings
+4. Create main tracker: `docs/trackers/[feature-name]/TRACKER-[feature-name]-main.md`
+5. Create component trackers for each major area:
+   - Data models tracker
+   - Core APIs/logic tracker
+   - Testing tracker
+   - Other domain-specific trackers
+6. Cross-link related trackers in "Related Trackers" section
+
 ### Update Tracker
 
 When user says "update tracker" or completes work:
@@ -154,6 +202,7 @@ When user says "resume [feature]" or "continue work":
 
 All trackers live in `docs/trackers/`:
 
+### Single Tracker Pattern
 ```
 docs/trackers/TRACKER-user-auth.md       # Feature tracker
 docs/trackers/TRACKER-fix-login-123.md   # Bug fix tracker
@@ -161,6 +210,25 @@ docs/trackers/TRACKER-refactor-api.md    # Refactoring tracker
 ```
 
 Naming pattern: `TRACKER-[kebab-case-description].md`
+
+### Multiple Tracker Pattern (Subfolders)
+```
+docs/trackers/anthropic-a2ui/                    # Package subfolder
+├── TRACKER-anthropic-a2ui-package.md            # Main tracker
+├── TRACKER-a2ui-data-models.md                  # Component
+├── TRACKER-a2ui-core-apis.md                    # Component
+└── TRACKER-a2ui-testing.md                      # Testing
+
+docs/trackers/genui-anthropic/                   # Another package
+├── TRACKER-genui-anthropic-package.md           # Main tracker
+├── TRACKER-genui-content-generator.md           # Component
+├── TRACKER-genui-adapters.md                    # Component
+└── TRACKER-genui-anthropic-testing.md           # Testing
+```
+
+Subfolder naming: `[kebab-case-feature-name]/`
+Main tracker: `TRACKER-[feature-name]-package.md` or `TRACKER-[feature-name]-main.md`
+Component trackers: `TRACKER-[component-name].md`
 
 ## Best Practices
 
