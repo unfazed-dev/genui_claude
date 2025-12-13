@@ -1,6 +1,6 @@
 # TRACKER: genui_anthropic Package Implementation
 
-## Status: PLANNING
+## Status: IN_PROGRESS
 
 ## Overview
 
@@ -10,53 +10,63 @@ Flutter ContentGenerator implementation that enables Anthropic's Claude AI model
 
 ## Tasks
 
-### Phase 1: Package Infrastructure
-- [ ] Update pubspec.yaml with required dependencies:
-  - [ ] genui: ^0.5.1
-  - [ ] anthropic_a2ui: ^1.0.0 (path dependency for monorepo)
-  - [ ] anthropic_sdk_dart: ^0.9.0
-  - [ ] http: ^1.1.0
-- [ ] Update dev dependencies:
-  - [ ] flutter_test (sdk)
+### Phase 1: Package Infrastructure ✅
+- [x] Update pubspec.yaml with required dependencies:
+  - [x] genui: ^0.5.1
+  - [x] anthropic_a2ui: ^1.0.0 (path dependency for monorepo)
+  - [ ] anthropic_sdk_dart: ^0.9.0 (deferred - using mock stream for now)
+  - [ ] http: ^1.1.0 (deferred - using mock stream for now)
+- [x] Update dev dependencies:
+  - [x] flutter_test (sdk)
   - [ ] integration_test (sdk)
-  - [ ] mockito: ^5.4.0
-  - [ ] build_runner: ^2.4.0
-- [ ] Update environment constraints (sdk: >=3.0.0, flutter: >=3.35.0)
-- [ ] Create package directory structure per spec
+  - [x] mockito: ^5.4.0
+  - [x] build_runner: ^2.4.0
+- [x] Update environment constraints (sdk: ^3.5.0, flutter: >=3.22.0)
+- [x] Create package directory structure per spec
 
-### Phase 2: Configuration Classes
-- [ ] Create AnthropicConfig (lib/src/config/)
-  - [ ] maxTokens property
-  - [ ] timeout property
-  - [ ] retryAttempts property
-  - [ ] enableStreaming property
-  - [ ] headers property
-- [ ] Create ProxyConfig (lib/src/config/)
-  - [ ] timeout property
-  - [ ] retryAttempts property
-  - [ ] headers property
-  - [ ] includeHistory property
-  - [ ] maxHistoryMessages property
+### Phase 2: Configuration Classes ✅
+- [x] Create AnthropicConfig (lib/src/config/anthropic_config.dart)
+  - [x] maxTokens property (default 4096)
+  - [x] timeout property (default 60s)
+  - [x] retryAttempts property (default 3)
+  - [x] enableStreaming property (default true)
+  - [x] headers property (optional)
+  - [x] defaults constant
+  - [x] copyWith method
+- [x] Create ProxyConfig (lib/src/config/anthropic_config.dart)
+  - [x] timeout property (default 120s)
+  - [x] retryAttempts property (default 3)
+  - [x] headers property (optional)
+  - [x] includeHistory property (default true)
+  - [x] maxHistoryMessages property (default 20)
+  - [x] defaults constant
+  - [x] copyWith method
 
-### Phase 3: Content Generator Core
-- [ ] Create AnthropicContentGenerator implementing ContentGenerator
-  - [ ] Default factory constructor (direct API mode)
-  - [ ] .proxy() factory constructor (backend proxy mode)
-  - [ ] a2uiMessageStream getter
-  - [ ] textResponseStream getter
-  - [ ] errorStream getter
-  - [ ] sendRequest() method
-  - [ ] tools getter
-  - [ ] dispose() method
-- [ ] Implement DirectModeHandler (lib/src/content_generator/)
-- [ ] Implement ProxyModeHandler (lib/src/content_generator/)
-- [ ] Stream controller management
+### Phase 3: Content Generator Core ✅
+- [x] Create AnthropicContentGenerator implementing ContentGenerator
+  - [x] Default factory constructor (direct API mode)
+  - [x] .proxy() factory constructor (backend proxy mode)
+  - [x] a2uiMessageStream getter (StreamController.broadcast)
+  - [x] textResponseStream getter (StreamController.broadcast)
+  - [x] errorStream getter (StreamController.broadcast)
+  - [x] isProcessing getter (ValueNotifier<bool>)
+  - [x] sendRequest() method
+  - [x] dispose() method
+- [ ] Implement DirectModeHandler (deferred - using mock stream)
+- [ ] Implement ProxyModeHandler (deferred - using mock stream)
+- [x] Stream controller management
+- [x] ClaudeStreamHandler integration from anthropic_a2ui
 
-### Phase 4: Adapters and Bridges
-- [ ] Create A2uiMessageAdapter (lib/src/adapter/)
-  - [ ] toGenUiMessage() static method
-  - [ ] _toGenUiWidget() helper
-  - [ ] Handle all A2uiMessageData types
+### Phase 4: Adapters and Bridges (Partial)
+- [x] Create A2uiMessageAdapter (lib/src/adapter/message_adapter.dart)
+  - [x] toGenUiMessage() static method
+  - [x] _toComponent() helper (WidgetNode → Component)
+  - [x] Handle all A2uiMessageData types:
+    - [x] BeginRenderingData → BeginRendering
+    - [x] SurfaceUpdateData → SurfaceUpdate
+    - [x] DataModelUpdateData → DataModelUpdate
+    - [x] DeleteSurfaceData → SurfaceDeletion
+  - [x] toGenUiMessages() batch conversion
 - [ ] Create CatalogToolBridge (lib/src/adapter/)
   - [ ] fromCatalog() static method
   - [ ] fromItems() static method
@@ -69,20 +79,21 @@ Flutter ContentGenerator implementation that enables Anthropic's Claude AI model
   - [ ] Handle conversation history
   - [ ] Pruning logic for max messages
 
-### Phase 6: Public API
-- [ ] Update lib/genui_anthropic.dart exports
-- [ ] Export all public types
-- [ ] Add library-level documentation
+### Phase 6: Public API ✅
+- [x] Update lib/genui_anthropic.dart exports
+- [x] Export all public types (adapter, config, content_generator)
+- [x] Add library-level documentation with examples
 
-### Phase 7: Testing
-- [ ] Unit tests for AnthropicContentGenerator
+### Phase 7: Testing (Partial)
+- [x] Unit tests for AnthropicContentGenerator (basic tests)
 - [ ] Unit tests for A2uiMessageAdapter
 - [ ] Unit tests for CatalogToolBridge
-- [ ] Unit tests for configuration classes
+- [x] Unit tests for configuration classes (AnthropicConfig, ProxyConfig)
 - [ ] Widget tests for chat integration
 - [ ] Integration tests for full Claude → GenUI flow
 - [ ] Create mock generators
 - [ ] Achieve 90%+ code coverage
+- **Current: 10 tests passing**
 
 ### Phase 8: Examples
 - [ ] Create example/lib/main.dart (basic example)

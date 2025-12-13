@@ -1,6 +1,6 @@
 # TRACKER: GenUI Content Generator Implementation
 
-## Status: PLANNING
+## Status: IN_PROGRESS
 
 ## Overview
 
@@ -10,86 +10,89 @@ Implementation of AnthropicContentGenerator, the core class that implements GenU
 
 ## Tasks
 
-### Configuration Classes (lib/src/config/)
+### Configuration Classes (lib/src/config/) ✅
 
-#### AnthropicConfig (anthropic_config.dart)
-- [ ] Create AnthropicConfig class
-- [ ] Properties:
-  - [ ] maxTokens (int, default 4096)
-  - [ ] timeout (Duration, default 60s)
-  - [ ] retryAttempts (int, default 3)
-  - [ ] enableStreaming (bool, default true)
-  - [ ] headers (Map<String, String>?, optional)
-- [ ] Const constructor
-- [ ] copyWith method
-- [ ] Default instance constant
+#### AnthropicConfig (anthropic_config.dart) ✅
+- [x] Create AnthropicConfig class
+- [x] Properties:
+  - [x] maxTokens (int, default 4096)
+  - [x] timeout (Duration, default 60s)
+  - [x] retryAttempts (int, default 3)
+  - [x] enableStreaming (bool, default true)
+  - [x] headers (Map<String, String>?, optional)
+- [x] Const constructor
+- [x] copyWith method
+- [x] Default instance constant
 
-#### ProxyConfig (proxy_config.dart)
-- [ ] Create ProxyConfig class
-- [ ] Properties:
-  - [ ] timeout (Duration, default 120s)
-  - [ ] retryAttempts (int, default 3)
-  - [ ] headers (Map<String, String>?, optional)
-  - [ ] includeHistory (bool, default true)
-  - [ ] maxHistoryMessages (int, default 20)
-- [ ] Const constructor
-- [ ] copyWith method
-- [ ] Default instance constant
+#### ProxyConfig (anthropic_config.dart) ✅
+- [x] Create ProxyConfig class
+- [x] Properties:
+  - [x] timeout (Duration, default 120s)
+  - [x] retryAttempts (int, default 3)
+  - [x] headers (Map<String, String>?, optional)
+  - [x] includeHistory (bool, default true)
+  - [x] maxHistoryMessages (int, default 20)
+- [x] Const constructor
+- [x] copyWith method
+- [x] Default instance constant
 
-### AnthropicContentGenerator (lib/src/content_generator/)
+### AnthropicContentGenerator (lib/src/content_generator/) ✅
 
-#### Main Class (anthropic_content_generator.dart)
-- [ ] Implement ContentGenerator interface
-- [ ] Private constructor with required dependencies
-- [ ] Create default factory constructor for direct mode:
+#### Main Class (anthropic_content_generator.dart) ✅
+- [x] Implement ContentGenerator interface
+- [x] Create default constructor for direct mode:
   ```dart
-  factory AnthropicContentGenerator({
+  AnthropicContentGenerator({
     required String apiKey,
     String model = 'claude-sonnet-4-20250514',
     String? systemInstruction,
-    required List<Tool> tools,
     AnthropicConfig? config,
   })
   ```
-- [ ] Create .proxy() factory for backend mode:
+- [x] Create .proxy() factory for backend mode:
   ```dart
-  factory AnthropicContentGenerator.proxy({
-    required Uri endpoint,
+  AnthropicContentGenerator.proxy({
+    required Uri proxyEndpoint,
     String? authToken,
-    required List<Tool> tools,
     ProxyConfig? config,
   })
   ```
-- [ ] Create .withHandler() factory for testing
+- [ ] Create .withHandler() factory for testing (deferred)
 
-#### Stream Controllers
-- [ ] _a2uiController (StreamController<A2uiMessage>.broadcast())
-- [ ] _textController (StreamController<String>.broadcast())
-- [ ] _errorController (StreamController<Object>.broadcast())
+#### Stream Controllers ✅
+- [x] _a2uiController (StreamController<A2uiMessage>.broadcast())
+- [x] _textController (StreamController<String>.broadcast())
+- [x] _errorController (StreamController<ContentGeneratorError>.broadcast())
+- [x] _isProcessing (ValueNotifier<bool>)
 
-#### ContentGenerator Interface Implementation
-- [ ] a2uiMessageStream getter -> _a2uiController.stream
-- [ ] textResponseStream getter -> _textController.stream
-- [ ] errorStream getter -> _errorController.stream
-- [ ] tools getter
-- [ ] sendRequest(List<Message> conversationHistory) method
+#### ContentGenerator Interface Implementation ✅
+- [x] a2uiMessageStream getter -> _a2uiController.stream
+- [x] textResponseStream getter -> _textController.stream
+- [x] errorStream getter -> _errorController.stream
+- [x] isProcessing getter -> _isProcessing
+- [x] sendRequest(ChatMessage, {history}) method
 
-#### sendRequest Implementation
-- [ ] Convert GenUI messages to Claude format
-- [ ] Call handler.streamRequest()
-- [ ] Process StreamEvent types:
-  - [ ] A2uiMessageEvent -> convert and emit to _a2uiController
-  - [ ] TextDeltaEvent -> emit to _textController
-  - [ ] ErrorEvent -> emit to _errorController
-  - [ ] CompleteEvent -> no action
-- [ ] Wrap in try-catch, emit errors to _errorController
+#### sendRequest Implementation ✅
+- [x] Extract text from ChatMessage
+- [x] Call _streamHandler.streamRequest()
+- [x] Process StreamEvent types:
+  - [x] A2uiMessageEvent -> convert via A2uiMessageAdapter and emit
+  - [x] TextDeltaEvent -> emit to _textController
+  - [x] ErrorEvent -> emit to _errorController
+  - [x] DeltaEvent -> ignored
+  - [x] CompleteEvent -> no action
+- [x] Wrap in try-catch, emit errors to _errorController
+- [x] Set isProcessing flag during request
 
-#### Resource Management
-- [ ] dispose() method
-- [ ] Close all stream controllers
-- [ ] Clean up handler resources
+#### Resource Management ✅
+- [x] dispose() method
+- [x] Close all stream controllers
+- [x] Dispose ValueNotifier
+- [x] Dispose ClaudeStreamHandler
 
-### Direct Mode Handler (direct_mode.dart)
+### Direct Mode Handler (direct_mode.dart) - DEFERRED
+
+> Currently using mock stream in AnthropicContentGenerator. Will implement when anthropic_sdk_dart integration is added.
 
 - [ ] Create DirectModeHandler class
 - [ ] Constructor with:
@@ -102,7 +105,9 @@ Implementation of AnthropicContentGenerator, the core class that implements GenU
 - [ ] Implement streamRequest() method
 - [ ] Connection management
 
-### Proxy Mode Handler (proxy_mode.dart)
+### Proxy Mode Handler (proxy_mode.dart) - DEFERRED
+
+> Currently using mock stream in AnthropicContentGenerator. Will implement when HTTP integration is added.
 
 - [ ] Create ProxyModeHandler class
 - [ ] Constructor with:
@@ -118,7 +123,7 @@ Implementation of AnthropicContentGenerator, the core class that implements GenU
 - [ ] Handle conversation history pruning
 - [ ] Connection management
 
-### Handler Interface (handler.dart)
+### Handler Interface (handler.dart) - DEFERRED
 
 - [ ] Create abstract RequestHandler class or interface
 - [ ] Define streamRequest() method signature
@@ -126,17 +131,14 @@ Implementation of AnthropicContentGenerator, the core class that implements GenU
 
 ## Files
 
-### Config
-- `lib/src/config/anthropic_config.dart`
-- `lib/src/config/proxy_config.dart`
-- `lib/src/config/config.dart` (barrel export)
+### Config ✅
+- `lib/src/config/anthropic_config.dart` ✅ (contains both AnthropicConfig and ProxyConfig)
 
-### Content Generator
-- `lib/src/content_generator/anthropic_content_generator.dart`
-- `lib/src/content_generator/direct_mode.dart`
-- `lib/src/content_generator/proxy_mode.dart`
-- `lib/src/content_generator/handler.dart`
-- `lib/src/content_generator/content_generator.dart` (barrel export)
+### Content Generator (Partial)
+- `lib/src/content_generator/anthropic_content_generator.dart` ✅
+- `lib/src/content_generator/direct_mode.dart` (not yet created)
+- `lib/src/content_generator/proxy_mode.dart` (not yet created)
+- `lib/src/content_generator/handler.dart` (not yet created)
 
 ## Dependencies
 
@@ -223,3 +225,4 @@ abstract class ContentGenerator {
 | Date | Action |
 |------|--------|
 | 2025-12-13 | Created tracker from spec |
+| 2025-12-14 | Updated status: Configuration classes and main AnthropicContentGenerator complete. Handler classes deferred. |

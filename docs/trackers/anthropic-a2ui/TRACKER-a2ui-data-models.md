@@ -1,6 +1,6 @@
 # TRACKER: A2UI Data Models Implementation
 
-## Status: PLANNING
+## Status: COMPLETE
 
 ## Overview
 
@@ -10,10 +10,10 @@ Implementation of all data model classes for the anthropic_a2ui package. These m
 
 ## Tasks
 
-### A2UI Message Types (lib/src/models/a2ui_message.dart)
+### A2UI Message Types (lib/src/models/a2ui_message.dart) ✅
 
-#### Base Class
-- [ ] Create `A2uiMessageData` sealed class
+#### Base Class ✅
+- [x] Create `A2uiMessageData` sealed class
   ```dart
   sealed class A2uiMessageData {
     const A2uiMessageData();
@@ -21,73 +21,73 @@ Implementation of all data model classes for the anthropic_a2ui package. These m
   }
   ```
 
-#### BeginRenderingData
-- [ ] Implement BeginRenderingData class
-- [ ] Properties:
-  - [ ] surfaceId (required String)
-  - [ ] parentSurfaceId (optional String)
-  - [ ] metadata (optional Map<String, dynamic>)
-- [ ] Add fromJson factory constructor
-- [ ] Add toJson method
-- [ ] Add equality and hashCode overrides
+#### BeginRenderingData ✅
+- [x] Implement BeginRenderingData class
+- [x] Properties:
+  - [x] surfaceId (required String)
+  - [x] parentSurfaceId (optional String)
+  - [x] metadata (optional Map<String, dynamic>)
+- [x] Add fromJson factory constructor
+- [x] Add toJson method
+- [x] Add equality and hashCode overrides
 
-#### SurfaceUpdateData
-- [ ] Implement SurfaceUpdateData class
-- [ ] Properties:
-  - [ ] surfaceId (required String)
-  - [ ] widgets (required List<WidgetNode>)
-  - [ ] append (bool, default false)
-- [ ] Add fromJson factory constructor
-- [ ] Add toJson method
-- [ ] Add equality and hashCode overrides
+#### SurfaceUpdateData ✅
+- [x] Implement SurfaceUpdateData class
+- [x] Properties:
+  - [x] surfaceId (required String)
+  - [x] widgets (required List<WidgetNode>)
+  - [x] append (bool, default false)
+- [x] Add fromJson factory constructor
+- [x] Add toJson method
+- [x] Add equality and hashCode overrides
 
-#### DataModelUpdateData
-- [ ] Implement DataModelUpdateData class
-- [ ] Properties:
-  - [ ] updates (required Map<String, dynamic>)
-  - [ ] scope (optional String)
-- [ ] Add fromJson factory constructor
-- [ ] Add toJson method
-- [ ] Add equality and hashCode overrides
+#### DataModelUpdateData ✅
+- [x] Implement DataModelUpdateData class
+- [x] Properties:
+  - [x] updates (required Map<String, dynamic>)
+  - [x] scope (optional String)
+- [x] Add fromJson factory constructor
+- [x] Add toJson method
+- [x] Add equality and hashCode overrides
 
-#### DeleteSurfaceData
-- [ ] Implement DeleteSurfaceData class
-- [ ] Properties:
-  - [ ] surfaceId (required String)
-  - [ ] cascade (bool, default true)
-- [ ] Add fromJson factory constructor
-- [ ] Add toJson method
-- [ ] Add equality and hashCode overrides
+#### DeleteSurfaceData ✅
+- [x] Implement DeleteSurfaceData class
+- [x] Properties:
+  - [x] surfaceId (required String)
+  - [x] cascade (bool, default true)
+- [x] Add fromJson factory constructor
+- [x] Add toJson method
+- [x] Add equality and hashCode overrides
 
-### Widget Node (lib/src/models/widget_node.dart)
+### Widget Node (lib/src/models/widget_node.dart) ✅
 
-- [ ] Implement WidgetNode class
-- [ ] Properties:
-  - [ ] type (required String)
-  - [ ] properties (required Map<String, dynamic>)
-  - [ ] children (optional List<WidgetNode>)
-  - [ ] dataBinding (optional String)
-- [ ] Add fromJson factory constructor (recursive for children)
-- [ ] Add toJson method
-- [ ] Add copyWith method for immutable updates
-- [ ] Add equality and hashCode overrides
+- [x] Implement WidgetNode class
+- [x] Properties:
+  - [x] type (required String)
+  - [x] properties (required Map<String, dynamic>)
+  - [x] children (optional List<WidgetNode>)
+  - [x] dataBinding (optional String)
+- [x] Add fromJson factory constructor (recursive for children)
+- [x] Add toJson method
+- [x] Add copyWith method for immutable updates
+- [x] Add equality and hashCode overrides
 
-### Tool Schema (lib/src/models/tool_schema.dart)
+### Tool Schema (lib/src/models/tool_schema.dart) ✅
 
-- [ ] Implement A2uiToolSchema class
-- [ ] Properties:
-  - [ ] name (required String)
-  - [ ] description (required String)
-  - [ ] inputSchema (required Map<String, dynamic>)
-  - [ ] requiredFields (optional List<String>)
-- [ ] Add fromJson factory constructor
-- [ ] Add toJson method
-- [ ] Add toClaudeTool() conversion method
-- [ ] Add equality and hashCode overrides
+- [x] Implement A2uiToolSchema class
+- [x] Properties:
+  - [x] name (required String)
+  - [x] description (required String)
+  - [x] inputSchema (required Map<String, dynamic>)
+  - [x] requiredFields (optional List<String>)
+- [x] Add fromJson factory constructor
+- [x] Add toJson method
+- [x] Add toClaudeTool() conversion method
+- [x] Add equality and hashCode overrides
 
-### Stream Events (lib/src/models/stream_event.dart)
+### Stream Events (lib/src/models/stream_event.dart) ✅
 
-- [ ] Create StreamEvent sealed class hierarchy:
+- [x] Create StreamEvent sealed class hierarchy:
   ```dart
   sealed class StreamEvent {
     const StreamEvent();
@@ -99,68 +99,70 @@ Implementation of all data model classes for the anthropic_a2ui package. These m
   class CompleteEvent extends StreamEvent { ... }
   class ErrorEvent extends StreamEvent { ... }
   ```
-- [ ] Implement DeltaEvent for raw content deltas
-- [ ] Implement A2uiMessageEvent containing A2uiMessageData
-- [ ] Implement TextDeltaEvent for text content
-- [ ] Implement CompleteEvent for stream completion
-- [ ] Implement ErrorEvent with A2uiException
+- [x] Implement DeltaEvent for raw content deltas
+- [x] Implement A2uiMessageEvent containing A2uiMessageData
+- [x] Implement TextDeltaEvent for text content
+- [x] Implement CompleteEvent for stream completion
+- [x] Implement ErrorEvent with error string
 
-### Parse Result (lib/src/models/parse_result.dart)
+### Parse Result (lib/src/models/parse_result.dart) ✅
 
-- [ ] Implement ParseResult class
-- [ ] Properties:
-  - [ ] a2uiMessages (List<A2uiMessageData>)
-  - [ ] textContent (String)
-  - [ ] hasToolUse (bool)
-- [ ] Add factory methods for common cases
-- [ ] Add isEmpty/isNotEmpty getters
+- [x] Implement ParseResult class
+- [x] Properties:
+  - [x] a2uiMessages (List<A2uiMessageData>)
+  - [x] textContent (String)
+  - [x] hasToolUse (bool)
+- [x] Add factory methods for common cases
+- [x] Add isEmpty/isNotEmpty getters
 
-### Validation Result (lib/src/models/validation_result.dart)
+### Validation Result (lib/src/models/validation_result.dart) ✅
 
-- [ ] Implement ValidationResult class
-- [ ] Properties:
-  - [ ] isValid (bool)
-  - [ ] errors (List<ValidationError>)
-- [ ] Implement ValidationError class
-  - [ ] field (String)
-  - [ ] message (String)
-  - [ ] code (String)
+- [x] Implement ValidationResult class
+- [x] Properties:
+  - [x] isValid (bool)
+  - [x] errors (List<ValidationError>)
+- [x] Implement ValidationError class
+  - [x] field (String)
+  - [x] message (String)
+  - [x] code (String)
 
-### Stream Config (lib/src/models/stream_config.dart)
+### Stream Config (lib/src/models/stream_config.dart) ✅
 
-- [ ] Implement StreamConfig class
-- [ ] Properties:
-  - [ ] maxTokens (int, default 4096)
-  - [ ] timeout (Duration, default 60s)
-  - [ ] retryAttempts (int, default 3)
-- [ ] Make it a const class for default instantiation
+- [x] Implement StreamConfig class
+- [x] Properties:
+  - [x] maxTokens (int, default 4096)
+  - [x] timeout (Duration, default 60s)
+  - [x] retryAttempts (int, default 3)
+- [x] Make it a const class for default instantiation
+- [x] Add copyWith method
 
-### JSON Serialization Setup
+### JSON Serialization Setup (Manual)
 
-- [ ] Add @JsonSerializable annotations to all models
-- [ ] Create build.yaml for json_serializable config
-- [ ] Run build_runner to generate .g.dart files
-- [ ] Export generated files properly
+- [x] Manual JSON serialization implemented (no json_serializable)
+- [ ] Add @JsonSerializable annotations to all models (deferred)
+- [ ] Create build.yaml for json_serializable config (deferred)
+- [ ] Run build_runner to generate .g.dart files (deferred)
+- [ ] Export generated files properly (deferred)
 
 ## Files
 
-### Primary Files
-- `lib/src/models/a2ui_message.dart` - Message type hierarchy
-- `lib/src/models/widget_node.dart` - Widget tree node
-- `lib/src/models/tool_schema.dart` - Tool schema definition
-- `lib/src/models/stream_event.dart` - Stream event types
-- `lib/src/models/parse_result.dart` - Parser output
-- `lib/src/models/validation_result.dart` - Validation output
-- `lib/src/models/stream_config.dart` - Stream configuration
+### Primary Files ✅
+- `lib/src/models/a2ui_message.dart` ✅ - Message type hierarchy
+- `lib/src/models/widget_node.dart` ✅ - Widget tree node
+- `lib/src/models/tool_schema.dart` ✅ - Tool schema definition
+- `lib/src/models/stream_event.dart` ✅ - Stream event types
+- `lib/src/models/parse_result.dart` ✅ - Parser output
+- `lib/src/models/validation_result.dart` ✅ - Validation output
+- `lib/src/models/stream_config.dart` ✅ - Stream configuration
 
-### Generated Files
-- `lib/src/models/a2ui_message.g.dart`
-- `lib/src/models/widget_node.g.dart`
-- `lib/src/models/tool_schema.g.dart`
-- `lib/src/models/parse_result.g.dart`
+### Generated Files (Deferred - using manual JSON)
+- `lib/src/models/a2ui_message.g.dart` (not generated)
+- `lib/src/models/widget_node.g.dart` (not generated)
+- `lib/src/models/tool_schema.g.dart` (not generated)
+- `lib/src/models/parse_result.g.dart` (not generated)
 
-### Barrel Export
-- `lib/src/models/models.dart` - Exports all models
+### Barrel Export ✅
+- `lib/src/models/models.dart` ✅ - Exports all models
 
 ## Dependencies
 
@@ -219,3 +221,4 @@ Implementation of all data model classes for the anthropic_a2ui package. These m
 | Date | Action |
 |------|--------|
 | 2025-12-13 | Created tracker from spec |
+| 2025-12-14 | Status: COMPLETE. All data models implemented with manual JSON serialization. 37 tests passing for package. |

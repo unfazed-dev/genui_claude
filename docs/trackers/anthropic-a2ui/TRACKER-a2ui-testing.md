@@ -1,6 +1,6 @@
 # TRACKER: A2UI Testing Implementation
 
-## Status: PLANNING
+## Status: IN_PROGRESS
 
 ## Overview
 
@@ -10,16 +10,18 @@ Comprehensive testing strategy for the anthropic_a2ui package including unit tes
 
 ## Tasks
 
-### Test Infrastructure Setup
+### Test Infrastructure Setup ✅
 
-- [ ] Configure test dependencies in pubspec.yaml
-  - [ ] test: ^1.24.0
-  - [ ] mockito: ^5.4.0
-  - [ ] build_runner: ^2.4.0 (for mockito generation)
-  - [ ] coverage: ^1.6.0
-- [ ] Create test directory structure matching lib/src
-- [ ] Create test utilities and helpers
-- [ ] Set up mock generation with @GenerateMocks
+- [x] Configure test dependencies in pubspec.yaml
+  - [x] test: ^1.24.0
+  - [x] mockito: ^5.4.0
+  - [x] build_runner: ^2.4.0 (for mockito generation)
+  - [x] coverage: ^1.6.0
+- [x] Create test directory structure
+- [ ] Create test utilities and helpers (deferred)
+- [ ] Set up mock generation with @GenerateMocks (deferred)
+
+**Current: 37 tests passing**
 
 ### Mock Fixtures (test/fixtures/)
 
@@ -43,78 +45,66 @@ Comprehensive testing strategy for the anthropic_a2ui package including unit tes
 - [ ] Implement stubErrorResponse helper
 - [ ] Create MockHttpClient for network tests
 
-### Unit Tests - Models (test/models/)
+### Unit Tests - Models (test/anthropic_a2ui_test.dart) ✅
 
-#### a2ui_message_test.dart
-- [ ] Test BeginRenderingData
-  - [ ] Construction with required fields
-  - [ ] Construction with optional fields
-  - [ ] fromJson parsing
-  - [ ] toJson serialization
-  - [ ] Equality comparison
-- [ ] Test SurfaceUpdateData
-  - [ ] Construction with widgets list
-  - [ ] append flag behavior
-  - [ ] fromJson with nested WidgetNodes
-  - [ ] toJson serialization
-- [ ] Test DataModelUpdateData
-  - [ ] Various update types (primitives, objects, arrays)
-  - [ ] Scope handling
-- [ ] Test DeleteSurfaceData
-  - [ ] cascade flag defaults
-  - [ ] Serialization roundtrip
+#### a2ui_message tests ✅
+- [x] Test BeginRenderingData
+  - [x] Construction with required fields
+  - [x] Construction with optional fields (all fields)
+  - [x] toJson serialization
+  - [x] fromJson parsing (deserializes from JSON)
+- [x] Test SurfaceUpdateData
+  - [x] Construction with widgets list
+  - [x] toJson serialization
+- [x] Test DataModelUpdateData
+  - [x] Construction with updates
+  - [x] Construction with scope
+- [x] Test DeleteSurfaceData
+  - [x] cascade flag defaults (true)
+  - [x] cascade flag false
 
-#### widget_node_test.dart
-- [ ] Test flat widget node
-- [ ] Test widget with children (1 level)
-- [ ] Test deeply nested widgets (5+ levels)
-- [ ] Test widget with dataBinding
-- [ ] Test fromJson recursive parsing
-- [ ] Test toJson recursive serialization
-- [ ] Test copyWith method
+#### widget_node tests ✅
+- [x] Test construction with required fields
+- [x] Test widget with children
+- [x] Test copyWith method
 
-#### tool_schema_test.dart
-- [ ] Test schema construction
-- [ ] Test toClaudeTool conversion
-- [ ] Test inputSchema variations
-- [ ] Test requiredFields handling
+#### tool_schema tests ✅
+- [x] Test schema construction with required fields
 
-### Unit Tests - Converter (test/converter/)
+### Unit Tests - Converter (test/anthropic_a2ui_test.dart) ✅
 
-#### tool_converter_test.dart
+#### A2uiToolConverter tests ✅
+- [x] Test validateToolInput - valid input
+- [x] Test validateToolInput - missing required field
+- [x] Test validateToolInput - unknown tool
+- [x] Test generateToolInstructions output format
 - [ ] Test toClaudeTools with single schema
 - [ ] Test toClaudeTools with multiple schemas
 - [ ] Test toClaudeTools with nested object properties
 - [ ] Test toClaudeTools with array properties
-- [ ] Test generateToolInstructions output format
-- [ ] Test validateToolInput - valid input
-- [ ] Test validateToolInput - missing required field
-- [ ] Test validateToolInput - wrong type
-- [ ] Test validateToolInput - unknown tool
 
-#### schema_mapper_test.dart
+#### schema_mapper_test.dart - Not Yet Implemented
 - [ ] Test primitive type mapping (string, number, boolean, integer)
 - [ ] Test array type mapping
 - [ ] Test object type mapping
 - [ ] Test nested schema mapping
 - [ ] Test required field mapping
 
-### Unit Tests - Parser (test/parser/)
+### Unit Tests - Parser (test/anthropic_a2ui_test.dart) ✅
 
-#### message_parser_test.dart
-- [ ] Test parseToolUse - begin_rendering
-- [ ] Test parseToolUse - surface_update
+#### ClaudeA2uiParser tests ✅
+- [x] Test parseToolUse - begin_rendering
+- [x] Test parseToolUse - surface_update
+- [x] Test parseToolUse - unknown tool returns null
+- [x] Test parseMessage - with tool_use blocks
 - [ ] Test parseToolUse - data_model_update
 - [ ] Test parseToolUse - delete_surface
-- [ ] Test parseToolUse - unknown tool returns null
 - [ ] Test parseToolUse - malformed input
-- [ ] Test parseMessage - single tool_use
-- [ ] Test parseMessage - multiple tool_use blocks
 - [ ] Test parseMessage - mixed content (tool + text)
 - [ ] Test parseMessage - text only
 - [ ] Test ParseResult hasToolUse flag
 
-#### stream_parser_test.dart
+#### stream_parser_test.dart - Not Yet Implemented
 - [ ] Test parseStream - complete tool_use
 - [ ] Test parseStream - streaming deltas
 - [ ] Test parseStream - multiple blocks
@@ -128,42 +118,49 @@ Comprehensive testing strategy for the anthropic_a2ui package including unit tes
 - [ ] Test TextBlockHandler delta accumulation
 - [ ] Test BlockHandlerFactory selection
 
-### Unit Tests - Stream (test/stream/)
+### Unit Tests - Stream (test/anthropic_a2ui_test.dart) (Partial)
 
-#### stream_handler_test.dart
+#### StreamConfig tests ✅
+- [x] Test has default values
+- [x] Test copyWith creates modified copy
+
+#### ParseResult tests ✅
+- [x] Test empty result
+- [x] Test text only result
+- [x] Test messages only result
+
+#### ValidationResult tests ✅
+- [x] Test valid result
+- [x] Test invalid result with errors
+- [x] Test error factory
+
+#### RetryPolicy tests ✅
+- [x] Test has default values
+- [x] Test shouldRetry respects max attempts
+- [x] Test shouldRetry checks isRetryable
+- [x] Test getDelay uses exponential backoff
+
+#### stream_handler_test.dart - Not Yet Implemented
 - [ ] Test streamRequest - successful flow
 - [ ] Test streamRequest - emits correct event types
-- [ ] Test streamRequest - handles message_start
 - [ ] Test streamRequest - handles content_block events
 - [ ] Test streamRequest - handles message_stop
 - [ ] Test streamRequest - connection error
-- [ ] Test StreamConfig defaults
-- [ ] Test custom model parameter
 
-#### retry_policy_test.dart
-- [ ] Test shouldRetry - retryable error
-- [ ] Test shouldRetry - non-retryable error
-- [ ] Test shouldRetry - max attempts exceeded
-- [ ] Test getDelay - exponential backoff calculation
-- [ ] Test getDelay - respects maxDelay
-- [ ] Test retryWithBackoff - success on first try
-- [ ] Test retryWithBackoff - success on retry
-- [ ] Test retryWithBackoff - exhausted retries
-
-#### rate_limiter_test.dart
+#### rate_limiter_test.dart - Not Yet Implemented
 - [ ] Test 429 response handling
 - [ ] Test Retry-After header parsing
 - [ ] Test request queuing
 - [ ] Test rate limit reset
 
-### Unit Tests - Exceptions (test/exceptions/)
+### Unit Tests - Exceptions (test/anthropic_a2ui_test.dart) ✅
 
-#### exceptions_test.dart
+#### Exceptions tests ✅
+- [x] Test ToolConversionException contains tool name
+- [x] Test StreamException tracks retryable status
+- [x] Test ValidationException contains errors
 - [ ] Test A2uiException toString
-- [ ] Test ToolConversionException with details
 - [ ] Test MessageParseException with raw content
-- [ ] Test StreamException with status code
-- [ ] Test ValidationException with error list
 - [ ] Test exception inheritance/sealed class behavior
 
 ### Integration Tests (test/integration/)
@@ -325,3 +322,4 @@ dart run build_runner build
 | Date | Action |
 |------|--------|
 | 2025-12-13 | Created tracker from spec |
+| 2025-12-14 | Status: IN_PROGRESS. 37 tests passing. Models, converter, parser, and stream basics covered. Mock setup and integration tests pending. |

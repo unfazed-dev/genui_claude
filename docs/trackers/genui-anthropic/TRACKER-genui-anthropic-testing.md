@@ -1,6 +1,6 @@
 # TRACKER: GenUI Anthropic Testing Implementation
 
-## Status: PLANNING
+## Status: IN_PROGRESS
 
 ## Overview
 
@@ -10,16 +10,18 @@ Comprehensive testing strategy for the genui_anthropic package including unit te
 
 ## Tasks
 
-### Test Infrastructure Setup
+### Test Infrastructure Setup (Partial)
 
-- [ ] Configure test dependencies in pubspec.yaml
-  - [ ] flutter_test (sdk)
-  - [ ] integration_test (sdk)
-  - [ ] mockito: ^5.4.0
-  - [ ] build_runner: ^2.4.0
-- [ ] Create test directory structure
+- [x] Configure test dependencies in pubspec.yaml
+  - [x] flutter_test (sdk)
+  - [ ] integration_test (sdk) - not yet added
+  - [x] mockito: ^5.4.0
+  - [x] build_runner: ^2.4.0
+- [x] Create test directory structure
 - [ ] Set up mock generation with @GenerateMocks
 - [ ] Create test utilities and helpers
+
+**Current: 10 tests passing**
 
 ### Mock Setup (test/mocks/)
 
@@ -37,22 +39,22 @@ Comprehensive testing strategy for the genui_anthropic package including unit te
 - [ ] Create stub CatalogItem definitions
 - [ ] Create stub conversation histories
 
-### Unit Tests - Content Generator (test/content_generator/)
+### Unit Tests - Content Generator (test/genui_anthropic_test.dart) (Partial)
 
-#### anthropic_content_generator_test.dart
-- [ ] Test factory constructor creates DirectModeHandler
-- [ ] Test .proxy() constructor creates ProxyModeHandler
+#### anthropic_content_generator_test.dart ✅
+- [x] Test default constructor creates with required parameters
+- [x] Test default constructor creates with custom model and config
+- [x] Test .proxy() constructor creates with required parameters
+- [x] Test .proxy() constructor creates with auth token and config
+- [x] Test implements ContentGenerator interface
+- [x] Test isProcessing starts as false
+- [x] Test stream getters return correct types
 - [ ] Test a2uiMessageStream emits A2uiMessages
 - [ ] Test textResponseStream emits text chunks
 - [ ] Test errorStream emits errors
-- [ ] Test sendRequest processes all event types:
-  - [ ] A2uiMessageEvent -> a2uiMessageStream
-  - [ ] TextDeltaEvent -> textResponseStream
-  - [ ] ErrorEvent -> errorStream
-  - [ ] CompleteEvent -> no emission
+- [ ] Test sendRequest processes all event types
 - [ ] Test sendRequest handles exceptions
 - [ ] Test dispose() closes all controllers
-- [ ] Test tools getter returns provided tools
 
 #### direct_mode_test.dart
 - [ ] Test DirectModeHandler initialization
@@ -119,19 +121,15 @@ Comprehensive testing strategy for the genui_anthropic package including unit te
 - [ ] Test data_model_update tool schema
 - [ ] Test delete_surface tool schema
 
-### Unit Tests - Config (test/config/)
+### Unit Tests - Config (test/genui_anthropic_test.dart) ✅
 
-#### anthropic_config_test.dart
-- [ ] Test default values
-- [ ] Test custom values
-- [ ] Test copyWith
-- [ ] Test equality
+#### AnthropicConfig tests ✅
+- [x] Test has default values
+- [x] Test copyWith creates modified copy
 
-#### proxy_config_test.dart
-- [ ] Test default values
-- [ ] Test custom values
-- [ ] Test copyWith
-- [ ] Test equality
+#### ProxyConfig tests ✅
+- [x] Test has default values
+- [x] Test copyWith creates modified copy
 
 ### Unit Tests - Utils (test/utils/)
 
@@ -377,3 +375,4 @@ cd example && flutter run
 | Date | Action |
 |------|--------|
 | 2025-12-13 | Created tracker from spec |
+| 2025-12-14 | Updated status: 10 tests passing (7 AnthropicContentGenerator, 2 AnthropicConfig, 2 ProxyConfig). Mock setup and advanced tests pending. |

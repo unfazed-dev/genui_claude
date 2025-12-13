@@ -30,6 +30,8 @@
 /// - [A2uiMessageAdapter] - Utility for message type conversion
 library genui_anthropic;
 
+import 'package:genui_anthropic/genui_anthropic.dart' show AnthropicContentGenerator, AnthropicConfig, ProxyConfig, A2uiMessageAdapter;
+
 export 'src/adapter/message_adapter.dart';
 export 'src/config/anthropic_config.dart';
 export 'src/content_generator/anthropic_content_generator.dart';

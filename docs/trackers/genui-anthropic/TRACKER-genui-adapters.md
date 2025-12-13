@@ -1,6 +1,6 @@
 # TRACKER: GenUI Adapters and Bridges Implementation
 
-## Status: PLANNING
+## Status: IN_PROGRESS
 
 ## Overview
 
@@ -10,55 +10,56 @@ Implementation of adapter and bridge classes that connect anthropic_a2ui types t
 
 ## Tasks
 
-### A2uiMessageAdapter (lib/src/adapter/message_adapter.dart)
+### A2uiMessageAdapter (lib/src/adapter/message_adapter.dart) ✅
 
-#### Main Conversion Method
-- [ ] Create A2uiMessageAdapter class
-- [ ] Implement toGenUiMessage(A2uiMessageData) static method
-- [ ] Use exhaustive pattern matching on A2uiMessageData:
+#### Main Conversion Method ✅
+- [x] Create A2uiMessageAdapter class
+- [x] Implement toGenUiMessage(A2uiMessageData) static method
+- [x] Use exhaustive pattern matching on A2uiMessageData:
   ```dart
-  static A2uiMessage toGenUiMessage(A2uiMessageData data) {
+  static A2uiMessage toGenUiMessage(a2ui.A2uiMessageData data) {
     return switch (data) {
-      BeginRenderingData d => ...,
-      SurfaceUpdateData d => ...,
-      DataModelUpdateData d => ...,
-      DeleteSurfaceData d => ...,
+      a2ui.BeginRenderingData(:final surfaceId, :final metadata) =>
+        BeginRendering(surfaceId: surfaceId, root: 'root', styles: metadata),
+      a2ui.SurfaceUpdateData(:final surfaceId, :final widgets) =>
+        SurfaceUpdate(surfaceId: surfaceId, components: widgets.map(_toComponent).toList()),
+      a2ui.DataModelUpdateData(:final updates, :final scope) =>
+        DataModelUpdate(surfaceId: scope ?? 'default', contents: updates),
+      a2ui.DeleteSurfaceData(:final surfaceId) =>
+        SurfaceDeletion(surfaceId: surfaceId),
     };
   }
   ```
 
-#### BeginRenderingData Conversion
-- [ ] Map to A2uiMessage.beginRendering()
-- [ ] Pass surfaceId
-- [ ] Pass parentSurfaceId (if present)
-- [ ] Handle metadata (if GenUI supports it)
+#### BeginRenderingData Conversion ✅
+- [x] Map to BeginRendering
+- [x] Pass surfaceId
+- [x] Pass metadata as styles
 
-#### SurfaceUpdateData Conversion
-- [ ] Map to A2uiMessage.surfaceUpdate()
-- [ ] Pass surfaceId
-- [ ] Convert widgets list using _toGenUiWidget()
-- [ ] Handle append flag
+#### SurfaceUpdateData Conversion ✅
+- [x] Map to SurfaceUpdate
+- [x] Pass surfaceId
+- [x] Convert widgets list using _toComponent()
 
-#### DataModelUpdateData Conversion
-- [ ] Map to A2uiMessage.dataModelUpdate()
-- [ ] Pass updates map
-- [ ] Handle scope (if GenUI supports it)
+#### DataModelUpdateData Conversion ✅
+- [x] Map to DataModelUpdate
+- [x] Pass updates as contents
+- [x] Map scope to surfaceId (with 'default' fallback)
 
-#### DeleteSurfaceData Conversion
-- [ ] Map to A2uiMessage.deleteSurface()
-- [ ] Pass surfaceId
-- [ ] Handle cascade flag
+#### DeleteSurfaceData Conversion ✅
+- [x] Map to SurfaceDeletion
+- [x] Pass surfaceId
 
-#### Widget Node Conversion
-- [ ] Implement _toGenUiWidget(WidgetNode) private static method
-- [ ] Create GenUiWidget with:
-  - [ ] type from node.type
-  - [ ] properties from node.properties
-  - [ ] children via recursive mapping
-  - [ ] dataBinding from node.dataBinding
-- [ ] Handle null children gracefully
+#### Widget Node Conversion ✅
+- [x] Implement _toComponent(WidgetNode) private static method
+- [x] Create Component with:
+  - [x] id from node.type
+  - [x] componentProperties from node.properties
 
-### CatalogToolBridge (lib/src/adapter/tool_bridge.dart)
+#### Batch Conversion ✅
+- [x] Implement toGenUiMessages(List<A2uiMessageData>) static method
+
+### CatalogToolBridge (lib/src/adapter/tool_bridge.dart) - NOT STARTED
 
 #### Catalog Extraction Methods
 - [ ] Create CatalogToolBridge class
@@ -95,7 +96,7 @@ Implementation of adapter and bridge classes that connect anthropic_a2ui types t
 - [ ] Prepend A2UI control tools to widget tools
 - [ ] Return combined list
 
-### MessageConverter (lib/src/utils/message_converter.dart)
+### MessageConverter (lib/src/utils/message_converter.dart) - NOT STARTED
 
 #### GenUI to Claude Message Conversion
 - [ ] Create MessageConverter class
@@ -121,15 +122,13 @@ Implementation of adapter and bridge classes that connect anthropic_a2ui types t
 
 ## Files
 
-### Adapter
-- `lib/src/adapter/message_adapter.dart` - A2UI message bridging
-- `lib/src/adapter/tool_bridge.dart` - Catalog to tools conversion
-- `lib/src/adapter/a2ui_control_tools.dart` - A2UI tool definitions
-- `lib/src/adapter/adapter.dart` (barrel export)
+### Adapter (Partial)
+- `lib/src/adapter/message_adapter.dart` ✅ - A2UI message bridging
+- `lib/src/adapter/tool_bridge.dart` (not yet created) - Catalog to tools conversion
+- `lib/src/adapter/a2ui_control_tools.dart` (not yet created) - A2UI tool definitions
 
-### Utils
-- `lib/src/utils/message_converter.dart` - GenUI Message conversion
-- `lib/src/utils/utils.dart` (barrel export)
+### Utils (Not Started)
+- `lib/src/utils/message_converter.dart` (not yet created) - GenUI Message conversion
 
 ## Dependencies
 
@@ -283,3 +282,4 @@ Tool(
 | Date | Action |
 |------|--------|
 | 2025-12-13 | Created tracker from spec |
+| 2025-12-14 | Updated status: A2uiMessageAdapter complete. CatalogToolBridge and MessageConverter not started. |

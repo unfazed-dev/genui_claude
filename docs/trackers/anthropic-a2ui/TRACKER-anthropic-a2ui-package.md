@@ -164,3 +164,4 @@ Pure Dart package for converting between Anthropic's Claude API responses and A2
 | Date | Action |
 |------|--------|
 | 2025-12-13 | Created tracker from spec document |
+| 2025-12-14 | Updated sub-trackers: Data Models COMPLETE, Core APIs COMPLETE, Testing IN_PROGRESS (37 tests). Package converted to pure Dart. |
