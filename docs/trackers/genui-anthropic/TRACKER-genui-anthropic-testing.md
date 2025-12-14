@@ -1,6 +1,6 @@
 # TRACKER: GenUI Anthropic Testing Implementation
 
-## Status: IN_PROGRESS
+## Status: COMPLETE
 
 ## Overview
 
@@ -14,14 +14,14 @@ Comprehensive testing strategy for the genui_anthropic package including unit te
 
 - [x] Configure test dependencies in pubspec.yaml
   - [x] flutter_test (sdk)
-  - [ ] integration_test (sdk) - not yet added
+  - [x] integration_test (sdk)
   - [x] mockito: ^5.4.0
   - [x] build_runner: ^2.4.0
 - [x] Create test directory structure
 - [x] Set up mock generation with @GenerateMocks
 - [x] Create test utilities and helpers
 
-**Current: 149 tests passing**
+**Current: 161 tests passing** (149 unit/widget + 12 integration)
 
 ### Mock Setup (test/mocks/) ✅
 
@@ -164,20 +164,23 @@ Comprehensive testing strategy for the genui_anthropic package including unit te
 - [x] Test generator can be disposed without error
 - [x] Test widget unmounts cleanly after dispose
 
-### Integration Tests (integration_test/)
+### Integration Tests (test/integration/) ✅
 
-#### claude_flow_test.dart
-- [ ] Test full Claude → GenUI flow with real API
-- [ ] Test tool selection and execution
-- [ ] Test streaming UI rendering
-- [ ] Test conversation continuity
-- [ ] Test error recovery
-- [ ] Test multiple sequential messages
+#### claude_flow_test.dart ✅ (6 tests)
+- [x] Test full Claude → GenUI flow with real API
+- [x] Test tool selection and execution
+- [x] Test streaming UI rendering
+- [x] Test conversation continuity
+- [x] Test error recovery
+- [x] Test multiple sequential messages
 
-#### proxy_flow_test.dart (if proxy available)
-- [ ] Test proxy mode with test endpoint
-- [ ] Test auth token handling
-- [ ] Test history pruning
+#### proxy_flow_test.dart ✅ (6 tests)
+- [x] Test proxy mode with mock server endpoint
+- [x] Test auth token handling
+- [x] Test history pruning
+- [x] Test handles server errors gracefully
+- [x] Test handles unauthorized errors
+- [x] Test streams multiple text chunks
 
 ### Example App (example/) ✅
 
@@ -264,11 +267,15 @@ example/
 └── README.md                              ✅
 ```
 
-### Remaining (Optional)
+### Integration Tests ✅
 ```
-integration_test/
-├── claude_flow_test.dart               ⏳ (requires API key)
-└── proxy_flow_test.dart                ⏳ (requires proxy)
+test/integration/
+├── helpers/
+│   ├── api_key_config.dart             ✅
+│   ├── integration_test_utils.dart     ✅
+│   └── mock_proxy_server.dart          ✅
+├── claude_flow_test.dart               ✅ (6 tests - real API)
+└── proxy_flow_test.dart                ✅ (6 tests - mock server)
 ```
 
 ## Coverage Requirements
@@ -403,3 +410,4 @@ cd example && flutter run
 | 2025-12-14 | Updated status: 10 tests passing (7 AnthropicContentGenerator, 2 AnthropicConfig, 2 ProxyConfig). Mock setup and advanced tests pending. |
 | 2025-12-14 | Major update: **125+ tests passing**. Added ProxyModeHandler tests (25), DirectModeHandler tests (24), extended ContentGenerator sendRequest tests (17). Handler layer now fully tested. |
 | 2025-12-14 | Major update: **149 tests passing**. Added MockClaudeStreamHandler, MockToolFactory, MockCatalogItemFactory to mock_generators.dart. Created test_utils.dart with custom matchers (isBeginRendering, isSurfaceUpdate, etc.), stream helpers, and ConversationBuilder. Added 12 widget tests for ContentGenerator integration. Example app already complete. |
+| 2025-12-14 | **COMPLETE: 161 tests passing**. Added integration tests: claude_flow_test.dart (6 tests with real Claude API) and proxy_flow_test.dart (6 tests with mock HTTP server). Fixed bug in anthropic_a2ui ClaudeStreamHandler that was iterating stream twice. Tests now in test/integration/ folder with helper utilities for API key config, test utilities, and mock proxy server. |
