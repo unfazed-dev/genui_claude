@@ -13,6 +13,7 @@ dependencies:
   genui_anthropic:
     path: ../
 
+  json_schema_builder: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
