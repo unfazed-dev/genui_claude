@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:genui_anthropic/genui_anthropic.dart' show RetryConfig, ProxyModeHandler;
 
 /// Configuration for direct Anthropic API mode.
 @immutable
@@ -86,9 +87,15 @@ class ProxyConfig {
 
   /// Number of retry attempts for transient failures.
   ///
-  /// Note: Retry logic for proxy mode is not yet implemented.
-  /// This option is reserved for future automatic retry functionality.
-  /// Currently, errors are emitted as events for client-side handling.
+  /// This value is used to create a default [RetryConfig] when no explicit
+  /// retry configuration is provided to [ProxyModeHandler]. For more advanced
+  /// retry behavior (custom backoff, jitter, etc.), provide a [RetryConfig]
+  /// directly to the handler.
+  ///
+  /// Retries are automatically applied for:
+  /// - Rate limit errors (HTTP 429) with Retry-After header support
+  /// - Transient server errors (HTTP 500, 502, 503, 504)
+  /// - Network timeouts and connection errors
   final int retryAttempts;
 
   /// Custom HTTP headers (in addition to auth).

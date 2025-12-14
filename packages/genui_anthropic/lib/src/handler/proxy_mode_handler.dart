@@ -77,7 +77,9 @@ class ProxyModeHandler implements ApiHandler {
         _endpoint = endpoint,
         _authToken = authToken,
         _config = config,
-        _retryConfig = retryConfig ?? RetryConfig.defaults,
+        // Use explicit retryConfig if provided, otherwise create one from ProxyConfig
+        _retryConfig = retryConfig ??
+            RetryConfig(maxAttempts: config.retryAttempts),
         _circuitBreaker = circuitBreaker,
         _streamInactivityTimeout =
             streamInactivityTimeout ?? const Duration(seconds: 60),
