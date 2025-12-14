@@ -1,5 +1,7 @@
 # genui_anthropic
 
+[![Test Coverage](https://img.shields.io/badge/coverage-view%20report-blue)](coverage/html/index.html)
+
 Flutter ContentGenerator implementation for Anthropic's Claude AI, enabling Claude-powered generative UI with the [GenUI SDK](https://pub.dev/packages/genui).
 
 ## Features
@@ -248,6 +250,27 @@ serve(async (req) => {
 
 - [API Reference](doc/API_REFERENCE.md) - Complete API documentation with all classes, methods, and properties
 - [Examples](doc/EXAMPLES.md) - Practical code examples, patterns, and troubleshooting guide
+- [Production Guide](doc/PRODUCTION_GUIDE.md) - Deployment and production hardening guide
+- [FAQ](doc/FAQ.md) - Frequently asked questions and troubleshooting
+- [Performance Tuning](doc/PERFORMANCE_TUNING.md) - Optimization guide
+- [Debug Logging](doc/DEBUG_LOGGING.md) - Logging configuration guide
+- [Catalog Patterns](doc/CATALOG_PATTERNS.md) - Best practices for widget catalogs
+
+## Testing
+
+Run tests:
+
+```bash
+flutter test
+```
+
+Run tests with coverage:
+
+```bash
+./tool/coverage.sh          # Run tests with coverage
+./tool/coverage.sh --html   # Generate HTML report
+./tool/coverage.sh --open   # Generate and open HTML report
+```
 
 ## Related Packages
 

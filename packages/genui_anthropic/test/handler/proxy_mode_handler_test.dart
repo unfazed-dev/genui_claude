@@ -575,6 +575,7 @@ data: {"type": "message_stop"}
           final handler = ProxyModeHandler(
             endpoint: testEndpoint,
             client: mockClient,
+            retryConfig: RetryConfig.noRetry,
           );
 
           final mockResponse = _createMockStreamedResponse(
@@ -595,7 +596,7 @@ data: {"type": "message_stop"}
           expect(events, hasLength(1));
           expect(events[0]['type'], equals('error'));
           final errorData = events[0]['error'] as Map<String, dynamic>;
-          expect(errorData['message'], contains('HTTP 400'));
+          expect(errorData['message'], contains('Invalid request'));
           expect(errorData['http_status'], equals(400));
 
           handler.dispose();
@@ -605,6 +606,7 @@ data: {"type": "message_stop"}
           final handler = ProxyModeHandler(
             endpoint: testEndpoint,
             client: mockClient,
+            retryConfig: RetryConfig.noRetry,
           );
 
           final mockResponse = _createMockStreamedResponse(
@@ -634,6 +636,7 @@ data: {"type": "message_stop"}
           final handler = ProxyModeHandler(
             endpoint: testEndpoint,
             client: mockClient,
+            retryConfig: RetryConfig.noRetry,
           );
 
           final mockResponse = _createMockStreamedResponse(
@@ -664,6 +667,7 @@ data: {"type": "message_stop"}
             endpoint: testEndpoint,
             config: const ProxyConfig(timeout: Duration(milliseconds: 100)),
             client: mockClient,
+            retryConfig: RetryConfig.noRetry,
           );
 
           when(mockClient.send(any)).thenAnswer(
@@ -694,6 +698,7 @@ data: {"type": "message_stop"}
           final handler = ProxyModeHandler(
             endpoint: testEndpoint,
             client: mockClient,
+            retryConfig: RetryConfig.noRetry,
           );
 
           when(mockClient.send(any)).thenThrow(

@@ -1,14 +1,23 @@
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart' as sdk;
 import 'package:genui_anthropic/src/config/anthropic_config.dart';
+import 'package:genui_anthropic/src/exceptions/anthropic_exceptions.dart' as exc;
 import 'package:genui_anthropic/src/handler/api_handler.dart';
+import 'package:genui_anthropic/src/metrics/metrics_collector.dart';
 import 'package:logging/logging.dart';
+import 'package:uuid/uuid.dart';
 
 final _log = Logger('DirectModeHandler');
+const _uuid = Uuid();
 
 /// Handler for direct Anthropic API access.
 ///
 /// Uses anthropic_sdk_dart to call the Claude API directly.
 /// Suitable for development, prototyping, and server-side usage.
+///
+/// Features:
+/// - Request ID tracking for debugging
+/// - Structured error handling with categorization
+/// - Automatic retry via SDK (configured through AnthropicConfig)
 ///
 /// Example:
 /// ```dart
@@ -32,23 +41,38 @@ class DirectModeHandler implements ApiHandler {
   /// - [apiKey]: Your Anthropic API key
   /// - [model]: Model to use (default: 'claude-sonnet-4-20250514')
   /// - [config]: Optional configuration for timeouts, retries, etc.
+  /// - [metricsCollector]: Optional metrics collector for observability
   DirectModeHandler({
     required String apiKey,
     this.model = 'claude-sonnet-4-20250514',
     AnthropicConfig config = AnthropicConfig.defaults,
-  }) : _client = sdk.AnthropicClient(
+    MetricsCollector? metricsCollector,
+  })  : _client = sdk.AnthropicClient(
           apiKey: apiKey,
           headers: config.headers,
           retries: config.retryAttempts,
-        );
+        ),
+        _metricsCollector = metricsCollector;
 
   final sdk.AnthropicClient _client;
+  final MetricsCollector? _metricsCollector;
 
   /// The default model to use for requests.
   final String model;
 
   @override
   Stream<Map<String, dynamic>> createStream(ApiRequest request) async* {
+    final requestId = _uuid.v4();
+    final startTime = DateTime.now();
+    _log.fine('[Request $requestId] Starting direct API request');
+
+    // Record request start
+    _metricsCollector?.recordRequestStart(
+      requestId: requestId,
+      endpoint: 'api.anthropic.com',
+      model: request.model ?? model,
+    );
+
     try {
       // Build the SDK request
       final sdkRequest = sdk.CreateMessageRequest(
@@ -65,15 +89,72 @@ class DirectModeHandler implements ApiHandler {
 
       // Stream SDK events and convert to Map format
       await for (final event in _client.createMessageStream(request: sdkRequest)) {
-        yield _convertEventToMap(event);
+        final eventMap = _convertEventToMap(event);
+        eventMap['_requestId'] = requestId;
+        yield eventMap;
       }
+
+      _log.fine('[Request $requestId] Request completed successfully');
+      _metricsCollector?.recordRequestSuccess(
+        requestId: requestId,
+        duration: DateTime.now().difference(startTime),
+      );
     } on Exception catch (e, stackTrace) {
-      _log.warning('Claude API request failed', e, stackTrace);
+      _log.warning('[Request $requestId] Claude API request failed', e, stackTrace);
+
+      // Map exception to our exception types based on message content
+      final exception = _mapException(e, requestId, stackTrace);
+
+      _metricsCollector?.recordRequestFailure(
+        requestId: requestId,
+        duration: DateTime.now().difference(startTime),
+        errorType: exception.typeName,
+        errorMessage: exception.message,
+        statusCode: exception.statusCode,
+        isRetryable: exception.isRetryable,
+      );
+
       yield {
         'type': 'error',
-        'error': {'message': e.toString()},
+        'error': {
+          'message': exception.message,
+          'type': exception.typeName,
+          if (exception.statusCode != null) 'http_status': exception.statusCode,
+          'retryable': exception.isRetryable,
+        },
+        '_requestId': requestId,
       };
     }
+  }
+
+  /// Maps exceptions to our exception hierarchy.
+  exc.AnthropicException _mapException(
+    Exception e,
+    String requestId,
+    StackTrace stackTrace,
+  ) {
+    final message = e.toString();
+
+    // Try to extract status code from message if available
+    final statusMatch = RegExp(r'status(?:Code)?[:\s]+(\d{3})').firstMatch(message);
+    if (statusMatch != null) {
+      final statusCode = int.tryParse(statusMatch.group(1) ?? '');
+      if (statusCode != null) {
+        return exc.ExceptionFactory.fromHttpStatus(
+          statusCode: statusCode,
+          body: message,
+          requestId: requestId,
+        );
+      }
+    }
+
+    // Network or unknown error
+    return exc.NetworkException(
+      message: message,
+      requestId: requestId,
+      originalError: e,
+      stackTrace: stackTrace,
+    );
   }
 
   /// Converts message maps to SDK Message objects.
