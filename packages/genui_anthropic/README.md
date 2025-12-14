@@ -244,6 +244,11 @@ serve(async (req) => {
 })
 ```
 
+## Documentation
+
+- [API Reference](doc/API_REFERENCE.md) - Complete API documentation with all classes, methods, and properties
+- [Examples](doc/EXAMPLES.md) - Practical code examples, patterns, and troubleshooting guide
+
 ## Related Packages
 
 - [genui](https://pub.dev/packages/genui) - Flutter GenUI SDK
