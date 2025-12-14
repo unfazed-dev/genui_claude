@@ -1,6 +1,9 @@
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart' as sdk;
 import 'package:genui_anthropic/src/config/anthropic_config.dart';
 import 'package:genui_anthropic/src/handler/api_handler.dart';
+import 'package:logging/logging.dart';
+
+final _log = Logger('DirectModeHandler');
 
 /// Handler for direct Anthropic API access.
 ///
@@ -64,8 +67,8 @@ class DirectModeHandler implements ApiHandler {
       await for (final event in _client.createMessageStream(request: sdkRequest)) {
         yield _convertEventToMap(event);
       }
-    } on Exception catch (e) {
-      // Emit error as an event rather than throwing
+    } on Exception catch (e, stackTrace) {
+      _log.warning('Claude API request failed', e, stackTrace);
       yield {
         'type': 'error',
         'error': {'message': e.toString()},
@@ -210,6 +213,9 @@ class DirectModeHandler implements ApiHandler {
 
   @override
   void dispose() {
-    // AnthropicClient doesn't require explicit disposal
+    // AnthropicClient from anthropic_sdk_dart manages its own HTTP lifecycle
+    // and doesn't expose a close() method. The underlying HTTP client is
+    // managed internally by the SDK.
+    _log.fine('DirectModeHandler disposed');
   }
 }

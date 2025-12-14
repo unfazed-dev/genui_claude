@@ -4,6 +4,9 @@ import 'dart:convert';
 import 'package:genui_anthropic/src/config/anthropic_config.dart';
 import 'package:genui_anthropic/src/handler/api_handler.dart';
 import 'package:http/http.dart' as http;
+import 'package:logging/logging.dart';
+
+final _log = Logger('ProxyModeHandler');
 
 /// Handler for backend proxy API access.
 ///
@@ -80,6 +83,7 @@ class ProxyModeHandler implements ApiHandler {
       // Check for HTTP errors
       if (response.statusCode != 200) {
         final body = await response.stream.bytesToString();
+        _log.warning('HTTP error ${response.statusCode}: $body');
         yield {
           'type': 'error',
           'error': {
@@ -92,12 +96,14 @@ class ProxyModeHandler implements ApiHandler {
 
       // Parse SSE stream
       yield* _parseSSEStream(response.stream);
-    } on TimeoutException {
+    } on TimeoutException catch (e, stackTrace) {
+      _log.warning('Request timed out after ${_config.timeout}', e, stackTrace);
       yield {
         'type': 'error',
         'error': {'message': 'Request timed out after ${_config.timeout}'},
       };
-    } on Exception catch (e) {
+    } on Exception catch (e, stackTrace) {
+      _log.warning('Request failed', e, stackTrace);
       yield {
         'type': 'error',
         'error': {'message': e.toString()},
@@ -140,8 +146,8 @@ class ProxyModeHandler implements ApiHandler {
         try {
           final json = jsonDecode(data) as Map<String, dynamic>;
           yield json;
-        } on FormatException catch (e) {
-          // Log parse error but continue processing
+        } on FormatException catch (e, stackTrace) {
+          _log.warning('Failed to parse SSE data: $data', e, stackTrace);
           yield {
             'type': 'error',
             'error': {'message': 'Failed to parse SSE data: $e'},

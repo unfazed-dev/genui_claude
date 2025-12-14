@@ -4,6 +4,9 @@ import 'dart:convert';
 import 'package:anthropic_a2ui/src/exceptions/exceptions.dart';
 import 'package:anthropic_a2ui/src/models/models.dart';
 import 'package:anthropic_a2ui/src/parser/parser.dart';
+import 'package:logging/logging.dart';
+
+final _log = Logger('ClaudeStreamHandler');
 
 /// Manages streaming connections to Claude API.
 ///
@@ -69,19 +72,27 @@ class ClaudeStreamHandler {
 
           // If this was a tool use block, parse and emit A2UI message
           if (toolName != null && buffer != null) {
-            try {
-              final jsonStr = buffer.toString();
-              if (jsonStr.isNotEmpty) {
+            final jsonStr = buffer.toString();
+            if (jsonStr.isNotEmpty) {
+              try {
                 final input = jsonDecode(jsonStr) as Map<String, dynamic>;
                 final message = ClaudeA2uiParser.parseToolUse(toolName, input);
                 if (message != null) {
                   yield A2uiMessageEvent(message);
                 }
+              } on FormatException catch (e, stackTrace) {
+                _log.warning(
+                  'Malformed JSON in tool "$toolName": $jsonStr',
+                  e,
+                  stackTrace,
+                );
+              } on Exception catch (e, stackTrace) {
+                _log.warning(
+                  'Failed to parse tool "$toolName"',
+                  e,
+                  stackTrace,
+                );
               }
-            } on FormatException {
-              // Skip malformed JSON
-            } on Exception {
-              // Skip other parsing errors
             }
           }
 

@@ -22,6 +22,10 @@ class AnthropicConfig {
   final int retryAttempts;
 
   /// Enable streaming responses.
+  ///
+  /// Note: Currently streaming is always enabled as the GenUI framework
+  /// requires streaming for progressive UI rendering. This option is
+  /// reserved for potential future non-streaming use cases.
   final bool enableStreaming;
 
   /// Custom HTTP headers.
@@ -63,7 +67,11 @@ class ProxyConfig {
   /// Request timeout duration.
   final Duration timeout;
 
-  /// Number of retry attempts.
+  /// Number of retry attempts for transient failures.
+  ///
+  /// Note: Retry logic for proxy mode is not yet implemented.
+  /// This option is reserved for future automatic retry functionality.
+  /// Currently, errors are emitted as events for client-side handling.
   final int retryAttempts;
 
   /// Custom HTTP headers (in addition to auth).

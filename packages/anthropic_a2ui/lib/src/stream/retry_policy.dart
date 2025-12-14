@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:anthropic_a2ui/src/exceptions/exceptions.dart';
 
@@ -35,9 +36,10 @@ class RetryPolicy {
       return error.isRetryable;
     }
 
-    // Retry network-related errors
-    return error.toString().contains('SocketException') ||
-        error.toString().contains('TimeoutException');
+    // Retry network-related errors using proper type checking
+    return error is SocketException ||
+        error is TimeoutException ||
+        error is HttpException;
   }
 
   /// Calculates the delay before the next retry attempt.

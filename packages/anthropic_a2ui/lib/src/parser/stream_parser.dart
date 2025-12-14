@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:anthropic_a2ui/src/models/models.dart';
 
@@ -73,8 +74,6 @@ class StreamParser {
   }
 
   Map<String, dynamic> _parseJson(String json) {
-    // Placeholder - in production, use dart:convert
-    // This is a stub that should be replaced with proper JSON parsing
-    return {};
+    return jsonDecode(json) as Map<String, dynamic>;
   }
 }

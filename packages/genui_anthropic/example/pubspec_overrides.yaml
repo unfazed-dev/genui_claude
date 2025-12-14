@@ -1,0 +1,6 @@
+# melos_managed_dependency_overrides: anthropic_a2ui,genui_anthropic
+dependency_overrides:
+  anthropic_a2ui:
+    path: ../../anthropic_a2ui
+  genui_anthropic:
+    path: ..

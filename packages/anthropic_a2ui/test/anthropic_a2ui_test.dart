@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:anthropic_a2ui/anthropic_a2ui.dart';
 import 'package:test/test.dart';
@@ -735,6 +736,49 @@ void main() {
       expect(policy.getDelay(1), equals(const Duration(seconds: 3)));
       expect(policy.getDelay(2), equals(const Duration(seconds: 6)));
     });
+
+    test('shouldRetry returns true for TimeoutException', () {
+      const policy = RetryPolicy.defaults;
+      // TimeoutException should be retryable
+      expect(
+        policy.shouldRetry(TimeoutException('timeout'), 1),
+        isTrue,
+      );
+    });
+
+    test('shouldRetry returns true for SocketException', () {
+      const policy = RetryPolicy.defaults;
+      // SocketException should be retryable
+      expect(
+        policy.shouldRetry(
+          const SocketException('connection failed'),
+          1,
+        ),
+        isTrue,
+      );
+    });
+
+    test('shouldRetry returns false for non-retryable exceptions', () {
+      const policy = RetryPolicy.defaults;
+      // Generic exceptions should not be retryable
+      expect(
+        policy.shouldRetry(Exception('generic error'), 1),
+        isFalse,
+      );
+      expect(
+        policy.shouldRetry(const FormatException('parse error'), 1),
+        isFalse,
+      );
+    });
+
+    test('shouldRetry returns true for HttpException', () {
+      const policy = RetryPolicy.defaults;
+      // HttpException should be retryable (network error)
+      expect(
+        policy.shouldRetry(const HttpException('connection reset'), 1),
+        isTrue,
+      );
+    });
   });
 
   group('SchemaMapper', () {
@@ -1157,6 +1201,77 @@ void main() {
 
       expect(newEvents, isEmpty);
       expect(parser.reset, returnsNormally);
+    });
+
+    test('parseStream yields BeginRenderingData for complete begin_rendering tool', () async {
+      // BUG FIX TEST: This test verifies JSON is properly parsed
+      // Previously _parseJson() returned {} which broke all parsing
+      final parser = StreamParser();
+      final inputEvents = [
+        {
+          'type': 'content_block_start',
+          'index': 0,
+          'content_block': {'type': 'tool_use', 'name': 'begin_rendering'},
+        },
+        {
+          'type': 'content_block_delta',
+          'index': 0,
+          'delta': {'type': 'input_json_delta', 'partial_json': '{"surfaceId":"test-surface-123"}'},
+        },
+        {
+          'type': 'content_block_stop',
+          'index': 0,
+        },
+      ];
+
+      final events = <A2uiMessageData>[];
+      await for (final event
+          in parser.parseStream(Stream.fromIterable(inputEvents))) {
+        events.add(event);
+      }
+
+      // Should yield exactly one BeginRenderingData with correct surfaceId
+      expect(events, hasLength(1));
+      expect(events.first, isA<BeginRenderingData>());
+      final beginData = events.first as BeginRenderingData;
+      expect(beginData.surfaceId, equals('test-surface-123'));
+    });
+
+    test('parseStream yields SurfaceUpdateData for complete surface_update tool', () async {
+      // BUG FIX TEST: Verifies JSON parsing works for surface_update
+      final parser = StreamParser();
+      final inputEvents = [
+        {
+          'type': 'content_block_start',
+          'index': 0,
+          'content_block': {'type': 'tool_use', 'name': 'surface_update'},
+        },
+        {
+          'type': 'content_block_delta',
+          'index': 0,
+          'delta': {
+            'type': 'input_json_delta',
+            'partial_json': '{"surfaceId":"surface-1","widgets":[{"type":"Text","properties":{"text":"Hello"}}]}',
+          },
+        },
+        {
+          'type': 'content_block_stop',
+          'index': 0,
+        },
+      ];
+
+      final events = <A2uiMessageData>[];
+      await for (final event
+          in parser.parseStream(Stream.fromIterable(inputEvents))) {
+        events.add(event);
+      }
+
+      expect(events, hasLength(1));
+      expect(events.first, isA<SurfaceUpdateData>());
+      final updateData = events.first as SurfaceUpdateData;
+      expect(updateData.surfaceId, equals('surface-1'));
+      expect(updateData.widgets, hasLength(1));
+      expect(updateData.widgets.first.type, equals('Text'));
     });
   });
 
