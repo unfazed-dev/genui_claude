@@ -100,7 +100,7 @@ feat: add user onboarding flow         # No scope - spans multiple areas
 
 ## Breaking Changes
 
-Use `!` after type/scope to indicate breaking changes:
+Add an exclamation mark after type/scope to indicate breaking changes:
 
 ```
 feat!: remove deprecated user API
