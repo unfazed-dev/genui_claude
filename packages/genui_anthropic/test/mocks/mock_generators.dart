@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:anthropic_a2ui/anthropic_a2ui.dart' as a2ui;
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:genui/genui.dart';
 import 'package:genui_anthropic/genui_anthropic.dart';
+import 'package:json_schema_builder/json_schema_builder.dart';
 
 /// Mock implementation of [AnthropicContentGenerator] for testing.
 ///
@@ -407,5 +409,292 @@ class MockStreamEventFactory {
       blockStop(),
       messageStop(),
     ];
+  }
+}
+
+/// Mock implementation of [a2ui.ClaudeStreamHandler] for testing.
+///
+/// Provides controllable stream output without actual API calls.
+class MockClaudeStreamHandler {
+  MockClaudeStreamHandler({this.config = a2ui.StreamConfig.defaults});
+
+  final a2ui.StreamConfig config;
+
+  final _queuedEvents = <a2ui.StreamEvent>[];
+
+  /// Queue events to be emitted on next streamRequest.
+  void stubEvents(List<a2ui.StreamEvent> events) {
+    _queuedEvents.addAll(events);
+  }
+
+  /// Queue a single A2UI message event.
+  void stubA2uiMessage(a2ui.A2uiMessageData message) {
+    _queuedEvents.add(a2ui.A2uiMessageEvent(message));
+  }
+
+  /// Queue a text delta event.
+  void stubTextDelta(String text) {
+    _queuedEvents.add(a2ui.TextDeltaEvent(text));
+  }
+
+  /// Queue a complete event.
+  void stubComplete() {
+    _queuedEvents.add(const a2ui.CompleteEvent());
+  }
+
+  /// Queue an error event.
+  void stubError(a2ui.A2uiException error) {
+    _queuedEvents.add(a2ui.ErrorEvent(error));
+  }
+
+  /// Simulates streaming request by yielding queued events.
+  Stream<a2ui.StreamEvent> streamRequest({
+    required Stream<Map<String, dynamic>> messageStream,
+  }) async* {
+    for (final event in _queuedEvents) {
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+      yield event;
+    }
+    _queuedEvents.clear();
+  }
+
+  /// Resets queued events.
+  void reset() {
+    _queuedEvents.clear();
+  }
+
+  void dispose() {
+    _queuedEvents.clear();
+  }
+}
+
+/// Factory for creating mock [a2ui.A2uiToolSchema] objects.
+class MockToolFactory {
+  MockToolFactory._();
+
+  /// Creates a simple tool schema for testing.
+  static a2ui.A2uiToolSchema tool({
+    required String name,
+    String description = 'A test tool',
+    Map<String, dynamic>? inputSchema,
+    List<String>? requiredFields,
+  }) {
+    return a2ui.A2uiToolSchema(
+      name: name,
+      description: description,
+      inputSchema: inputSchema ??
+          {
+            'type': 'object',
+            'properties': {
+              'value': {'type': 'string'},
+            },
+          },
+      requiredFields: requiredFields,
+    );
+  }
+
+  /// Creates a tool schema with string property.
+  static a2ui.A2uiToolSchema stringTool({
+    String name = 'string_tool',
+    String propertyName = 'text',
+    bool required = false,
+  }) {
+    return a2ui.A2uiToolSchema(
+      name: name,
+      description: 'Tool with string input',
+      inputSchema: {
+        'type': 'object',
+        'properties': {
+          propertyName: {'type': 'string', 'description': 'Text input'},
+        },
+      },
+      requiredFields: required ? [propertyName] : null,
+    );
+  }
+
+  /// Creates a tool schema mimicking a widget tool.
+  static a2ui.A2uiToolSchema widgetTool({
+    String name = 'test_widget',
+    Map<String, dynamic>? properties,
+    List<String>? requiredFields,
+  }) {
+    return a2ui.A2uiToolSchema(
+      name: name,
+      description: 'Renders a $name widget',
+      inputSchema: {
+        'type': 'object',
+        'properties': properties ??
+            {
+              'title': {'type': 'string'},
+              'subtitle': {'type': 'string'},
+            },
+      },
+      requiredFields: requiredFields ?? ['title'],
+    );
+  }
+
+  /// Creates begin_rendering control tool.
+  static a2ui.A2uiToolSchema beginRenderingTool() {
+    return const a2ui.A2uiToolSchema(
+      name: 'begin_rendering',
+      description: 'Begin rendering a new UI surface',
+      inputSchema: {
+        'type': 'object',
+        'properties': {
+          'surfaceId': {'type': 'string'},
+          'metadata': {'type': 'object'},
+        },
+      },
+      requiredFields: ['surfaceId'],
+    );
+  }
+
+  /// Creates surface_update control tool.
+  static a2ui.A2uiToolSchema surfaceUpdateTool() {
+    return const a2ui.A2uiToolSchema(
+      name: 'surface_update',
+      description: 'Update widgets on a surface',
+      inputSchema: {
+        'type': 'object',
+        'properties': {
+          'surfaceId': {'type': 'string'},
+          'widgets': {'type': 'array'},
+        },
+      },
+      requiredFields: ['surfaceId', 'widgets'],
+    );
+  }
+}
+
+/// Factory for creating mock [CatalogItem] objects.
+class MockCatalogItemFactory {
+  MockCatalogItemFactory._();
+
+  /// Creates a simple catalog item for testing.
+  static CatalogItem item({
+    required String name,
+    String? description,
+    ObjectSchema? dataSchema,
+    Widget Function(dynamic)? widgetBuilder,
+  }) {
+    return CatalogItem(
+      name: name,
+      dataSchema: dataSchema ??
+          S.object(
+            description: description ?? 'A test $name widget',
+            properties: {
+              'value': S.string(description: 'Widget value'),
+            },
+          ),
+      widgetBuilder: widgetBuilder ?? (_) => const SizedBox(),
+    );
+  }
+
+  /// Creates a text widget catalog item.
+  static CatalogItem textWidget({
+    String name = 'text_widget',
+  }) {
+    return CatalogItem(
+      name: name,
+      dataSchema: S.object(
+        description: 'Displays text content',
+        properties: {
+          'text': S.string(description: 'The text to display'),
+          'style': S.string(description: 'Text style'),
+        },
+        required: ['text'],
+      ),
+      widgetBuilder: (data) => Text(
+        (data as Map<String, dynamic>?)?['text']?.toString() ?? '',
+      ),
+    );
+  }
+
+  /// Creates a card widget catalog item.
+  static CatalogItem cardWidget({
+    String name = 'card_widget',
+  }) {
+    return CatalogItem(
+      name: name,
+      dataSchema: S.object(
+        description: 'Displays a card with title and content',
+        properties: {
+          'title': S.string(description: 'Card title'),
+          'subtitle': S.string(description: 'Card subtitle'),
+          'content': S.string(description: 'Card content'),
+        },
+        required: ['title'],
+      ),
+      widgetBuilder: (_) => const Card(child: SizedBox()),
+    );
+  }
+
+  /// Creates a button widget catalog item.
+  static CatalogItem buttonWidget({
+    String name = 'button_widget',
+  }) {
+    return CatalogItem(
+      name: name,
+      dataSchema: S.object(
+        description: 'Interactive button',
+        properties: {
+          'label': S.string(description: 'Button label'),
+          'enabled': S.boolean(description: 'Whether button is enabled'),
+          'action': S.string(description: 'Action identifier'),
+        },
+        required: ['label'],
+      ),
+      widgetBuilder: (data) => ElevatedButton(
+        onPressed: () {},
+        child: Text(
+          (data as Map<String, dynamic>?)?['label']?.toString() ?? 'Button',
+        ),
+      ),
+    );
+  }
+
+  /// Creates a form widget catalog item.
+  static CatalogItem formWidget({
+    String name = 'form_widget',
+  }) {
+    return CatalogItem(
+      name: name,
+      dataSchema: S.object(
+        description: 'Form with input fields',
+        properties: {
+          'fields': S.list(
+            items: S.object(
+              properties: {
+                'name': S.string(),
+                'type': S.string(),
+                'required': S.boolean(),
+              },
+            ),
+          ),
+          'submitLabel': S.string(),
+        },
+        required: ['fields'],
+      ),
+      widgetBuilder: (_) => const SizedBox(),
+    );
+  }
+
+  /// Creates a list of common catalog items for testing.
+  static List<CatalogItem> commonItems() {
+    return [
+      textWidget(),
+      cardWidget(),
+      buttonWidget(),
+    ];
+  }
+
+  /// Creates a Catalog with the given items.
+  static Catalog catalog(List<CatalogItem> items) {
+    return Catalog(items);
+  }
+
+  /// Creates a Catalog with common test items.
+  static Catalog commonCatalog() {
+    return Catalog(commonItems());
   }
 }
