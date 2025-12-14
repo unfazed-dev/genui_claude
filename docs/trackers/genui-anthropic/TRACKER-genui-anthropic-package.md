@@ -14,11 +14,11 @@ Flutter ContentGenerator implementation that enables Anthropic's Claude AI model
 - [x] Update pubspec.yaml with required dependencies:
   - [x] genui: ^0.5.1
   - [x] anthropic_a2ui: ^1.0.0 (path dependency for monorepo)
-  - [ ] anthropic_sdk_dart: ^0.9.0 (deferred - using mock stream for now)
-  - [ ] http: ^1.1.0 (deferred - using mock stream for now)
+  - [x] anthropic_sdk_dart: ^0.3.0
+  - [x] http: ^1.2.0
 - [x] Update dev dependencies:
   - [x] flutter_test (sdk)
-  - [ ] integration_test (sdk)
+  - [x] integration_test (sdk)
   - [x] mockito: ^5.4.0
   - [x] build_runner: ^2.4.0
 - [x] Update environment constraints (sdk: ^3.5.0, flutter: >=3.22.0)
@@ -52,8 +52,8 @@ Flutter ContentGenerator implementation that enables Anthropic's Claude AI model
   - [x] isProcessing getter (ValueNotifier<bool>)
   - [x] sendRequest() method
   - [x] dispose() method
-- [ ] Implement DirectModeHandler (deferred - using mock stream)
-- [ ] Implement ProxyModeHandler (deferred - using mock stream)
+- [x] Implement DirectModeHandler (lib/src/handler/direct_mode_handler.dart)
+- [x] Implement ProxyModeHandler (lib/src/handler/proxy_mode_handler.dart)
 - [x] Stream controller management
 - [x] ClaudeStreamHandler integration from anthropic_a2ui
 
@@ -89,10 +89,11 @@ Flutter ContentGenerator implementation that enables Anthropic's Claude AI model
 - [x] Unit tests for A2uiMessageAdapter
 - [x] Unit tests for CatalogToolBridge
 - [x] Unit tests for configuration classes (AnthropicConfig, ProxyConfig)
-- [ ] Widget tests for chat integration (deferred)
-- [ ] Integration tests for full Claude → GenUI flow (deferred)
+- [x] Widget tests for chat integration (test/widget/content_generator_widget_test.dart)
+- [x] Integration tests for full Claude → GenUI flow (test/integration/)
 - [x] Create mock generators (test/mocks/mock_generators.dart)
-- **Current: 73 tests passing**
+- **Current: 153 tests passing (0 skipped with API key)**
+- Run with API key: `flutter test --dart-define=TEST_ANTHROPIC_API_KEY=your-key`
 
 ### Phase 8: Examples ✅
 - [x] Create example/lib/main.dart (basic example)
@@ -118,6 +119,9 @@ Flutter ContentGenerator implementation that enables Anthropic's Claude AI model
 
 ### Source Files
 - `lib/src/content_generator/anthropic_content_generator.dart` - Main class
+- `lib/src/handler/api_handler.dart` - Handler interface and ApiRequest
+- `lib/src/handler/direct_mode_handler.dart` - Direct API handler using anthropic_sdk_dart
+- `lib/src/handler/proxy_mode_handler.dart` - Proxy handler with HTTP streaming
 - `lib/src/adapter/message_adapter.dart` - A2UI message bridging
 - `lib/src/adapter/tool_bridge.dart` - Catalog to tools conversion
 - `lib/src/adapter/a2ui_control_tools.dart` - A2UI control tool definitions
@@ -125,12 +129,20 @@ Flutter ContentGenerator implementation that enables Anthropic's Claude AI model
 - `lib/src/utils/message_converter.dart` - GenUI Message conversion
 
 ### Test Files
-- `test/content_generator/anthropic_content_generator_test.dart`
+- `test/genui_anthropic_test.dart` - Main package tests
 - `test/adapter/message_adapter_test.dart`
 - `test/adapter/tool_bridge_test.dart`
 - `test/adapter/a2ui_control_tools_test.dart`
-- `test/config/anthropic_config_test.dart`
+- `test/handler/direct_mode_handler_test.dart`
+- `test/handler/proxy_mode_handler_test.dart`
+- `test/handler/mock_api_handler.dart` - Mock handler for testing
+- `test/widget/content_generator_widget_test.dart` - Widget tests
+- `test/integration/claude_flow_test.dart` - Direct mode integration
+- `test/integration/proxy_flow_test.dart` - Proxy mode integration
+- `test/integration/helpers/mock_proxy_server.dart` - Mock HTTP server
+- `test/integration/helpers/integration_test_utils.dart`
 - `test/utils/message_converter_test.dart`
+- `test/helpers/test_utils.dart` - Test utilities
 - `test/mocks/mock_generators.dart`
 
 ### Example Files
@@ -161,17 +173,15 @@ Flutter ContentGenerator implementation that enables Anthropic's Claude AI model
 4. **Flutter Lifecycle**: Proper dispose patterns for stream controllers
 
 ### Current State
-- Package fully implemented with core functionality
-- 73 unit tests passing
+- Package fully implemented with all functionality
+- 153 tests passing (0 skipped with API key)
+- DirectModeHandler using anthropic_sdk_dart for direct API access
+- ProxyModeHandler with real HTTP streaming implementation
+- Widget tests for UI integration patterns
+- Integration tests for full Claude → GenUI flow (verified with real API)
 - Complete example app with basic and production chat screens
 - Comprehensive README documentation
 - Supabase Edge Function template for production deployments
-
-### Deferred Items
-- DirectModeHandler/ProxyModeHandler actual HTTP implementation (using mock streams)
-- anthropic_sdk_dart and http dependencies
-- Widget tests and integration tests
-- 90%+ code coverage target
 
 ### Relationship to anthropic_a2ui
 
@@ -214,3 +224,5 @@ Flutter ContentGenerator implementation that enables Anthropic's Claude AI model
 | 2025-12-14 | Created CHANGELOG.md |
 | 2025-12-14 | Created Supabase Edge Function template |
 | 2025-12-14 | Marked tracker as COMPLETED (73 tests passing) |
+| 2025-12-14 | Updated tracker: all deferred items now complete (147 tests passing) |
+| 2025-12-14 | Verified with real API key: 153 tests passing, 0 skipped |

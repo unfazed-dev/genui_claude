@@ -11,6 +11,7 @@ class ApiKeyConfig {
   /// Gets the API key, returns null if not available.
   static String? get apiKey {
     // Check dart-define first (compile-time constant)
+    // ignore: do_not_use_environment
     const dartDefineKey = String.fromEnvironment('TEST_ANTHROPIC_API_KEY');
     if (dartDefineKey.isNotEmpty) return dartDefineKey;
 
