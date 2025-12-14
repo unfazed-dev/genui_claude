@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:genui/genui.dart';
 import 'package:genui_anthropic/genui_anthropic.dart';
 
+import 'handler/mock_api_handler.dart';
+
 void main() {
   group('AnthropicContentGenerator', () {
     group('direct mode', () {
@@ -11,10 +13,7 @@ void main() {
           apiKey: 'test-api-key',
         );
 
-        expect(generator.apiKey, equals('test-api-key'));
-        expect(generator.model, equals('claude-sonnet-4-20250514'));
         expect(generator.isDirectMode, isTrue);
-        expect(generator.config, equals(AnthropicConfig.defaults));
 
         generator.dispose();
       });
@@ -27,9 +26,8 @@ void main() {
           config: const AnthropicConfig(maxTokens: 8192),
         );
 
-        expect(generator.model, equals('claude-haiku-3-20240307'));
         expect(generator.systemInstruction, equals('You are a helpful assistant.'));
-        expect(generator.config?.maxTokens, equals(8192));
+        expect(generator.isDirectMode, isTrue);
 
         generator.dispose();
       });
@@ -65,10 +63,7 @@ void main() {
           proxyEndpoint: Uri.parse('https://example.com/api/claude'),
         );
 
-        expect(generator.proxyEndpoint?.toString(), equals('https://example.com/api/claude'));
         expect(generator.isDirectMode, isFalse);
-        expect(generator.apiKey, isNull);
-        expect(generator.proxyConfig, equals(ProxyConfig.defaults));
 
         generator.dispose();
       });
@@ -80,10 +75,23 @@ void main() {
           proxyConfig: const ProxyConfig(timeout: Duration(seconds: 180)),
         );
 
-        expect(generator.authToken, equals('bearer-token'));
-        expect(generator.proxyConfig?.timeout, equals(const Duration(seconds: 180)));
+        expect(generator.isDirectMode, isFalse);
 
         generator.dispose();
+      });
+    });
+
+    group('withHandler factory', () {
+      test('creates with custom handler', () {
+        final mockHandler = MockApiHandler();
+        final generator = AnthropicContentGenerator.withHandler(
+          handler: mockHandler,
+        );
+
+        expect(generator.isDirectMode, isTrue);
+
+        generator.dispose();
+        expect(mockHandler.disposed, isTrue);
       });
     });
   });

@@ -19,6 +19,9 @@ dependencies:
   # Melos will manage this during bootstrap
   anthropic_a2ui:
     path: ../anthropic_a2ui
+  # API handlers
+  anthropic_sdk_dart: ^0.3.0
+  http: ^1.2.0
 
 dev_dependencies:
   flutter_test:

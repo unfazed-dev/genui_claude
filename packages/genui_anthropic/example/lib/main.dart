@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'screens/basic_chat.dart';
-import 'screens/production_chat.dart';
+import 'package:genui_anthropic_example/screens/basic_chat.dart';
+import 'package:genui_anthropic_example/screens/production_chat.dart';
 
 void main() {
   runApp(const GenUiAnthropicExampleApp());
@@ -95,7 +95,7 @@ class _HeaderCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Flutter ContentGenerator implementation for Anthropic\'s Claude AI. '
+              "Flutter ContentGenerator implementation for Anthropic's Claude AI. "
               'Enables Claude-powered generative UI with the GenUI SDK.',
               style: Theme.of(context).textTheme.bodyMedium,
             ),

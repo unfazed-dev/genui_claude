@@ -25,7 +25,7 @@ packages:
     source: path
     version: "1.0.0"
   anthropic_sdk_dart:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: anthropic_sdk_dart
       sha256: ea5775add9f3f9a92f9f2d28eb655fa72708cbbcf30df9ea1630eb92eeda0549
@@ -267,7 +267,7 @@ packages:
     source: hosted
     version: "2.3.2"
   http:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: http
       sha256: "87721a4a50b19c7f1d49001e51409bddc46303966ce89a65af4f4e6004896412"

@@ -99,6 +99,7 @@ class MockAnthropicContentGenerator implements ContentGenerator {
   }
 
   /// Set processing state directly.
+  // ignore: avoid_positional_boolean_parameters, use_setters_to_change_properties
   void setProcessing(bool value) {
     _isProcessing.value = value;
   }
@@ -331,9 +332,7 @@ class MockStreamEventFactory {
 
   /// Creates a content_block_start event for tool_use.
   static Map<String, dynamic> toolUseStart({
-    int index = 0,
-    required String id,
-    required String name,
+    required String id, required String name, int index = 0,
   }) {
     return {
       'type': 'content_block_start',

@@ -1,6 +1,6 @@
 # TRACKER: GenUI Content Generator Implementation
 
-## Status: IN_PROGRESS
+## Status: COMPLETE
 
 ## Overview
 
@@ -57,7 +57,7 @@ Implementation of AnthropicContentGenerator, the core class that implements GenU
     ProxyConfig? config,
   })
   ```
-- [ ] Create .withHandler() factory for testing (deferred)
+- [x] Create .withHandler() factory for testing
 
 #### Stream Controllers ✅
 - [x] _a2uiController (StreamController<A2uiMessage>.broadcast())
@@ -90,55 +90,73 @@ Implementation of AnthropicContentGenerator, the core class that implements GenU
 - [x] Dispose ValueNotifier
 - [x] Dispose ClaudeStreamHandler
 
-### Direct Mode Handler (direct_mode.dart) - DEFERRED
+### Handler Interface (lib/src/handler/api_handler.dart) ✅
 
-> Currently using mock stream in AnthropicContentGenerator. Will implement when anthropic_sdk_dart integration is added.
+- [x] Create ApiRequest class with:
+  - [x] messages (List<Map<String, dynamic>>)
+  - [x] maxTokens (int)
+  - [x] systemInstruction (String?)
+  - [x] tools (List<Map<String, dynamic>>?)
+  - [x] model (String?)
+  - [x] temperature (double?)
+- [x] Create abstract ApiHandler class with:
+  - [x] createStream(ApiRequest) -> Stream<Map<String, dynamic>>
+  - [x] dispose() method
 
-- [ ] Create DirectModeHandler class
-- [ ] Constructor with:
-  - [ ] apiKey (String)
-  - [ ] model (String)
-  - [ ] systemInstruction (String?)
-  - [ ] config (AnthropicConfig)
-- [ ] Initialize AnthropicClient from anthropic_sdk_dart
-- [ ] Initialize ClaudeStreamHandler from anthropic_a2ui
-- [ ] Implement streamRequest() method
-- [ ] Connection management
+### Direct Mode Handler (lib/src/handler/direct_mode_handler.dart) ✅
 
-### Proxy Mode Handler (proxy_mode.dart) - DEFERRED
+- [x] Create DirectModeHandler class implementing ApiHandler
+- [x] Constructor with:
+  - [x] apiKey (String)
+  - [x] model (String, default 'claude-sonnet-4-20250514')
+  - [x] config (AnthropicConfig)
+- [x] Initialize AnthropicClient from anthropic_sdk_dart
+- [x] Implement createStream() method:
+  - [x] Convert ApiRequest to CreateMessageRequest
+  - [x] Convert messages to SDK Message format
+  - [x] Convert tools to SDK Tool format
+  - [x] Stream SDK events via createMessageStream()
+  - [x] Convert MessageStreamEvent to Map format
+- [x] Handle errors and emit error events
 
-> Currently using mock stream in AnthropicContentGenerator. Will implement when HTTP integration is added.
+### Proxy Mode Handler (lib/src/handler/proxy_mode_handler.dart) ✅
 
-- [ ] Create ProxyModeHandler class
-- [ ] Constructor with:
-  - [ ] endpoint (Uri)
-  - [ ] authToken (String?)
-  - [ ] config (ProxyConfig)
-- [ ] Initialize HTTP client
-- [ ] Build request headers (auth + custom)
-- [ ] Implement streamRequest() method:
-  - [ ] POST to endpoint with JSON body
-  - [ ] Parse SSE stream response
-  - [ ] Convert to StreamEvent
-- [ ] Handle conversation history pruning
-- [ ] Connection management
+- [x] Create ProxyModeHandler class implementing ApiHandler
+- [x] Constructor with:
+  - [x] endpoint (Uri)
+  - [x] authToken (String?)
+  - [x] config (ProxyConfig)
+  - [x] client (http.Client?, optional for testing)
+- [x] Build request headers (auth + custom)
+- [x] Implement createStream() method:
+  - [x] POST to endpoint with JSON body
+  - [x] Parse SSE stream response
+  - [x] Yield Map events directly
+- [x] Handle HTTP errors
+- [x] Resource cleanup in dispose()
 
-### Handler Interface (handler.dart) - DEFERRED
+### Testing Support ✅
 
-- [ ] Create abstract RequestHandler class or interface
-- [ ] Define streamRequest() method signature
-- [ ] Used by both DirectModeHandler and ProxyModeHandler
+- [x] MockApiHandler class in test/handler/mock_api_handler.dart
+- [x] MockEventFactory for common event sequences
+- [x] stubEvents(), stubTextResponse(), stubError() methods
 
 ## Files
 
 ### Config ✅
 - `lib/src/config/anthropic_config.dart` ✅ (contains both AnthropicConfig and ProxyConfig)
 
-### Content Generator (Partial)
+### Content Generator ✅
 - `lib/src/content_generator/anthropic_content_generator.dart` ✅
-- `lib/src/content_generator/direct_mode.dart` (not yet created)
-- `lib/src/content_generator/proxy_mode.dart` (not yet created)
-- `lib/src/content_generator/handler.dart` (not yet created)
+
+### Handler ✅
+- `lib/src/handler/api_handler.dart` ✅ (ApiRequest, ApiHandler interface)
+- `lib/src/handler/direct_mode_handler.dart` ✅ (DirectModeHandler)
+- `lib/src/handler/proxy_mode_handler.dart` ✅ (ProxyModeHandler)
+- `lib/src/handler/handler.dart` ✅ (barrel export)
+
+### Testing ✅
+- `test/handler/mock_api_handler.dart` ✅ (MockApiHandler, MockEventFactory)
 
 ## Dependencies
 
@@ -226,3 +244,4 @@ abstract class ContentGenerator {
 |------|--------|
 | 2025-12-13 | Created tracker from spec |
 | 2025-12-14 | Updated status: Configuration classes and main AnthropicContentGenerator complete. Handler classes deferred. |
+| 2025-12-14 | Implemented handler architecture: ApiHandler interface, DirectModeHandler (anthropic_sdk_dart), ProxyModeHandler (HTTP/SSE), integrated into AnthropicContentGenerator, added MockApiHandler for testing. All tasks complete. |

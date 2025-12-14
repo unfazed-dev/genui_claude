@@ -37,4 +37,5 @@ export 'src/adapter/catalog_tool_bridge.dart';
 export 'src/adapter/message_adapter.dart';
 export 'src/config/anthropic_config.dart';
 export 'src/content_generator/anthropic_content_generator.dart';
+export 'src/handler/handler.dart';
 export 'src/utils/message_converter.dart';

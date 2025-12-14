@@ -307,7 +307,7 @@ void main() {
 
         final result = A2uiMessageAdapter.toGenUiMessage(data) as SurfaceUpdate;
         final props = result.components.first.componentProperties;
-        final config = props['config'] as Map<String, dynamic>;
+        final config = props['config']! as Map<String, dynamic>;
 
         expect(config['theme'], 'dark');
         expect((config['settings'] as Map)['autoSave'], true);
@@ -338,7 +338,6 @@ void main() {
           widgets: [
             a2ui.WidgetNode(
               type: 'empty_widget',
-              properties: {},
             ),
           ],
         );

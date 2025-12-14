@@ -58,7 +58,7 @@ void main() {
       });
 
       test('has surfaceId as required field', () {
-        final tool = A2uiControlTools.beginRendering;
+        const tool = A2uiControlTools.beginRendering;
 
         expect(tool.requiredFields, contains('surfaceId'));
       });
@@ -82,7 +82,7 @@ void main() {
       });
 
       test('has surfaceId and widgets as required fields', () {
-        final tool = A2uiControlTools.surfaceUpdate;
+        const tool = A2uiControlTools.surfaceUpdate;
 
         expect(tool.requiredFields, containsAll(['surfaceId', 'widgets']));
       });
@@ -103,7 +103,7 @@ void main() {
       });
 
       test('has updates as required field', () {
-        final tool = A2uiControlTools.dataModelUpdate;
+        const tool = A2uiControlTools.dataModelUpdate;
 
         expect(tool.requiredFields, contains('updates'));
       });
@@ -123,7 +123,7 @@ void main() {
       });
 
       test('has surfaceId as required field', () {
-        final tool = A2uiControlTools.deleteSurface;
+        const tool = A2uiControlTools.deleteSurface;
 
         expect(tool.requiredFields, contains('surfaceId'));
       });

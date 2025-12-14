@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:genui/genui.dart';
 import 'package:genui_anthropic/genui_anthropic.dart';
 
-import '../catalog/demo_catalog.dart';
+import 'package:genui_anthropic_example/catalog/demo_catalog.dart';
 
 /// Basic chat screen demonstrating direct API mode.
 ///
@@ -24,6 +24,7 @@ class _BasicChatScreenState extends State<BasicChatScreen> {
   final _messages = <_ChatEntry>[];
 
   // API key should be provided via compile-time environment variable
+  // ignore: do_not_use_environment
   static const _apiKey = String.fromEnvironment('ANTHROPIC_API_KEY');
 
   @override
@@ -352,7 +353,6 @@ class _AiMessageBubble extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8, right: 48),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
@@ -396,7 +396,6 @@ class _SurfaceContainer extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8, right: 48),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(

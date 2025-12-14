@@ -5,6 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:genui/genui.dart';
 import 'package:genui_anthropic/src/adapter/message_adapter.dart';
 import 'package:genui_anthropic/src/config/anthropic_config.dart';
+import 'package:genui_anthropic/src/handler/api_handler.dart';
+import 'package:genui_anthropic/src/handler/direct_mode_handler.dart';
+import 'package:genui_anthropic/src/handler/proxy_mode_handler.dart';
+import 'package:genui_anthropic/src/utils/message_converter.dart';
 
 /// A [ContentGenerator] implementation for Anthropic's Claude AI.
 ///
@@ -24,13 +28,17 @@ class AnthropicContentGenerator implements ContentGenerator {
   /// Use this constructor for development and prototyping.
   /// For production, consider using [AnthropicContentGenerator.proxy].
   AnthropicContentGenerator({
-    required this.apiKey,
-    this.model = 'claude-sonnet-4-20250514',
+    required String apiKey,
+    String model = 'claude-sonnet-4-20250514',
     this.systemInstruction,
-    this.config = AnthropicConfig.defaults,
-  })  : proxyEndpoint = null,
-        authToken = null,
-        proxyConfig = null,
+    AnthropicConfig config = AnthropicConfig.defaults,
+  })  : _handler = DirectModeHandler(
+          apiKey: apiKey,
+          model: model,
+          config: config,
+        ),
+        _model = model,
+        _config = config,
         _isDirectMode = true;
 
   /// Creates a content generator that uses a backend proxy.
@@ -38,35 +46,44 @@ class AnthropicContentGenerator implements ContentGenerator {
   /// This is the recommended pattern for production deployments
   /// where the API key should not be exposed to the client.
   AnthropicContentGenerator.proxy({
-    required this.proxyEndpoint,
-    this.authToken,
-    this.proxyConfig = ProxyConfig.defaults,
-  })  : apiKey = null,
-        model = null,
+    required Uri proxyEndpoint,
+    String? authToken,
+    ProxyConfig proxyConfig = ProxyConfig.defaults,
+  })  : _handler = ProxyModeHandler(
+          endpoint: proxyEndpoint,
+          authToken: authToken,
+          config: proxyConfig,
+        ),
+        _model = null,
+        _config = null,
         systemInstruction = null,
-        config = null,
         _isDirectMode = false;
 
-  /// API key for direct mode.
-  final String? apiKey;
+  /// Creates a content generator with a custom handler.
+  ///
+  /// This factory is intended for testing and advanced use cases
+  /// where you need to provide a custom [ApiHandler] implementation.
+  @visibleForTesting
+  AnthropicContentGenerator.withHandler({
+    required ApiHandler handler,
+    String? model,
+    this.systemInstruction,
+  })  : _handler = handler,
+        _model = model,
+        _config = null,
+        _isDirectMode = true;
 
-  /// Model name for direct mode.
-  final String? model;
+  /// The API handler for making requests.
+  final ApiHandler _handler;
 
-  /// System instruction for direct mode.
+  /// Model name for requests.
+  final String? _model;
+
+  /// System instruction for requests.
   final String? systemInstruction;
 
   /// Configuration for direct mode.
-  final AnthropicConfig? config;
-
-  /// Proxy endpoint URI for proxy mode.
-  final Uri? proxyEndpoint;
-
-  /// Auth token for proxy mode.
-  final String? authToken;
-
-  /// Configuration for proxy mode.
-  final ProxyConfig? proxyConfig;
+  final AnthropicConfig? _config;
 
   final bool _isDirectMode;
 
@@ -110,15 +127,24 @@ class AnthropicContentGenerator implements ContentGenerator {
     _isProcessing.value = true;
 
     try {
-      // Convert ChatMessage to text for processing
-      final prompt = _extractTextFromMessage(message);
+      // Convert messages to Claude API format
+      final allMessages = [...?history, message];
+      final claudeMessages = MessageConverter.toClaudeMessages(allMessages);
 
-      // Create a mock stream for now - in production this would call the actual API
-      // The anthropic_a2ui package provides the parsing infrastructure
-      final mockEvents = _createMockStream(prompt);
+      // Build API request
+      final request = ApiRequest(
+        messages: claudeMessages,
+        maxTokens: _config?.maxTokens ?? 4096,
+        systemInstruction: systemInstruction,
+        model: _model,
+      );
 
+      // Get stream from handler
+      final eventStream = _handler.createStream(request);
+
+      // Process through ClaudeStreamHandler
       await for (final event in _streamHandler.streamRequest(
-        messageStream: mockEvents,
+        messageStream: eventStream,
       )) {
         switch (event) {
           case a2ui.A2uiMessageEvent(:final message):
@@ -149,37 +175,9 @@ class AnthropicContentGenerator implements ContentGenerator {
     }
   }
 
-  /// Extracts text content from a ChatMessage.
-  String _extractTextFromMessage(ChatMessage message) {
-    if (message is UserMessage) {
-      return message.text;
-    }
-    return message.toString();
-  }
-
-  /// Creates a mock event stream for demonstration.
-  ///
-  /// In a production implementation, this would be replaced with
-  /// actual API calls to Claude using anthropic_sdk_dart.
-  Stream<Map<String, dynamic>> _createMockStream(String prompt) async* {
-    // This is a placeholder - real implementation would use:
-    // - anthropic_sdk_dart for direct API calls
-    // - HTTP client for proxy mode
-    yield {
-      'type': 'content_block_start',
-      'index': 0,
-      'content_block': {'type': 'text'},
-    };
-    yield {
-      'type': 'content_block_delta',
-      'index': 0,
-      'delta': {'type': 'text_delta', 'text': 'Processing: $prompt'},
-    };
-    yield {'type': 'message_stop'};
-  }
-
   @override
   void dispose() {
+    _handler.dispose();
     _a2uiController.close();
     _textController.close();
     _errorController.close();

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:genui/genui.dart';
 import 'package:genui_anthropic/genui_anthropic.dart';
 
-import '../catalog/demo_catalog.dart';
+import 'package:genui_anthropic_example/catalog/demo_catalog.dart';
 
 /// Production chat screen demonstrating proxy mode.
 ///
@@ -24,12 +24,14 @@ class _ProductionChatScreenState extends State<ProductionChatScreen> {
   final _messages = <_ChatEntry>[];
 
   // Proxy endpoint should be configured for your backend
+  // ignore: do_not_use_environment
   static const _proxyEndpoint = String.fromEnvironment(
     'PROXY_ENDPOINT',
     defaultValue: 'https://your-project.supabase.co/functions/v1/claude-genui',
   );
 
   // Auth token from your authentication system
+  // ignore: do_not_use_environment
   static const _authToken = String.fromEnvironment('AUTH_TOKEN');
 
   @override
@@ -43,11 +45,6 @@ class _ProductionChatScreenState extends State<ProductionChatScreen> {
     _contentGenerator = AnthropicContentGenerator.proxy(
       proxyEndpoint: Uri.parse(_proxyEndpoint),
       authToken: _authToken.isNotEmpty ? _authToken : null,
-      proxyConfig: const ProxyConfig(
-        timeout: Duration(seconds: 120),
-        includeHistory: true,
-        maxHistoryMessages: 20,
-      ),
     );
 
     // Create the GenUI conversation
