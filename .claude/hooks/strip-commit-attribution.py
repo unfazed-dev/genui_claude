@@ -21,26 +21,33 @@ def main():
     if tool_name != "Bash" or "git commit" not in command:
         sys.exit(0)
 
-    # Patterns to remove
+    # Patterns to remove (stop before closing quote or newline)
     patterns_to_remove = [
         r'\n*🤖 Generated with \[Claude Code\]\(https://claude\.com/claude-code\)\n*',
-        r'\n*Co-Authored-By: Claude[^\n]*\n*',
-        r'\n*Co-Authored-By: Claude Opus[^\n]*\n*',
+        r'\n*Co-Authored-By: Claude[^\n"]*(?:\n|(?="))',
     ]
 
     modified_command = command
     for pattern in patterns_to_remove:
         modified_command = re.sub(pattern, '', modified_command)
 
-    # Clean up any trailing/leading whitespace in the message
-    # Handle HEREDOC format
-    modified_command = re.sub(r'\n+EOF', '\nEOF', modified_command)
+    # Clean up HEREDOC format - ensure exactly one newline before closing EOF
+    # Only match EOF at start of line (the heredoc delimiter), not <<'EOF'
+    # First normalize: ensure at least one newline before EOF at start of line
+    modified_command = re.sub(r'([^\n])\nEOF\n', r'\1\nEOF\n', modified_command)
+    # Handle case where EOF has no newline before it (due to pattern removal)
+    modified_command = re.sub(r'([^\n\'])EOF(\n|\))', r'\1\nEOF\2', modified_command)
+    # Clean up multiple newlines before EOF delimiter
+    modified_command = re.sub(r'\n{2,}EOF(\n|\))', r'\nEOF\1', modified_command)
 
     if modified_command != command:
         result = {
-            "decision": "continue",
-            "updatedInput": {
-                "command": modified_command
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "allow",
+                "updatedInput": {
+                    "command": modified_command
+                }
             }
         }
         print(json.dumps(result))
