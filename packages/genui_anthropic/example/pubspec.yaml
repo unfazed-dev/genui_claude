@@ -1,0 +1,22 @@
+name: genui_anthropic_example
+description: Example app demonstrating genui_anthropic package usage.
+publish_to: 'none'
+
+environment:
+  sdk: ^3.5.0
+  flutter: '>=3.22.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  genui: ^0.5.1
+  genui_anthropic:
+    path: ../
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
