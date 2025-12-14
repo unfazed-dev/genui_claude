@@ -21,11 +21,19 @@ enum CircuitState {
 @immutable
 class CircuitBreakerConfig {
   /// Creates a circuit breaker configuration.
+  ///
+  /// Throws [AssertionError] if:
+  /// - [failureThreshold] is less than 1
+  /// - [halfOpenSuccessThreshold] is less than 1
+  ///
+  /// Note: [recoveryTimeout] cannot be validated at construction time due to
+  /// const constructor constraints.
   const CircuitBreakerConfig({
     this.failureThreshold = 5,
     this.recoveryTimeout = const Duration(seconds: 30),
     this.halfOpenSuccessThreshold = 2,
-  });
+  })  : assert(failureThreshold > 0, 'failureThreshold must be at least 1'),
+        assert(halfOpenSuccessThreshold > 0, 'halfOpenSuccessThreshold must be at least 1');
 
   /// Number of failures before opening the circuit.
   final int failureThreshold;

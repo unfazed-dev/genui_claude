@@ -264,8 +264,9 @@ void main() {
         const iterations = 100000;
 
         for (var i = 0; i < iterations; i++) {
+          // Use i + 1 to ensure maxTokens is always > 0 (required by validation)
           // ignore: unused_local_variable
-          final copy = config.copyWith(maxTokens: i);
+          final copy = config.copyWith(maxTokens: i + 1);
         }
 
         stopwatch.stop();
@@ -309,8 +310,9 @@ void main() {
         const iterations = 100000;
 
         for (var i = 0; i < iterations; i++) {
+          // Use (i % 100) + 1 to ensure failureThreshold is always > 0 (required by validation)
           // ignore: unused_local_variable
-          final copy = config.copyWith(failureThreshold: i % 100);
+          final copy = config.copyWith(failureThreshold: (i % 100) + 1);
         }
 
         stopwatch.stop();

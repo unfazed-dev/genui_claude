@@ -35,6 +35,36 @@ void main() {
         handler.dispose();
       });
 
+      test('throws on endpoint without scheme', () {
+        expect(
+          () => ProxyModeHandler(
+            endpoint: Uri.parse('example.com/api'),
+            client: mockClient,
+          ),
+          throwsA(isA<AssertionError>()),
+        );
+      });
+
+      test('accepts http scheme', () {
+        final handler = ProxyModeHandler(
+          endpoint: Uri.parse('http://example.com/api'),
+          client: mockClient,
+        );
+
+        expect(handler, isA<ApiHandler>());
+        handler.dispose();
+      });
+
+      test('accepts https scheme', () {
+        final handler = ProxyModeHandler(
+          endpoint: Uri.parse('https://example.com/api'),
+          client: mockClient,
+        );
+
+        expect(handler, isA<ApiHandler>());
+        handler.dispose();
+      });
+
       test('creates handler with auth token', () {
         final handler = ProxyModeHandler(
           endpoint: testEndpoint,

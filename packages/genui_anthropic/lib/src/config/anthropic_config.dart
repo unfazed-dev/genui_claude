@@ -4,13 +4,22 @@ import 'package:flutter/foundation.dart';
 @immutable
 class AnthropicConfig {
   /// Creates an Anthropic API configuration.
+  ///
+  /// Throws [AssertionError] if:
+  /// - [maxTokens] is less than 1
+  /// - [retryAttempts] is negative
+  ///
+  /// Note: [timeout] is not validated at construction time due to const
+  /// constructor constraints. Invalid timeouts will be caught at runtime
+  /// when making API requests.
   const AnthropicConfig({
     this.maxTokens = 4096,
     this.timeout = const Duration(seconds: 60),
     this.retryAttempts = 3,
     this.enableStreaming = true,
     this.headers,
-  });
+  })  : assert(maxTokens > 0, 'maxTokens must be greater than 0'),
+        assert(retryAttempts >= 0, 'retryAttempts cannot be negative');
 
   /// Maximum tokens in response.
   final int maxTokens;
@@ -56,13 +65,21 @@ class AnthropicConfig {
 @immutable
 class ProxyConfig {
   /// Creates a proxy configuration.
+  ///
+  /// Throws [AssertionError] if:
+  /// - [retryAttempts] is negative
+  /// - [maxHistoryMessages] is negative
+  ///
+  /// Note: [timeout] is not validated at construction time due to const
+  /// constructor constraints. Invalid timeouts will be caught at runtime.
   const ProxyConfig({
     this.timeout = const Duration(seconds: 120),
     this.retryAttempts = 3,
     this.headers,
     this.includeHistory = true,
     this.maxHistoryMessages = 20,
-  });
+  })  : assert(retryAttempts >= 0, 'retryAttempts cannot be negative'),
+        assert(maxHistoryMessages >= 0, 'maxHistoryMessages cannot be negative');
 
   /// Request timeout duration.
   final Duration timeout;

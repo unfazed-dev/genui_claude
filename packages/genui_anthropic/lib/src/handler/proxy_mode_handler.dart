@@ -51,7 +51,7 @@ const _uuid = Uuid();
 class ProxyModeHandler implements ApiHandler {
   /// Creates a proxy mode handler with production resilience.
   ///
-  /// - [endpoint]: The backend proxy URL
+  /// - [endpoint]: The backend proxy URL (must have http or https scheme)
   /// - [authToken]: Optional auth token (sent as Bearer token)
   /// - [config]: Optional configuration for timeouts, retries, headers
   /// - [retryConfig]: Optional retry configuration
@@ -59,6 +59,8 @@ class ProxyModeHandler implements ApiHandler {
   /// - [streamInactivityTimeout]: Timeout for stream inactivity
   /// - [metricsCollector]: Optional metrics collector for observability
   /// - [client]: Optional HTTP client for testing/customization
+  ///
+  /// Throws [AssertionError] if [endpoint] does not have http or https scheme.
   ProxyModeHandler({
     required Uri endpoint,
     String? authToken,
@@ -68,7 +70,11 @@ class ProxyModeHandler implements ApiHandler {
     Duration? streamInactivityTimeout,
     MetricsCollector? metricsCollector,
     http.Client? client,
-  })  : _endpoint = endpoint,
+  })  : assert(
+          endpoint.scheme == 'http' || endpoint.scheme == 'https',
+          'endpoint must have http or https scheme',
+        ),
+        _endpoint = endpoint,
         _authToken = authToken,
         _config = config,
         _retryConfig = retryConfig ?? RetryConfig.defaults,

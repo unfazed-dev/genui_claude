@@ -178,6 +178,35 @@ These tests are skipped in CI unless `TEST_ANTHROPIC_API_KEY` is provided:
   - Tool use
   - Error responses
 
+#### Setting Up Integration Tests
+
+**Local Development:**
+```bash
+# Run integration tests with API key
+TEST_ANTHROPIC_API_KEY="sk-ant-api03-..." flutter test test/integration/
+
+# Or export the key for the session
+export TEST_ANTHROPIC_API_KEY="sk-ant-api03-..."
+flutter test test/integration/
+```
+
+**CI/CD Configuration:**
+```yaml
+# GitHub Actions example
+env:
+  TEST_ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+steps:
+  - name: Run integration tests
+    run: flutter test test/integration/
+```
+
+**Important Notes:**
+- Never commit API keys to version control
+- Use environment variables or secrets management
+- Integration tests consume API credits - run sparingly in CI
+- Tests will be skipped (not failed) if the key is not set
+
 ## Performance Benchmarks
 
 Performance tests validate:

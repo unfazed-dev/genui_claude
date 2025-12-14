@@ -454,6 +454,117 @@ void main() {
     });
   });
 
+  group('AnthropicConfig validation assertions', () {
+    // Note: Duration validation cannot be done in const constructors due to
+    // Dart language constraints. Only int values can be validated.
+
+    test('throws on zero maxTokens', () {
+      expect(
+        () => AnthropicConfig(maxTokens: 0),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('throws on negative maxTokens', () {
+      expect(
+        () => AnthropicConfig(maxTokens: -1),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('throws on negative retryAttempts', () {
+      expect(
+        () => AnthropicConfig(retryAttempts: -1),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+  });
+
+  group('ProxyConfig validation assertions', () {
+    // Note: Duration validation cannot be done in const constructors due to
+    // Dart language constraints. Only int values can be validated.
+
+    test('throws on negative retryAttempts', () {
+      expect(
+        () => ProxyConfig(retryAttempts: -1),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('throws on negative maxHistoryMessages', () {
+      expect(
+        () => ProxyConfig(maxHistoryMessages: -1),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+  });
+
+  group('RetryConfig validation assertions', () {
+    // Note: Duration validation cannot be done in const constructors due to
+    // Dart language constraints. Only numeric values can be validated.
+
+    test('throws on negative maxAttempts', () {
+      expect(
+        () => RetryConfig(maxAttempts: -1),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('throws on backoffMultiplier less than 1', () {
+      expect(
+        () => RetryConfig(backoffMultiplier: 0.5),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('throws on negative jitterFactor', () {
+      expect(
+        () => RetryConfig(jitterFactor: -0.1),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('throws on jitterFactor greater than 1', () {
+      expect(
+        () => RetryConfig(jitterFactor: 1.1),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+  });
+
+  group('CircuitBreakerConfig validation assertions', () {
+    // Note: Duration validation cannot be done in const constructors due to
+    // Dart language constraints. Only int values can be validated.
+
+    test('throws on zero failureThreshold', () {
+      expect(
+        () => CircuitBreakerConfig(failureThreshold: 0),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('throws on negative failureThreshold', () {
+      expect(
+        () => CircuitBreakerConfig(failureThreshold: -1),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('throws on zero halfOpenSuccessThreshold', () {
+      expect(
+        () => CircuitBreakerConfig(halfOpenSuccessThreshold: 0),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('throws on negative halfOpenSuccessThreshold', () {
+      expect(
+        () => CircuitBreakerConfig(halfOpenSuccessThreshold: -1),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+  });
+
   group('Configuration immutability', () {
     test('AnthropicConfig is immutable', () {
       const config = AnthropicConfig();

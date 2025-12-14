@@ -16,6 +16,14 @@ class RetryConfig {
   /// - [backoffMultiplier]: Multiplier for exponential backoff (default: 2.0)
   /// - [jitterFactor]: Random jitter factor 0.0-1.0 (default: 0.1)
   /// - [retryableStatusCodes]: HTTP status codes that should trigger retry
+  ///
+  /// Throws [AssertionError] if:
+  /// - [maxAttempts] is negative
+  /// - [backoffMultiplier] is less than 1.0
+  /// - [jitterFactor] is not between 0.0 and 1.0
+  ///
+  /// Note: Duration values ([initialDelay], [maxDelay]) cannot be validated
+  /// at construction time due to const constructor constraints.
   const RetryConfig({
     this.maxAttempts = 3,
     this.initialDelay = const Duration(seconds: 1),
@@ -23,7 +31,10 @@ class RetryConfig {
     this.backoffMultiplier = 2.0,
     this.jitterFactor = 0.1,
     this.retryableStatusCodes = defaultRetryableStatusCodes,
-  });
+  })  : assert(maxAttempts >= 0, 'maxAttempts cannot be negative'),
+        assert(backoffMultiplier >= 1.0, 'backoffMultiplier must be at least 1.0'),
+        assert(jitterFactor >= 0.0, 'jitterFactor cannot be negative'),
+        assert(jitterFactor <= 1.0, 'jitterFactor cannot be greater than 1.0');
 
   /// Maximum number of retry attempts.
   ///
