@@ -339,13 +339,12 @@ void main() {
       });
 
       test('respects rate limit state', () async {
-        final limiter = RateLimiter();
-
-        // Set rate limited with short duration
-        limiter.recordRateLimit(
-          statusCode: 429,
-          retryAfter: const Duration(milliseconds: 50),
-        );
+        final limiter = RateLimiter()
+          // Set rate limited with short duration
+          ..recordRateLimit(
+            statusCode: 429,
+            retryAfter: const Duration(milliseconds: 50),
+          );
 
         expect(limiter.isRateLimited, isTrue);
 

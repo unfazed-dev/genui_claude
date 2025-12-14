@@ -1,6 +1,8 @@
 import 'package:anthropic_a2ui/src/exceptions/exceptions.dart';
 import 'package:anthropic_a2ui/src/models/a2ui_message.dart';
-import 'package:meta/meta.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'stream_event.freezed.dart';
 
 /// Base class for stream events emitted during Claude API streaming.
 ///
@@ -23,70 +25,32 @@ import 'package:meta/meta.dart';
 ///   }
 /// }
 /// ```
-@immutable
-sealed class StreamEvent {
-  /// Creates a stream event.
-  const StreamEvent();
-}
+@Freezed(copyWith: false, toJson: false, fromJson: false)
+sealed class StreamEvent with _$StreamEvent {
+  /// Event containing raw content delta from the stream.
+  const factory StreamEvent.delta(
+    /// The raw delta data from the stream.
+    Map<String, dynamic> data,
+  ) = DeltaEvent;
 
-/// Event containing raw content delta from the stream.
-@immutable
-class DeltaEvent extends StreamEvent {
+  /// Event containing a parsed A2UI message.
+  const factory StreamEvent.a2uiMessage(
+    /// The parsed A2UI message.
+    A2uiMessageData message,
+  ) = A2uiMessageEvent;
 
-  /// Creates a delta event.
-  const DeltaEvent(this.data);
-  /// The raw delta data from the stream.
-  final Map<String, dynamic> data;
+  /// Event containing a text content delta.
+  const factory StreamEvent.textDelta(
+    /// The text content chunk.
+    String text,
+  ) = TextDeltaEvent;
 
-  @override
-  String toString() => 'DeltaEvent(data: $data)';
-}
+  /// Event indicating the stream has completed successfully.
+  const factory StreamEvent.complete() = CompleteEvent;
 
-/// Event containing a parsed A2UI message.
-@immutable
-class A2uiMessageEvent extends StreamEvent {
-
-  /// Creates an A2UI message event.
-  const A2uiMessageEvent(this.message);
-  /// The parsed A2UI message.
-  final A2uiMessageData message;
-
-  @override
-  String toString() => 'A2uiMessageEvent(message: $message)';
-}
-
-/// Event containing a text content delta.
-@immutable
-class TextDeltaEvent extends StreamEvent {
-
-  /// Creates a text delta event.
-  const TextDeltaEvent(this.text);
-  /// The text content chunk.
-  final String text;
-
-  @override
-  String toString() => 'TextDeltaEvent(text: $text)';
-}
-
-/// Event indicating the stream has completed successfully.
-@immutable
-class CompleteEvent extends StreamEvent {
-  /// Creates a complete event.
-  const CompleteEvent();
-
-  @override
-  String toString() => 'CompleteEvent()';
-}
-
-/// Event indicating an error occurred during streaming.
-@immutable
-class ErrorEvent extends StreamEvent {
-
-  /// Creates an error event.
-  const ErrorEvent(this.error);
-  /// The error that occurred.
-  final A2uiException error;
-
-  @override
-  String toString() => 'ErrorEvent(error: $error)';
+  /// Event indicating an error occurred during streaming.
+  const factory StreamEvent.error(
+    /// The error that occurred.
+    A2uiException error,
+  ) = ErrorEvent;
 }

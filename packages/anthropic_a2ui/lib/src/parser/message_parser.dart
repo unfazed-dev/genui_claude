@@ -30,7 +30,7 @@ class ClaudeA2uiParser {
 
     final content = message['content'] as List<dynamic>?;
     if (content == null) {
-      return const ParseResult.empty();
+      return ParseResult.empty();
     }
 
     for (final block in content) {

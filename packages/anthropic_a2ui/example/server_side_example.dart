@@ -25,7 +25,8 @@ void main() async {
   // 2. Generate Claude API request
   print('2. Preparing Claude API request...');
   final request = _prepareClaudeRequest(toolCatalog);
-  print('   Request prepared with ${request['tools'].length} tools\n');
+  final tools = request['tools'] as List<dynamic>;
+  print('   Request prepared with ${tools.length} tools\n');
 
   // 3. Process mock response (simulating API call)
   print('3. Processing API response...');
@@ -115,7 +116,8 @@ Map<String, dynamic> _prepareClaudeRequest(List<A2uiToolSchema> tools) {
   return {
     'model': 'claude-sonnet-4-20250514',
     'max_tokens': 4096,
-    'system': '''You are a UI generation assistant.
+    'system': '''
+You are a UI generation assistant.
 When asked to create UI, use the provided tools.
 
 $instructions''',

@@ -1,60 +1,30 @@
-import 'package:meta/meta.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'stream_config.freezed.dart';
 
 /// Configuration for Claude API streaming requests.
 ///
 /// Controls timeout, retry behavior, and token limits for streaming
 /// connections.
-@immutable
-class StreamConfig {
-
+@freezed
+abstract class StreamConfig with _$StreamConfig {
   /// Creates a stream configuration.
   ///
   /// Defaults:
   /// - [maxTokens]: 4096
   /// - [timeout]: 60 seconds
   /// - [retryAttempts]: 3
-  const StreamConfig({
-    this.maxTokens = 4096,
-    this.timeout = const Duration(seconds: 60),
-    this.retryAttempts = 3,
-  });
-  /// Maximum tokens in the response.
-  final int maxTokens;
+  const factory StreamConfig({
+    /// Maximum tokens in the response.
+    @Default(4096) int maxTokens,
 
-  /// Connection timeout duration.
-  final Duration timeout;
+    /// Connection timeout duration.
+    @Default(Duration(seconds: 60)) Duration timeout,
 
-  /// Number of retry attempts for transient failures.
-  final int retryAttempts;
+    /// Number of retry attempts for transient failures.
+    @Default(3) int retryAttempts,
+  }) = _StreamConfig;
 
   /// Default stream configuration.
   static const StreamConfig defaults = StreamConfig();
-
-  /// Creates a copy with the given fields replaced.
-  StreamConfig copyWith({
-    int? maxTokens,
-    Duration? timeout,
-    int? retryAttempts,
-  }) {
-    return StreamConfig(
-      maxTokens: maxTokens ?? this.maxTokens,
-      timeout: timeout ?? this.timeout,
-      retryAttempts: retryAttempts ?? this.retryAttempts,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is StreamConfig &&
-          maxTokens == other.maxTokens &&
-          timeout == other.timeout &&
-          retryAttempts == other.retryAttempts;
-
-  @override
-  int get hashCode => Object.hash(maxTokens, timeout, retryAttempts);
-
-  @override
-  String toString() => 'StreamConfig(maxTokens: $maxTokens, '
-      'timeout: ${timeout.inSeconds}s, retryAttempts: $retryAttempts)';
 }

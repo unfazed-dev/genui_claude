@@ -117,7 +117,6 @@ void main() {
     test('creates with children', () {
       const node = WidgetNode(
         type: 'column',
-        properties: {},
         children: [
           WidgetNode(type: 'text', properties: {'text': 'Child'}),
         ],
@@ -168,7 +167,7 @@ void main() {
 
   group('ParseResult', () {
     test('empty result', () {
-      const result = ParseResult.empty();
+      final result = ParseResult.empty();
       expect(result.isEmpty, isTrue);
       expect(result.hasToolUse, isFalse);
     });
@@ -403,10 +402,12 @@ void main() {
       ]);
 
       expect(tools.length, equals(1));
-      expect(tools.first['name'], equals('user_card'));
-      expect(tools.first['description'], equals('Display user profile'));
-      expect(tools.first['input_schema']['type'], equals('object'));
-      expect(tools.first['input_schema']['required'], equals(['userId']));
+      final firstTool = tools.first;
+      expect(firstTool['name'], equals('user_card'));
+      expect(firstTool['description'], equals('Display user profile'));
+      final inputSchema = firstTool['input_schema'] as Map<String, dynamic>;
+      expect(inputSchema['type'], equals('object'));
+      expect(inputSchema['required'], equals(['userId']));
     });
 
     test('toClaudeTools with multiple schemas', () {
@@ -458,9 +459,13 @@ void main() {
       ]);
 
       expect(tools.length, equals(1));
-      final props = tools.first['input_schema']['properties'];
-      expect(props['user']['type'], equals('object'));
-      expect(props['user']['properties']['address']['type'], equals('object'));
+      final inputSchema = tools.first['input_schema'] as Map<String, dynamic>;
+      final props = inputSchema['properties'] as Map<String, dynamic>;
+      final userProp = props['user'] as Map<String, dynamic>;
+      expect(userProp['type'], equals('object'));
+      final userProps = userProp['properties'] as Map<String, dynamic>;
+      final addressProp = userProps['address'] as Map<String, dynamic>;
+      expect(addressProp['type'], equals('object'));
     });
 
     test('toClaudeTools with array properties', () {
@@ -481,9 +486,12 @@ void main() {
       ]);
 
       expect(tools.length, equals(1));
-      final props = tools.first['input_schema']['properties'];
-      expect(props['items']['type'], equals('array'));
-      expect(props['items']['items']['type'], equals('string'));
+      final inputSchema = tools.first['input_schema'] as Map<String, dynamic>;
+      final props = inputSchema['properties'] as Map<String, dynamic>;
+      final itemsProp = props['items'] as Map<String, dynamic>;
+      expect(itemsProp['type'], equals('array'));
+      final itemsItems = itemsProp['items'] as Map<String, dynamic>;
+      expect(itemsItems['type'], equals('string'));
     });
   });
 
@@ -654,7 +662,7 @@ void main() {
 
   group('ValidationResult', () {
     test('valid result', () {
-      const result = ValidationResult.valid();
+      final result = ValidationResult.valid();
       expect(result.isValid, isTrue);
       expect(result.errors, isEmpty);
     });
@@ -737,8 +745,9 @@ void main() {
         },
       });
 
-      expect(result['name']['type'], equals('string'));
-      expect(result['name']['description'], equals('User name'));
+      final nameProp = result['name'] as Map<String, dynamic>;
+      expect(nameProp['type'], equals('string'));
+      expect(nameProp['description'], equals('User name'));
     });
 
     test('converts string property with enum', () {
@@ -751,8 +760,9 @@ void main() {
         },
       });
 
-      expect(result['status']['type'], equals('string'));
-      expect(result['status']['enum'], equals(['active', 'inactive']));
+      final statusProp = result['status'] as Map<String, dynamic>;
+      expect(statusProp['type'], equals('string'));
+      expect(statusProp['enum'], equals(['active', 'inactive']));
     });
 
     test('converts number property', () {
@@ -762,8 +772,9 @@ void main() {
         },
       });
 
-      expect(result['age']['type'], equals('number'));
-      expect(result['age']['description'], equals('User age'));
+      final ageProp = result['age'] as Map<String, dynamic>;
+      expect(ageProp['type'], equals('number'));
+      expect(ageProp['description'], equals('User age'));
     });
 
     test('converts integer property', () {
@@ -773,7 +784,8 @@ void main() {
         },
       });
 
-      expect(result['count']['type'], equals('integer'));
+      final countProp = result['count'] as Map<String, dynamic>;
+      expect(countProp['type'], equals('integer'));
     });
 
     test('converts boolean property', () {
@@ -783,8 +795,9 @@ void main() {
         },
       });
 
-      expect(result['active']['type'], equals('boolean'));
-      expect(result['active']['description'], equals('Is active'));
+      final activeProp = result['active'] as Map<String, dynamic>;
+      expect(activeProp['type'], equals('boolean'));
+      expect(activeProp['description'], equals('Is active'));
     });
 
     test('converts array property with items', () {
@@ -798,9 +811,11 @@ void main() {
         },
       });
 
-      expect(result['tags']['type'], equals('array'));
-      expect(result['tags']['items']['type'], equals('string'));
-      expect(result['tags']['description'], equals('List of tags'));
+      final tagsProp = result['tags'] as Map<String, dynamic>;
+      expect(tagsProp['type'], equals('array'));
+      final tagsItems = tagsProp['items'] as Map<String, dynamic>;
+      expect(tagsItems['type'], equals('string'));
+      expect(tagsProp['description'], equals('List of tags'));
     });
 
     test('converts object property with nested properties', () {
@@ -816,9 +831,12 @@ void main() {
         },
       });
 
-      expect(result['user']['type'], equals('object'));
-      expect(result['user']['properties']['name']['type'], equals('string'));
-      expect(result['user']['required'], equals(['name']));
+      final userProp = result['user'] as Map<String, dynamic>;
+      expect(userProp['type'], equals('object'));
+      final userProps = userProp['properties'] as Map<String, dynamic>;
+      final nameProp = userProps['name'] as Map<String, dynamic>;
+      expect(nameProp['type'], equals('string'));
+      expect(userProp['required'], equals(['name']));
     });
 
     test('converts deeply nested object', () {
@@ -838,12 +856,14 @@ void main() {
         },
       });
 
-      expect(result['data']['type'], equals('object'));
-      expect(result['data']['properties']['level1']['type'], equals('object'));
-      expect(
-        result['data']['properties']['level1']['properties']['level2']['type'],
-        equals('string'),
-      );
+      final dataProp = result['data'] as Map<String, dynamic>;
+      expect(dataProp['type'], equals('object'));
+      final dataProps = dataProp['properties'] as Map<String, dynamic>;
+      final level1Prop = dataProps['level1'] as Map<String, dynamic>;
+      expect(level1Prop['type'], equals('object'));
+      final level1Props = level1Prop['properties'] as Map<String, dynamic>;
+      final level2Prop = level1Props['level2'] as Map<String, dynamic>;
+      expect(level2Prop['type'], equals('string'));
     });
 
     test('returns empty map for null properties', () {
@@ -858,37 +878,36 @@ void main() {
         },
       });
 
-      expect(result['custom']['type'], equals('custom_type'));
-      expect(result['custom']['extra'], equals('data'));
+      final customProp = result['custom'] as Map<String, dynamic>;
+      expect(customProp['type'], equals('custom_type'));
+      expect(customProp['extra'], equals('data'));
     });
   });
 
   group('BlockHandlers', () {
     group('ToolUseBlockHandler', () {
       test('accumulates partial JSON deltas', () {
-        final handler = ToolUseBlockHandler();
-        handler.toolName = 'test_tool';
-
-        handler.handleDelta({'partial_json': '{"name":'});
-        handler.handleDelta({'partial_json': '"John"}'});
+        final handler = ToolUseBlockHandler()
+          ..toolName = 'test_tool'
+          ..handleDelta({'partial_json': '{"name":'})
+          ..handleDelta({'partial_json': '"John"}'});
 
         expect(handler.complete(), equals('{"name":"John"}'));
       });
 
       test('ignores null partial_json', () {
-        final handler = ToolUseBlockHandler();
-        handler.handleDelta({});
-        handler.handleDelta({'other': 'data'});
+        final handler = ToolUseBlockHandler()
+          ..handleDelta({})
+          ..handleDelta({'other': 'data'});
 
         expect(handler.complete(), isEmpty);
       });
 
       test('reset clears buffer and toolName', () {
-        final handler = ToolUseBlockHandler();
-        handler.toolName = 'test_tool';
-        handler.handleDelta({'partial_json': 'data'});
-
-        handler.reset();
+        final handler = ToolUseBlockHandler()
+          ..toolName = 'test_tool'
+          ..handleDelta({'partial_json': 'data'})
+          ..reset();
 
         expect(handler.complete(), isEmpty);
         expect(handler.toolName, isNull);
@@ -897,27 +916,25 @@ void main() {
 
     group('TextBlockHandler', () {
       test('accumulates text deltas', () {
-        final handler = TextBlockHandler();
-
-        handler.handleDelta({'text': 'Hello '});
-        handler.handleDelta({'text': 'World!'});
+        final handler = TextBlockHandler()
+          ..handleDelta({'text': 'Hello '})
+          ..handleDelta({'text': 'World!'});
 
         expect(handler.complete(), equals('Hello World!'));
       });
 
       test('ignores null text', () {
-        final handler = TextBlockHandler();
-        handler.handleDelta({});
-        handler.handleDelta({'other': 'data'});
+        final handler = TextBlockHandler()
+          ..handleDelta({})
+          ..handleDelta({'other': 'data'});
 
         expect(handler.complete(), isEmpty);
       });
 
       test('reset clears buffer', () {
-        final handler = TextBlockHandler();
-        handler.handleDelta({'text': 'data'});
-
-        handler.reset();
+        final handler = TextBlockHandler()
+          ..handleDelta({'text': 'data'})
+          ..reset();
 
         expect(handler.complete(), isEmpty);
       });
@@ -943,12 +960,11 @@ void main() {
 
   group('StreamParser', () {
     test('reset clears internal state', () {
-      final parser = StreamParser();
       // Call reset to ensure no exception
-      parser.reset();
       // Parser should be in clean state - no direct way to verify,
       // but we can verify it doesn't throw
-      expect(() => parser.reset(), returnsNormally);
+      final parser = StreamParser()..reset();
+      expect(parser.reset, returnsNormally);
     });
 
     test('parseStream yields nothing for empty stream', () async {
@@ -1159,9 +1175,7 @@ void main() {
     });
 
     test('records 429 response and sets rate limited state', () {
-      final limiter = RateLimiter();
-
-      limiter.recordRateLimit(statusCode: 429);
+      final limiter = RateLimiter()..recordRateLimit(statusCode: 429);
 
       expect(limiter.isRateLimited, isTrue);
     });
@@ -1173,22 +1187,18 @@ void main() {
     });
 
     test('queues requests when rate limited', () async {
-      final limiter = RateLimiter();
-      var requestCount = 0;
-
       // Set rate limited state with very short duration for test
-      limiter.recordRateLimit(
-        statusCode: 429,
-        retryAfter: const Duration(milliseconds: 50),
-      );
+      final limiter = RateLimiter()
+        ..recordRateLimit(
+          statusCode: 429,
+          retryAfter: const Duration(milliseconds: 50),
+        );
+      var requestCount = 0;
 
       expect(limiter.isRateLimited, isTrue);
 
       // Queue a request (will complete after rate limit resets)
-      final future = limiter.execute(() async {
-        requestCount++;
-        return requestCount;
-      });
+      final future = limiter.execute(() async => ++requestCount);
 
       // Request should be queued, not executed immediately
       expect(requestCount, equals(0));
@@ -1202,30 +1212,26 @@ void main() {
     });
 
     test('ignores non-429 status codes', () {
-      final limiter = RateLimiter();
-
-      limiter.recordRateLimit(statusCode: 500);
+      final limiter = RateLimiter()..recordRateLimit(statusCode: 500);
 
       expect(limiter.isRateLimited, isFalse);
     });
 
     test('dispose cancels timer and clears queue', () {
-      final limiter = RateLimiter();
-
-      limiter.recordRateLimit(statusCode: 429);
-      limiter.dispose();
+      final limiter = RateLimiter()
+        ..recordRateLimit(statusCode: 429)
+        ..dispose();
 
       // Should not throw
-      expect(() => limiter.dispose(), returnsNormally);
+      expect(limiter.dispose, returnsNormally);
     });
 
     test('uses custom retry duration from Retry-After header', () {
-      final limiter = RateLimiter();
-
-      limiter.recordRateLimit(
-        statusCode: 429,
-        retryAfter: const Duration(seconds: 120),
-      );
+      final limiter = RateLimiter()
+        ..recordRateLimit(
+          statusCode: 429,
+          retryAfter: const Duration(seconds: 120),
+        );
 
       expect(limiter.isRateLimited, isTrue);
     });
@@ -1360,7 +1366,7 @@ void main() {
         equals('delta'),
       );
       expect(
-        matchEvent(A2uiMessageEvent(const BeginRenderingData(surfaceId: 's'))),
+        matchEvent(const A2uiMessageEvent(BeginRenderingData(surfaceId: 's'))),
         equals('a2ui'),
       );
       expect(

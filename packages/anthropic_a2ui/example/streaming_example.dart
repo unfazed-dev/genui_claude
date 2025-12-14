@@ -65,7 +65,7 @@ Future<void> _demonstrateStreaming(ClaudeStreamHandler handler) async {
 
       case CompleteEvent():
         print('   [Complete] Stream finished');
-        print('   -> Total text: "${textBuffer.toString()}"');
+        print('   -> Total text: "$textBuffer"');
         print('   -> Total A2UI messages: ${receivedMessages.length}');
 
       case ErrorEvent(:final error):

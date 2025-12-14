@@ -73,7 +73,7 @@ class A2uiToolConverter {
       return ValidationResult.invalid(errors);
     }
 
-    return const ValidationResult.valid();
+    return ValidationResult.valid();
   }
 
   static String _enhanceDescription(A2uiToolSchema schema) {

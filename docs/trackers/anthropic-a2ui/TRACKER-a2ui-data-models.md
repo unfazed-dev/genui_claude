@@ -136,13 +136,18 @@ Implementation of all data model classes for the anthropic_a2ui package. These m
 - [x] Make it a const class for default instantiation
 - [x] Add copyWith method
 
-### JSON Serialization Setup (Manual)
+### JSON Serialization Setup (Freezed)
 
-- [x] Manual JSON serialization implemented (no json_serializable)
-- [ ] Add @JsonSerializable annotations to all models (deferred)
-- [ ] Create build.yaml for json_serializable config (deferred)
-- [ ] Run build_runner to generate .g.dart files (deferred)
-- [ ] Export generated files properly (deferred)
+- [x] Freezed code generation implemented
+- [x] @Freezed annotations added to all models
+- [x] build.yaml created with explicit_to_json and include_if_null settings
+- [x] build_runner generates .freezed.dart and .g.dart files
+- [x] Generated files exported properly
+
+**Migration Details:**
+- Migrated from manual JSON to freezed 3.x code generation
+- Added `abstract` keyword for non-sealed classes (freezed 3.x requirement)
+- Configured `explicit_to_json: true` for proper nested object serialization
 
 ## Files
 
@@ -155,20 +160,31 @@ Implementation of all data model classes for the anthropic_a2ui package. These m
 - `lib/src/models/validation_result.dart` ✅ - Validation output
 - `lib/src/models/stream_config.dart` ✅ - Stream configuration
 
-### Generated Files (Deferred - using manual JSON)
-- `lib/src/models/a2ui_message.g.dart` (not generated)
-- `lib/src/models/widget_node.g.dart` (not generated)
-- `lib/src/models/tool_schema.g.dart` (not generated)
-- `lib/src/models/parse_result.g.dart` (not generated)
+### Generated Files ✅
+- `lib/src/models/a2ui_message.freezed.dart` ✅ - Freezed implementation
+- `lib/src/models/a2ui_message.g.dart` ✅ - JSON serialization
+- `lib/src/models/widget_node.freezed.dart` ✅
+- `lib/src/models/widget_node.g.dart` ✅
+- `lib/src/models/tool_schema.freezed.dart` ✅
+- `lib/src/models/tool_schema.g.dart` ✅
+- `lib/src/models/stream_event.freezed.dart` ✅
+- `lib/src/models/parse_result.freezed.dart` ✅
+- `lib/src/models/validation_result.freezed.dart` ✅
+- `lib/src/models/stream_config.freezed.dart` ✅
 
 ### Barrel Export ✅
 - `lib/src/models/models.dart` ✅ - Exports all models
 
 ## Dependencies
 
-- json_annotation: ^4.8.0
-- json_serializable: ^6.7.0 (dev)
+- freezed_annotation: ^3.1.0
+- json_annotation: ^4.9.0
 - meta: ^1.9.0
+
+**Dev Dependencies:**
+- freezed: ^3.0.6
+- json_serializable: ^6.9.0
+- build_runner: ^2.4.0
 
 ## Notes
 
@@ -222,3 +238,5 @@ Implementation of all data model classes for the anthropic_a2ui package. These m
 |------|--------|
 | 2025-12-13 | Created tracker from spec |
 | 2025-12-14 | Status: COMPLETE. All data models implemented with manual JSON serialization. 37 tests passing for package. |
+| 2025-12-14 | Marked json_serializable tasks as N/A - sealed classes not compatible with code generation. Manual JSON is the correct approach. 146 tests passing. |
+| 2025-12-14 | **MIGRATED TO FREEZED**: All models migrated to freezed 3.x code generation. Added mocktail for mock clients. 146 tests passing. Industry standard approach. |

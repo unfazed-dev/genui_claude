@@ -1,22 +1,29 @@
 import 'package:anthropic_a2ui/src/exceptions/exceptions.dart';
-import 'package:meta/meta.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'validation_result.freezed.dart';
 
 /// Result of validating tool input against a schema.
 ///
 /// Contains validation status and any errors found.
-@immutable
-class ValidationResult {
+@freezed
+abstract class ValidationResult with _$ValidationResult {
 
   /// Creates a validation result.
-  const ValidationResult({
-    required this.isValid,
-    required this.errors,
-  });
+  const factory ValidationResult({
+    /// Whether the input is valid.
+    required bool isValid,
+
+    /// List of validation errors (empty if valid).
+    required List<ValidationError> errors,
+  }) = _ValidationResult;
+  const ValidationResult._();
 
   /// Creates a successful validation result.
-  const ValidationResult.valid()
-      : isValid = true,
-        errors = const [];
+  factory ValidationResult.valid() => const ValidationResult(
+        isValid: true,
+        errors: [],
+      );
 
   /// Creates a failed validation result with errors.
   factory ValidationResult.invalid(List<ValidationError> errors) =>
@@ -35,22 +42,4 @@ class ValidationResult {
         isValid: false,
         errors: [ValidationError(field: field, message: message, code: code)],
       );
-  /// Whether the input is valid.
-  final bool isValid;
-
-  /// List of validation errors (empty if valid).
-  final List<ValidationError> errors;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ValidationResult && isValid == other.isValid;
-
-  @override
-  int get hashCode => isValid.hashCode;
-
-  @override
-  String toString() => isValid
-      ? 'ValidationResult.valid()'
-      : 'ValidationResult.invalid(${errors.length} errors)';
 }

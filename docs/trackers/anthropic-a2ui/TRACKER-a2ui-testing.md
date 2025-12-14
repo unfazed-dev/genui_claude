@@ -14,12 +14,12 @@ Comprehensive testing strategy for the anthropic_a2ui package including unit tes
 
 - [x] Configure test dependencies in pubspec.yaml
   - [x] test: ^1.24.0
-  - [x] mockito: ^5.4.0
-  - [x] build_runner: ^2.4.0 (for mockito generation)
+  - [x] mocktail: ^1.0.3 (replaced mockito - no codegen needed)
+  - [x] build_runner: ^2.4.0
   - [x] coverage: ^1.6.0
 - [x] Create test directory structure
 - [x] Create test utilities and helpers
-- [ ] Set up mock generation with @GenerateMocks (deferred)
+- [x] Create mock_clients.dart with mocktail mocks
 
 **Current: 146 tests passing**
 
@@ -40,11 +40,20 @@ Comprehensive testing strategy for the anthropic_a2ui package including unit tes
   - [x] Authentication error response
 - [x] Create MockStreamSequences for complete stream flows
 
-#### Mock Clients (mock_clients.dart) - Deferred
-- [ ] Create MockAnthropicClient using mockito (deferred - requires external dependency)
-- [ ] Implement stubStreamResponse helper (deferred)
-- [ ] Implement stubErrorResponse helper (deferred)
-- [ ] Create MockHttpClient for network tests (deferred)
+#### Mock Clients (test/mocks/mock_clients.dart) ✅
+- [x] Create MockHttpClient using mocktail
+- [x] Implement stubStreamResponse helper
+- [x] Implement stubErrorStream helper
+- [x] Implement stubDelayedStream helper
+- [x] Create MockStreamHandler for testing stream processing
+- [x] Create MockStreamedResponse for HTTP response simulation
+- [x] Create MockEventSequences for common test scenarios
+- [x] Create registerMockFallbackValues() helper
+
+**Architecture Note:** Package is decoupled from anthropic_sdk_dart:
+- `ClaudeStreamHandler.streamRequest()` accepts `Stream<Map<String, dynamic>>`
+- Mock clients simulate HTTP-level interactions, not SDK types
+- This enables testing without external dependencies
 
 ### Unit Tests - Models (test/anthropic_a2ui_test.dart) ✅
 
@@ -363,3 +372,5 @@ dart run build_runner build
 | 2025-12-14 | Status: IN_PROGRESS. 98 tests passing. Added StreamParser tests (3), RateLimiter tests (7), ClaudeStreamHandler tests (9). All unit tests for stream components complete. Mock fixtures and integration tests pending. |
 | 2025-12-14 | Status: IN_PROGRESS. 124 tests passing. Added mock fixtures (mock_responses.dart), test utilities (test_utils.dart), and integration tests (end_to_end_test.dart with 26 tests). Performance tests pending. |
 | 2025-12-14 | Status: COMPLETE. 146 tests passing. Added performance benchmarks (benchmarks_test.dart with 22 tests). All spec performance targets verified: tool conversion <1ms for 10 tools, message parsing <5ms, stream processing <0.1ms per event. |
+| 2025-12-14 | Marked mock client tasks as N/A - package architecture decoupled from SDK, using raw JSON maps for testability. All deferred tasks resolved. |
+| 2025-12-14 | **ADDED MOCKTAIL MOCKS**: Created mock_clients.dart with MockHttpClient, MockStreamHandler, stubStreamResponse, stubErrorStream, stubDelayedStream, and MockEventSequences. Industry standard mocktail replaces mockito. |
