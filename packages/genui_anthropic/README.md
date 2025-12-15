@@ -11,6 +11,9 @@ Flutter ContentGenerator implementation for Anthropic's Claude AI, enabling Clau
 - **Streaming Support**: Real-time progressive UI rendering as Claude generates responses
 - **Type-Safe Adapters**: Convert between anthropic_a2ui and GenUI message formats
 - **Catalog Tool Bridge**: Automatically convert GenUI catalogs to Claude tool schemas
+- **Production Resilience**: Circuit breaker pattern, retry with exponential backoff and jitter
+- **Observability**: Built-in metrics collection with event streaming and aggregated statistics
+- **Type-Safe Errors**: Sealed exception hierarchy with exhaustive pattern matching
 
 ## Installation
 
@@ -248,13 +251,22 @@ serve(async (req) => {
 
 ## Documentation
 
+### Guides
 - [API Reference](doc/API_REFERENCE.md) - Complete API documentation with all classes, methods, and properties
 - [Examples](doc/EXAMPLES.md) - Practical code examples, patterns, and troubleshooting guide
 - [Production Guide](doc/PRODUCTION_GUIDE.md) - Deployment and production hardening guide
 - [FAQ](doc/FAQ.md) - Frequently asked questions and troubleshooting
-- [Performance Tuning](doc/PERFORMANCE_TUNING.md) - Optimization guide
+
+### Configuration & Tuning
+- [Performance Tuning](doc/PERFORMANCE_TUNING.md) - Optimization guide for timeouts, retries, and circuit breaker
 - [Debug Logging](doc/DEBUG_LOGGING.md) - Logging configuration guide
 - [Catalog Patterns](doc/CATALOG_PATTERNS.md) - Best practices for widget catalogs
+
+### Production
+- [Security Best Practices](doc/SECURITY_BEST_PRACTICES.md) - Security guidelines for production deployments
+- [Monitoring Integration](doc/MONITORING_INTEGRATION.md) - Integrate metrics with DataDog, Firebase, etc.
+- [Migration Guide](doc/MIGRATION_GUIDE.md) - Version migration instructions and helpers
+- [Coverage Matrix](doc/COVERAGE_MATRIX.md) - Test coverage overview and CI/CD setup
 
 ## Testing
 

@@ -19,8 +19,8 @@ anthropic_genui/
 
 | Package | Description |
 |---------|-------------|
-| `anthropic_a2ui` | Core Anthropic A2UI Flutter components |
-| `genui_anthropic` | GenUI Anthropic Flutter utilities |
+| [`anthropic_a2ui`](packages/anthropic_a2ui) | Pure Dart package for converting between Claude API responses and A2UI protocol messages. No Flutter dependency - works in apps, CLI tools, servers, and edge functions. |
+| [`genui_anthropic`](packages/genui_anthropic) | Flutter `ContentGenerator` implementation for Claude-powered GenUI. Features dual-mode architecture (direct/proxy), streaming, circuit breaker, metrics, and comprehensive error handling. |
 
 ## Getting Started
 

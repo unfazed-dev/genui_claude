@@ -9,6 +9,20 @@ Complete API documentation for the `genui_anthropic` package.
   - [AnthropicContentGenerator](#anthropiccontentgenerator)
   - [AnthropicConfig](#anthropicconfig)
   - [ProxyConfig](#proxyconfig)
+  - [RetryConfig](#retryconfig)
+- [Resilience Classes](#resilience-classes)
+  - [CircuitBreaker](#circuitbreaker)
+  - [CircuitBreakerConfig](#circuitbreakerconfig)
+  - [CircuitState](#circuitstate)
+- [Metrics Classes](#metrics-classes)
+  - [MetricsCollector](#metricscollector)
+  - [MetricsStats](#metricsstats)
+  - [MetricsEvent](#metricsevent)
+  - [globalMetricsCollector](#globalmetricscollector)
+- [Exception Classes](#exception-classes)
+  - [AnthropicException](#anthropicexception)
+  - [Exception Types](#exception-types)
+  - [ExceptionFactory](#exceptionfactory)
 - [Adapter Classes](#adapter-classes)
   - [A2uiMessageAdapter](#a2uimessageadapter)
   - [CatalogToolBridge](#catalogtoolbridge)
@@ -235,6 +249,526 @@ ProxyConfig copyWith({
 ```
 
 Creates a copy with specified fields replaced.
+
+---
+
+### RetryConfig
+
+Configuration for retry behavior with exponential backoff.
+
+```dart
+const RetryConfig({
+  int maxAttempts = 3,
+  Duration initialDelay = const Duration(seconds: 1),
+  Duration maxDelay = const Duration(seconds: 30),
+  double backoffMultiplier = 2.0,
+  double jitterFactor = 0.1,
+  Set<int> retryableStatusCodes = defaultRetryableStatusCodes,
+})
+```
+
+#### Properties
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `maxAttempts` | `int` | `3` | Maximum retry attempts (0 = no retries) |
+| `initialDelay` | `Duration` | `1 second` | Initial delay before first retry |
+| `maxDelay` | `Duration` | `30 seconds` | Maximum delay cap |
+| `backoffMultiplier` | `double` | `2.0` | Exponential backoff multiplier |
+| `jitterFactor` | `double` | `0.1` | Random jitter factor (0.0-1.0) |
+| `retryableStatusCodes` | `Set<int>` | `{429, 500, 502, 503, 504}` | HTTP codes that trigger retry |
+
+#### Static Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `defaults` | `RetryConfig` | Default configuration |
+| `noRetry` | `RetryConfig` | No retries (maxAttempts: 0) |
+| `aggressive` | `RetryConfig` | More retries, longer waits |
+| `defaultRetryableStatusCodes` | `Set<int>` | Default retryable status codes |
+
+#### Methods
+
+##### getDelayForAttempt
+
+```dart
+Duration getDelayForAttempt(int attempt, [Random? random])
+```
+
+Calculates the delay for a given attempt number using exponential backoff with jitter.
+
+```dart
+final config = RetryConfig.defaults;
+final delay = config.getDelayForAttempt(0); // ~1 second
+final delay2 = config.getDelayForAttempt(1); // ~2 seconds
+final delay3 = config.getDelayForAttempt(2); // ~4 seconds
+```
+
+##### shouldRetryStatusCode
+
+```dart
+bool shouldRetryStatusCode(int statusCode)
+```
+
+Checks if an HTTP status code should trigger a retry.
+
+##### copyWith
+
+```dart
+RetryConfig copyWith({
+  int? maxAttempts,
+  Duration? initialDelay,
+  Duration? maxDelay,
+  double? backoffMultiplier,
+  double? jitterFactor,
+  Set<int>? retryableStatusCodes,
+})
+```
+
+Creates a copy with specified fields replaced.
+
+---
+
+## Resilience Classes
+
+### CircuitBreaker
+
+Circuit breaker pattern to prevent cascading failures.
+
+```dart
+CircuitBreaker({
+  CircuitBreakerConfig config = CircuitBreakerConfig.defaults,
+  String name = 'default',
+  MetricsCollector? metricsCollector,
+})
+```
+
+#### States
+
+The circuit breaker has three states:
+
+| State | Description | Behavior |
+|-------|-------------|----------|
+| `closed` | Normal operation | Requests pass through |
+| `open` | Failing fast | Requests rejected immediately |
+| `halfOpen` | Testing recovery | Limited requests allowed |
+
+#### Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `name` | `String` | Name for logging and identification |
+| `state` | `CircuitState` | Current circuit state |
+| `failureCount` | `int` | Current failure count |
+| `lastFailureTime` | `DateTime?` | Time of last recorded failure |
+| `allowsRequest` | `bool` | Whether the circuit allows requests |
+
+#### Methods
+
+##### checkState
+
+```dart
+void checkState()
+```
+
+Checks if request is allowed. Throws `CircuitBreakerOpenException` if circuit is open.
+
+```dart
+try {
+  breaker.checkState();
+  final result = await makeRequest();
+  breaker.recordSuccess();
+  return result;
+} catch (e) {
+  breaker.recordFailure();
+  rethrow;
+}
+```
+
+##### recordSuccess
+
+```dart
+void recordSuccess()
+```
+
+Records a successful operation. In half-open state, after enough successes, closes the circuit.
+
+##### recordFailure
+
+```dart
+void recordFailure()
+```
+
+Records a failed operation. If threshold is reached, opens the circuit.
+
+##### reset
+
+```dart
+void reset()
+```
+
+Manually resets the circuit breaker to closed state.
+
+#### Example
+
+```dart
+final breaker = CircuitBreaker(
+  config: CircuitBreakerConfig.defaults,
+  name: 'claude-api',
+  metricsCollector: globalMetricsCollector,
+);
+
+// Use in request flow
+try {
+  breaker.checkState();
+  final response = await callApi();
+  breaker.recordSuccess();
+  return response;
+} on CircuitBreakerOpenException catch (e) {
+  // Circuit is open, fail fast
+  print('Circuit open, retry after: ${e.recoveryTime}');
+} catch (e) {
+  breaker.recordFailure();
+  rethrow;
+}
+```
+
+---
+
+### CircuitBreakerConfig
+
+Configuration for circuit breaker behavior.
+
+```dart
+const CircuitBreakerConfig({
+  int failureThreshold = 5,
+  Duration recoveryTimeout = const Duration(seconds: 30),
+  int halfOpenSuccessThreshold = 2,
+})
+```
+
+#### Properties
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `failureThreshold` | `int` | `5` | Failures before opening |
+| `recoveryTimeout` | `Duration` | `30 seconds` | Wait time before half-open |
+| `halfOpenSuccessThreshold` | `int` | `2` | Successes to close from half-open |
+
+#### Static Presets
+
+| Preset | failureThreshold | recoveryTimeout | halfOpenSuccessThreshold | Use Case |
+|--------|-----------------|-----------------|--------------------------|----------|
+| `defaults` | 5 | 30s | 2 | Balanced |
+| `lenient` | 10 | 60s | 3 | High tolerance |
+| `strict` | 3 | 15s | 1 | Fast failure detection |
+
+#### Methods
+
+##### copyWith
+
+```dart
+CircuitBreakerConfig copyWith({
+  int? failureThreshold,
+  Duration? recoveryTimeout,
+  int? halfOpenSuccessThreshold,
+})
+```
+
+---
+
+### CircuitState
+
+Enum representing circuit breaker states.
+
+```dart
+enum CircuitState {
+  closed,   // Normal operation
+  open,     // Failing fast
+  halfOpen, // Testing recovery
+}
+```
+
+---
+
+## Metrics Classes
+
+### MetricsCollector
+
+Collects and streams metrics events for monitoring and observability.
+
+```dart
+MetricsCollector({
+  bool enabled = true,
+  bool aggregationEnabled = true,
+})
+```
+
+#### Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `enabled` | `bool` | Whether metrics collection is enabled |
+| `aggregationEnabled` | `bool` | Whether to maintain aggregated statistics |
+| `eventStream` | `Stream<MetricsEvent>` | Broadcast stream of metrics events |
+| `stats` | `MetricsStats` | Aggregated statistics |
+
+#### Methods
+
+##### Record Methods
+
+```dart
+void recordCircuitBreakerStateChange({...})
+void recordRetryAttempt({...})
+void recordRequestStart({...})
+void recordRequestSuccess({...})
+void recordRequestFailure({...})
+void recordRateLimit({...})
+void recordLatency({...})
+void recordStreamInactivity({...})
+```
+
+##### resetStats
+
+```dart
+void resetStats()
+```
+
+Resets all aggregated statistics.
+
+##### dispose
+
+```dart
+void dispose()
+```
+
+Disposes of the collector and closes the event stream.
+
+#### Example
+
+```dart
+final collector = MetricsCollector();
+
+// Listen to metrics events
+collector.eventStream.listen((event) {
+  // Send to your monitoring system
+  datadog.track(event.eventType, event.toMap());
+});
+
+// Access aggregated statistics
+print('Success rate: ${collector.stats.successRate}%');
+print('P95 latency: ${collector.stats.p95LatencyMs}ms');
+```
+
+---
+
+### MetricsStats
+
+Aggregated statistics from collected metrics. Access via `MetricsCollector.stats`.
+
+#### Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `totalRequests` | `int` | Total requests started |
+| `activeRequests` | `int` | Currently active requests |
+| `successfulRequests` | `int` | Successful requests |
+| `failedRequests` | `int` | Failed requests |
+| `totalRetries` | `int` | Total retry attempts |
+| `rateLimitEvents` | `int` | Rate limit events |
+| `circuitBreakerEvents` | `int` | Circuit breaker state changes |
+| `circuitBreakerOpens` | `int` | Times circuit breaker opened |
+| `streamInactivityEvents` | `int` | Stream inactivity events |
+| `successRate` | `double` | Success rate percentage (0-100) |
+| `averageLatencyMs` | `double` | Average latency in ms |
+| `p50LatencyMs` | `int` | 50th percentile (median) latency |
+| `p95LatencyMs` | `int` | 95th percentile latency |
+| `p99LatencyMs` | `int` | 99th percentile latency |
+
+#### Methods
+
+##### toMap
+
+```dart
+Map<String, dynamic> toMap()
+```
+
+Converts statistics to a map for serialization.
+
+---
+
+### MetricsEvent
+
+Sealed base class for all metrics events.
+
+```dart
+sealed class MetricsEvent {
+  DateTime get timestamp;
+  String? get requestId;
+  String get eventType;
+  Map<String, dynamic> toMap();
+}
+```
+
+#### Event Types
+
+| Event Type | Description |
+|------------|-------------|
+| `CircuitBreakerStateChangeEvent` | Circuit breaker state transitions |
+| `RetryAttemptEvent` | Retry attempts with delay info |
+| `RequestStartEvent` | Request started |
+| `RequestSuccessEvent` | Request completed successfully |
+| `RequestFailureEvent` | Request failed |
+| `RateLimitEvent` | Rate limit encountered |
+| `LatencyEvent` | Custom latency measurement |
+| `StreamInactivityEvent` | Stream stall detected |
+
+---
+
+### globalMetricsCollector
+
+Global metrics collector instance for convenience.
+
+```dart
+MetricsCollector get globalMetricsCollector
+```
+
+Use when you don't need multiple isolated collectors.
+
+```dart
+// Enable global metrics
+globalMetricsCollector.eventStream.listen((event) {
+  print('Metrics: ${event.toMap()}');
+});
+
+// Access stats
+print('Success rate: ${globalMetricsCollector.stats.successRate}%');
+```
+
+---
+
+## Exception Classes
+
+### AnthropicException
+
+Sealed base class for all Anthropic API errors.
+
+```dart
+sealed class AnthropicException implements Exception {
+  String get message;
+  String? get requestId;
+  int? get statusCode;
+  Object? get originalError;
+  StackTrace? get stackTrace;
+  bool get isRetryable;
+  String get typeName;
+}
+```
+
+Use pattern matching for exhaustive error handling:
+
+```dart
+try {
+  await generator.sendRequest(message);
+} on AnthropicException catch (e) {
+  switch (e) {
+    case NetworkException():
+      // Handle network error
+    case TimeoutException(:final timeout):
+      // Handle timeout
+    case AuthenticationException():
+      // Handle auth error
+    case RateLimitException(:final retryAfter):
+      // Handle rate limit
+    case ValidationException():
+      // Handle validation error
+    case ServerException():
+      // Handle server error
+    case StreamException():
+      // Handle stream error
+    case CircuitBreakerOpenException(:final recoveryTime):
+      // Handle circuit open
+  }
+}
+```
+
+---
+
+### Exception Types
+
+| Exception | Status Code | isRetryable | Description |
+|-----------|-------------|-------------|-------------|
+| `NetworkException` | - | `true` | Network failures (DNS, connection refused) |
+| `TimeoutException` | - | `true` | Request timeout exceeded |
+| `AuthenticationException` | 401, 403 | `false` | Invalid credentials |
+| `RateLimitException` | 429 | `true` | Rate limit exceeded |
+| `ValidationException` | 400, 422 | `false` | Request validation errors |
+| `ServerException` | 5xx | `true` | Server-side errors |
+| `StreamException` | - | `false` | SSE parsing errors |
+| `CircuitBreakerOpenException` | - | `true` | Circuit breaker is open |
+
+#### TimeoutException
+
+```dart
+final class TimeoutException extends AnthropicException {
+  Duration get timeout;  // The timeout duration that was exceeded
+}
+```
+
+#### RateLimitException
+
+```dart
+final class RateLimitException extends AnthropicException {
+  Duration? get retryAfter;  // Suggested wait time before retrying
+}
+```
+
+#### CircuitBreakerOpenException
+
+```dart
+final class CircuitBreakerOpenException extends AnthropicException {
+  DateTime? get recoveryTime;  // When the circuit will attempt recovery
+}
+```
+
+---
+
+### ExceptionFactory
+
+Factory for creating appropriate exceptions from HTTP responses.
+
+#### Static Methods
+
+##### fromHttpStatus
+
+```dart
+static AnthropicException fromHttpStatus({
+  required int statusCode,
+  required String body,
+  String? requestId,
+  Duration? retryAfter,
+})
+```
+
+Creates an appropriate exception based on HTTP status code.
+
+```dart
+final exception = ExceptionFactory.fromHttpStatus(
+  statusCode: 429,
+  body: 'Rate limit exceeded',
+  requestId: 'req_123',
+  retryAfter: Duration(seconds: 30),
+);
+// Returns RateLimitException
+```
+
+##### parseRetryAfter
+
+```dart
+static Duration? parseRetryAfter(String? value)
+```
+
+Parses Retry-After header value to Duration. Supports both seconds (integer) and HTTP-date formats.
 
 ---
 

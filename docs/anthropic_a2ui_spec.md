@@ -486,7 +486,7 @@ void main() {
 
 ```yaml
 dependencies:
-  anthropic_sdk_dart: ^0.9.0    # Claude API client
+  anthropic_sdk_dart: ^0.3.0    # Claude API client
   json_annotation: ^4.8.0        # JSON serialization
   meta: ^1.9.0                   # Annotations
   collection: ^1.18.0            # Collection utilities
