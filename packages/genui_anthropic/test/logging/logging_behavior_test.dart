@@ -508,17 +508,89 @@ data: {"type": "message_stop"}
           handler.dispose();
         });
 
-        // Note: Stream inactivity timeout logging is tested via integration tests
-        // and the streaming_edge_cases_test.dart file. This specific unit test
-        // is skipped due to timing complexity with async stream processing.
         test(
           'logs stream inactivity timeout at WARNING level',
-          skip: 'Timing-sensitive test - covered in integration tests',
           () async {
-            // Stream inactivity timeout triggers a warning when no data is
-            // received within the configured timeout period. The handler uses
-            // a Timer that resets on each data event and logs a WARNING
-            // when it fires: "Stream inactivity timeout after {duration}"
+            // Use a short inactivity timeout for testing
+            const inactivityTimeout = Duration(milliseconds: 100);
+
+            final handler = ProxyModeHandler(
+              endpoint: testEndpoint,
+              client: mockClient,
+              streamInactivityTimeout: inactivityTimeout,
+            );
+
+            // Create a stream that emits initial data, then pauses to trigger timeout
+            final streamController = StreamController<List<int>>();
+
+            final mockResponse = http.StreamedResponse(
+              streamController.stream,
+              200,
+            );
+            when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
+
+            const request = ApiRequest(
+              messages: [{'role': 'user', 'content': 'Hello'}],
+              maxTokens: 1024,
+            );
+
+            // Track if timeout error was thrown (via zone error handler)
+            Object? zoneError;
+
+            // Run in a guarded zone to catch the async timeout error
+            await runZonedGuarded(
+              () async {
+                // Start listening to the stream
+                final subscription = handler.createStream(request).listen(
+                  (_) {},
+                  onError: (Object error) {
+                    zoneError = error;
+                  },
+                  cancelOnError: true,
+                );
+
+                // Emit initial SSE data
+                streamController
+                    .add(utf8.encode('data: {"type": "message_start"}\n\n'));
+
+                // Wait longer than inactivity timeout to trigger the timer
+                await Future<void>.delayed(const Duration(milliseconds: 200));
+
+                // Emit more data to trigger the timeout check in the await-for loop
+                // This causes the loop to check `if (completer.isCompleted) break;`
+                streamController.add(utf8.encode('\n'));
+
+                // Small delay to allow processing
+                await Future<void>.delayed(const Duration(milliseconds: 50));
+
+                // Cleanup
+                await subscription.cancel();
+                await streamController.close();
+              },
+              (error, stackTrace) {
+                // Catch async errors from the timer callback
+                zoneError = error;
+              },
+            );
+
+            // Verify timeout was triggered
+            expect(zoneError, isA<TimeoutException>());
+
+            final proxyLogs = logRecords.where(
+              (r) => r.loggerName == 'ProxyModeHandler',
+            );
+
+            expect(
+              proxyLogs.any(
+                (r) =>
+                    r.level == Level.WARNING &&
+                    r.message.contains('inactivity timeout'),
+              ),
+              isTrue,
+              reason: 'Should log stream inactivity timeout at WARNING level',
+            );
+
+            handler.dispose();
           },
         );
       });
