@@ -139,6 +139,190 @@ void main() {
         expect(configProp['properties'], isA<Map<String, dynamic>>());
       });
 
+      test('handles object schema with string property', () {
+        final item = CatalogItem(
+          name: 'string_widget',
+          dataSchema: S.object(
+            description: 'Widget with string property',
+            properties: {
+              'text': S.string(description: 'The text content'),
+            },
+          ),
+          widgetBuilder: (_) => const SizedBox(),
+        );
+
+        final tools = CatalogToolBridge.fromItems([item]);
+        final schema = tools.first.inputSchema;
+        final props = schema['properties'] as Map<String, dynamic>;
+
+        expect(props.containsKey('text'), isTrue);
+        expect(props['text'], isA<Map<String, dynamic>>());
+      });
+
+      test('handles object schema with integer property', () {
+        final item = CatalogItem(
+          name: 'integer_widget',
+          dataSchema: S.object(
+            description: 'Widget with integer property',
+            properties: {
+              'count': S.integer(description: 'The count value'),
+            },
+          ),
+          widgetBuilder: (_) => const SizedBox(),
+        );
+
+        final tools = CatalogToolBridge.fromItems([item]);
+        final schema = tools.first.inputSchema;
+        final props = schema['properties'] as Map<String, dynamic>;
+
+        expect(props.containsKey('count'), isTrue);
+        expect(props['count'], isA<Map<String, dynamic>>());
+      });
+
+      test('handles object schema with number property', () {
+        final item = CatalogItem(
+          name: 'number_widget',
+          dataSchema: S.object(
+            description: 'Widget with number property',
+            properties: {
+              'value': S.number(description: 'A decimal value'),
+            },
+          ),
+          widgetBuilder: (_) => const SizedBox(),
+        );
+
+        final tools = CatalogToolBridge.fromItems([item]);
+        final schema = tools.first.inputSchema;
+        final props = schema['properties'] as Map<String, dynamic>;
+
+        expect(props.containsKey('value'), isTrue);
+      });
+
+      test('handles object schema with boolean property', () {
+        final item = CatalogItem(
+          name: 'boolean_widget',
+          dataSchema: S.object(
+            description: 'Widget with boolean property',
+            properties: {
+              'isEnabled': S.boolean(description: 'Whether enabled'),
+            },
+          ),
+          widgetBuilder: (_) => const SizedBox(),
+        );
+
+        final tools = CatalogToolBridge.fromItems([item]);
+        final schema = tools.first.inputSchema;
+        final props = schema['properties'] as Map<String, dynamic>;
+
+        expect(props.containsKey('isEnabled'), isTrue);
+      });
+
+      test('handles object schema with list property', () {
+        final item = CatalogItem(
+          name: 'list_widget',
+          dataSchema: S.object(
+            description: 'Widget with list property',
+            properties: {
+              'items': S.list(
+                description: 'List of items',
+                items: S.string(),
+              ),
+            },
+          ),
+          widgetBuilder: (_) => const SizedBox(),
+        );
+
+        final tools = CatalogToolBridge.fromItems([item]);
+        final schema = tools.first.inputSchema;
+        final props = schema['properties'] as Map<String, dynamic>;
+
+        expect(props.containsKey('items'), isTrue);
+      });
+
+      test('handles object with nested object properties', () {
+        final item = CatalogItem(
+          name: 'nested_props_widget',
+          dataSchema: S.object(
+            description: 'Widget with nested object',
+            properties: {
+              'config': S.object(
+                description: 'Configuration object',
+                properties: {
+                  'enabled': S.boolean(),
+                  'name': S.string(),
+                },
+                required: ['enabled'],
+              ),
+            },
+          ),
+          widgetBuilder: (_) => const SizedBox(),
+        );
+
+        final tools = CatalogToolBridge.fromItems([item]);
+        final schema = tools.first.inputSchema;
+        final props = schema['properties'] as Map<String, dynamic>;
+        final configProp = props['config'] as Map<String, dynamic>;
+
+        expect(configProp['type'], 'object');
+        expect(configProp['description'], 'Configuration object');
+        expect(configProp['properties'], isA<Map<String, dynamic>>());
+        expect(configProp['required'], contains('enabled'));
+      });
+
+      test('generates default description when schema has no description', () {
+        final item = CatalogItem(
+          name: 'no_desc_widget',
+          dataSchema: S.object(
+            properties: {
+              'value': S.string(),
+            },
+          ),
+          widgetBuilder: (_) => const SizedBox(),
+        );
+
+        final tools = CatalogToolBridge.fromItems([item]);
+
+        expect(tools.first.description, 'Render a no_desc_widget widget');
+      });
+
+      test('handles schema with no required fields', () {
+        final item = CatalogItem(
+          name: 'optional_widget',
+          dataSchema: S.object(
+            description: 'All optional fields',
+            properties: {
+              'field1': S.string(),
+              'field2': S.integer(),
+            },
+          ),
+          widgetBuilder: (_) => const SizedBox(),
+        );
+
+        final tools = CatalogToolBridge.fromItems([item]);
+
+        expect(tools.first.requiredFields, isNull);
+      });
+
+      test('handles schema with empty required list', () {
+        final item = CatalogItem(
+          name: 'empty_required_widget',
+          dataSchema: S.object(
+            description: 'Empty required list',
+            properties: {
+              'field1': S.string(),
+            },
+            required: [],
+          ),
+          widgetBuilder: (_) => const SizedBox(),
+        );
+
+        final tools = CatalogToolBridge.fromItems([item]);
+        final schema = tools.first.inputSchema;
+
+        // Empty required list should not be included in schema
+        expect(schema.containsKey('required'), isFalse);
+      });
+
     });
 
     group('fromCatalog', () {

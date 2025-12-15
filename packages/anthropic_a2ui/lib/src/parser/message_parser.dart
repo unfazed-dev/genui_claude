@@ -2,7 +2,7 @@ import 'package:anthropic_a2ui/src/models/models.dart';
 
 /// Parses Claude API responses into A2UI message streams.
 class ClaudeA2uiParser {
-  ClaudeA2uiParser._();
+  ClaudeA2uiParser._(); // coverage:ignore-line
 
   /// Parses a single tool_use block into an A2UI message.
   ///

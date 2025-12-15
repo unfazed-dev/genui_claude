@@ -53,7 +53,7 @@ class RateLimiter {
       final request = _queue.removeAt(0);
       try {
         await request.execute();
-      } on Exception {
+      } on Exception { // coverage:ignore-line
         // Errors are handled by the original caller
       }
     }

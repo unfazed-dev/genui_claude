@@ -58,7 +58,7 @@ class TextBlockHandler extends BlockHandler {
 
 /// Factory for creating block handlers by type.
 class BlockHandlerFactory {
-  BlockHandlerFactory._();
+  BlockHandlerFactory._(); // coverage:ignore-line
 
   /// Creates a handler for the given block type.
   static BlockHandler? create(String type) {

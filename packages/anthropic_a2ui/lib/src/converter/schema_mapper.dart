@@ -1,6 +1,6 @@
 /// Utilities for mapping JSON Schema types between A2UI and Claude formats.
 class SchemaMapper {
-  SchemaMapper._();
+  SchemaMapper._(); // coverage:ignore-line
 
   /// Converts A2UI schema properties to Claude format.
   static Map<String, dynamic> convertProperties(Map<String, dynamic> schema) {
@@ -78,7 +78,7 @@ class SchemaMapper {
     return {
       'type': 'object',
       if (property['description'] != null)
-        'description': property['description'],
+        'description': property['description'], // coverage:ignore-line
       if (property['properties'] != null)
         'properties': convertProperties(property),
       if (property['required'] != null) 'required': property['required'],

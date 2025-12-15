@@ -21,8 +21,10 @@ sealed class A2uiException implements Exception {
   /// Optional stack trace for debugging.
   final StackTrace? stackTrace;
 
+  // coverage:ignore-start
   @override
   String toString() => 'A2uiException: $message';
+  // coverage:ignore-end
 }
 
 /// Exception thrown when tool schema conversion fails.

@@ -6,7 +6,7 @@ import 'package:genui/genui.dart';
 /// This class bridges the gap between the pure Dart anthropic_a2ui package
 /// and the Flutter-based GenUI SDK.
 class A2uiMessageAdapter {
-  A2uiMessageAdapter._();
+  A2uiMessageAdapter._(); // coverage:ignore-line
 
   /// Converts an anthropic_a2ui message to a GenUI A2uiMessage.
   ///

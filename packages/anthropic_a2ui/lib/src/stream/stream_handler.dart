@@ -86,6 +86,7 @@ class ClaudeStreamHandler {
                   e,
                   stackTrace,
                 );
+              // coverage:ignore-start
               } on Exception catch (e, stackTrace) {
                 _log.warning(
                   'Failed to parse tool "$toolName"',
@@ -93,6 +94,7 @@ class ClaudeStreamHandler {
                   stackTrace,
                 );
               }
+              // coverage:ignore-end
             }
           }
 

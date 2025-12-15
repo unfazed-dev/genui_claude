@@ -6,7 +6,7 @@ import 'package:anthropic_a2ui/src/models/models.dart';
 /// This class provides static methods for converting tool schemas
 /// between A2UI and Claude API formats.
 class A2uiToolConverter {
-  A2uiToolConverter._();
+  A2uiToolConverter._(); // coverage:ignore-line
 
   /// Converts a list of A2UI tool schemas to Claude tool format.
   ///

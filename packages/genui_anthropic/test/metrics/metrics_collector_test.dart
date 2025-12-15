@@ -727,6 +727,36 @@ void main() {
 
         expect(event.eventType, equals('request_start'));
       });
+
+      test('toMap includes all fields', () {
+        final timestamp = DateTime.now();
+        final event = RequestStartEvent(
+          timestamp: timestamp,
+          requestId: 'req-123',
+          endpoint: 'https://api.example.com/chat',
+          model: 'claude-3-opus',
+        );
+
+        final map = event.toMap();
+
+        expect(map['event_type'], equals('request_start'));
+        expect(map['timestamp'], equals(timestamp.toIso8601String()));
+        expect(map['request_id'], equals('req-123'));
+        expect(map['endpoint'], equals('https://api.example.com/chat'));
+        expect(map['model'], equals('claude-3-opus'));
+      });
+
+      test('toMap excludes null model', () {
+        final event = RequestStartEvent(
+          timestamp: DateTime.now(),
+          requestId: 'req-123',
+          endpoint: 'test',
+        );
+
+        final map = event.toMap();
+
+        expect(map.containsKey('model'), isFalse);
+      });
     });
 
     group('RequestSuccessEvent', () {
@@ -738,6 +768,42 @@ void main() {
         );
 
         expect(event.eventType, equals('request_success'));
+      });
+
+      test('toMap includes all fields', () {
+        final timestamp = DateTime.now();
+        final event = RequestSuccessEvent(
+          timestamp: timestamp,
+          requestId: 'req-123',
+          durationMs: 1500,
+          totalRetries: 2,
+          firstTokenMs: 200,
+          tokensReceived: 150,
+        );
+
+        final map = event.toMap();
+
+        expect(map['event_type'], equals('request_success'));
+        expect(map['timestamp'], equals(timestamp.toIso8601String()));
+        expect(map['request_id'], equals('req-123'));
+        expect(map['duration_ms'], equals(1500));
+        expect(map['total_retries'], equals(2));
+        expect(map['first_token_ms'], equals(200));
+        expect(map['tokens_received'], equals(150));
+      });
+
+      test('toMap excludes null optional fields', () {
+        final event = RequestSuccessEvent(
+          timestamp: DateTime.now(),
+          requestId: 'req-123',
+          durationMs: 100,
+        );
+
+        final map = event.toMap();
+
+        expect(map.containsKey('total_retries'), isFalse);
+        expect(map.containsKey('first_token_ms'), isFalse);
+        expect(map.containsKey('tokens_received'), isFalse);
       });
     });
 
@@ -753,6 +819,48 @@ void main() {
 
         expect(event.eventType, equals('request_failure'));
       });
+
+      test('toMap includes all fields', () {
+        final timestamp = DateTime.now();
+        final event = RequestFailureEvent(
+          timestamp: timestamp,
+          requestId: 'req-123',
+          durationMs: 500,
+          errorType: 'ServerException',
+          errorMessage: 'Internal server error',
+          statusCode: 500,
+          totalRetries: 3,
+          isRetryable: true,
+        );
+
+        final map = event.toMap();
+
+        expect(map['event_type'], equals('request_failure'));
+        expect(map['timestamp'], equals(timestamp.toIso8601String()));
+        expect(map['request_id'], equals('req-123'));
+        expect(map['duration_ms'], equals(500));
+        expect(map['error_type'], equals('ServerException'));
+        expect(map['error_message'], equals('Internal server error'));
+        expect(map['status_code'], equals(500));
+        expect(map['total_retries'], equals(3));
+        expect(map['is_retryable'], isTrue);
+      });
+
+      test('toMap excludes null optional fields', () {
+        final event = RequestFailureEvent(
+          timestamp: DateTime.now(),
+          requestId: 'req-123',
+          durationMs: 100,
+          errorType: 'Error',
+          errorMessage: 'test',
+        );
+
+        final map = event.toMap();
+
+        expect(map.containsKey('status_code'), isFalse);
+        expect(map.containsKey('total_retries'), isFalse);
+        expect(map.containsKey('is_retryable'), isFalse);
+      });
     });
 
     group('RateLimitEvent', () {
@@ -762,6 +870,36 @@ void main() {
         );
 
         expect(event.eventType, equals('rate_limit'));
+      });
+
+      test('toMap includes all fields', () {
+        final timestamp = DateTime.now();
+        final event = RateLimitEvent(
+          timestamp: timestamp,
+          requestId: 'req-123',
+          retryAfterMs: 30000,
+          retryAfterHeader: '30',
+        );
+
+        final map = event.toMap();
+
+        expect(map['event_type'], equals('rate_limit'));
+        expect(map['timestamp'], equals(timestamp.toIso8601String()));
+        expect(map['request_id'], equals('req-123'));
+        expect(map['retry_after_ms'], equals(30000));
+        expect(map['retry_after_header'], equals('30'));
+      });
+
+      test('toMap excludes null optional fields', () {
+        final event = RateLimitEvent(
+          timestamp: DateTime.now(),
+        );
+
+        final map = event.toMap();
+
+        expect(map.containsKey('request_id'), isFalse);
+        expect(map.containsKey('retry_after_ms'), isFalse);
+        expect(map.containsKey('retry_after_header'), isFalse);
       });
     });
 
@@ -775,6 +913,39 @@ void main() {
 
         expect(event.eventType, equals('latency'));
       });
+
+      test('toMap includes all fields', () {
+        final timestamp = DateTime.now();
+        final event = LatencyEvent(
+          timestamp: timestamp,
+          operation: 'database_query',
+          durationMs: 50,
+          requestId: 'req-123',
+          metadata: const {'table': 'users', 'query_type': 'select'},
+        );
+
+        final map = event.toMap();
+
+        expect(map['event_type'], equals('latency'));
+        expect(map['timestamp'], equals(timestamp.toIso8601String()));
+        expect(map['request_id'], equals('req-123'));
+        expect(map['operation'], equals('database_query'));
+        expect(map['duration_ms'], equals(50));
+        expect(map['metadata'], equals({'table': 'users', 'query_type': 'select'}));
+      });
+
+      test('toMap excludes null optional fields', () {
+        final event = LatencyEvent(
+          timestamp: DateTime.now(),
+          operation: 'test',
+          durationMs: 100,
+        );
+
+        final map = event.toMap();
+
+        expect(map.containsKey('request_id'), isFalse);
+        expect(map.containsKey('metadata'), isFalse);
+      });
     });
 
     group('StreamInactivityEvent', () {
@@ -786,6 +957,36 @@ void main() {
         );
 
         expect(event.eventType, equals('stream_inactivity'));
+      });
+
+      test('toMap includes all fields', () {
+        final timestamp = DateTime.now();
+        final event = StreamInactivityEvent(
+          timestamp: timestamp,
+          timeoutMs: 60000,
+          lastActivityMs: 75000,
+          requestId: 'req-123',
+        );
+
+        final map = event.toMap();
+
+        expect(map['event_type'], equals('stream_inactivity'));
+        expect(map['timestamp'], equals(timestamp.toIso8601String()));
+        expect(map['timeout_ms'], equals(60000));
+        expect(map['last_activity_ms'], equals(75000));
+        expect(map['request_id'], equals('req-123'));
+      });
+
+      test('toMap excludes null requestId', () {
+        final event = StreamInactivityEvent(
+          timestamp: DateTime.now(),
+          timeoutMs: 60000,
+          lastActivityMs: 75000,
+        );
+
+        final map = event.toMap();
+
+        expect(map.containsKey('request_id'), isFalse);
       });
     });
   });

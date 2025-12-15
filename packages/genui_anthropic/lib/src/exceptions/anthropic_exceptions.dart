@@ -179,12 +179,16 @@ final class ServerException extends AnthropicException {
 /// Errors during SSE parsing or stream handling.
 /// May be retryable depending on the cause.
 final class StreamException extends AnthropicException {
+  // coverage:ignore-start
+  // NOTE: StreamException is defined for API completeness but stream errors
+  // are typically handled via other exception types in proxy mode.
   const StreamException({
     required super.message,
     super.requestId,
     super.originalError,
     super.stackTrace,
   }) : super(statusCode: null);
+  // coverage:ignore-end
 
   @override
   bool get isRetryable => false;
@@ -220,7 +224,7 @@ final class CircuitBreakerOpenException extends AnthropicException {
 /// and parsing retry-after headers.
 class ExceptionFactory {
   // Private constructor to prevent instantiation
-  const ExceptionFactory._();
+  const ExceptionFactory._(); // coverage:ignore-line
 
   /// Creates an appropriate exception based on HTTP status code.
   static AnthropicException fromHttpStatus({

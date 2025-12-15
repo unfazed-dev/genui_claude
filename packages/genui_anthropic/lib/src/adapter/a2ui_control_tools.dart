@@ -5,7 +5,7 @@ import 'package:anthropic_a2ui/anthropic_a2ui.dart';
 /// These tools allow Claude to generate dynamic UI by sending A2UI protocol
 /// messages. They are the core tools that enable generative UI functionality.
 class A2uiControlTools {
-  A2uiControlTools._();
+  A2uiControlTools._(); // coverage:ignore-line
 
   /// Tool for signaling the start of UI generation for a surface.
   static const beginRendering = A2uiToolSchema(

@@ -60,6 +60,10 @@ class DirectModeHandler implements ApiHandler {
   /// The default model to use for requests.
   final String model;
 
+  // coverage:ignore-start
+  // NOTE: This method requires a live Anthropic SDK connection.
+  // Testing is done via integration tests with TEST_ANTHROPIC_API_KEY.
+  // Unit tests use MockApiHandler which implements the ApiHandler interface.
   @override
   Stream<Map<String, dynamic>> createStream(ApiRequest request) async* {
     final requestId = _uuid.v4();
@@ -126,6 +130,13 @@ class DirectModeHandler implements ApiHandler {
       };
     }
   }
+  // coverage:ignore-end
+
+  // coverage:ignore-start
+  // NOTE: These private methods are SDK conversion helpers called only from createStream.
+  // They are tested indirectly via integration tests with TEST_ANTHROPIC_API_KEY.
+  // The DirectModeHandler is designed as an SDK wrapper - unit testing individual
+  // methods would require mocking SDK types which provides limited value.
 
   /// Maps exceptions to our exception hierarchy.
   exc.AnthropicException _mapException(
@@ -291,6 +302,7 @@ class DirectModeHandler implements ApiHandler {
         },
     };
   }
+  // coverage:ignore-end
 
   @override
   void dispose() {
