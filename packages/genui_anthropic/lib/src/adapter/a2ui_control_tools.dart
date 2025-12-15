@@ -24,6 +24,11 @@ class A2uiControlTools {
           'description':
               'Optional parent surface ID for nested UI hierarchies.',
         },
+        'root': {
+          'type': 'string',
+          'description':
+              'Optional root element ID for hierarchical rendering. Defaults to "root".',
+        },
       },
       'required': ['surfaceId'],
     },
@@ -45,7 +50,33 @@ class A2uiControlTools {
         'widgets': {
           'type': 'array',
           'description': 'Array of widget definitions to render.',
-          'items': {'type': 'object'},
+          'items': {
+            'type': 'object',
+            'properties': {
+              'id': {
+                'type': 'string',
+                'description':
+                    'Optional unique instance ID. Auto-generated if not provided.',
+              },
+              'type': {
+                'type': 'string',
+                'description': 'Widget type name (e.g., "text", "button").',
+              },
+              'properties': {
+                'type': 'object',
+                'description': 'Widget configuration properties.',
+              },
+              'children': {
+                'type': 'array',
+                'description': 'Child widgets for container types.',
+              },
+              'dataBinding': {
+                'type': 'string',
+                'description': 'Optional data binding path.',
+              },
+            },
+            'required': ['type'],
+          },
         },
         'append': {
           'type': 'boolean',

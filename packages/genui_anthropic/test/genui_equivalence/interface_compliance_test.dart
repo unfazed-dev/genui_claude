@@ -20,7 +20,7 @@ void main() {
 
         // This assignment must compile - proves interface compliance
         // ignore: omit_local_variable_types
-        ContentGenerator contentGenerator = generator;
+        final ContentGenerator contentGenerator = generator;
 
         expect(contentGenerator, isA<ContentGenerator>());
         expect(generator, isA<ContentGenerator>());

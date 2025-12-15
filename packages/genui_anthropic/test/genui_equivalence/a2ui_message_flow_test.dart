@@ -90,7 +90,9 @@ void main() {
         final surfaceUpdate = messages.first as SurfaceUpdate;
         expect(surfaceUpdate.surfaceId, 'main');
         expect(surfaceUpdate.components, hasLength(1));
-        expect(surfaceUpdate.components.first.id, 'Text');
+        // Type is the key in componentProperties, id is a UUID
+        expect(surfaceUpdate.components.first.componentProperties.containsKey('Text'), isTrue);
+        expect(surfaceUpdate.components.first.id, isNotEmpty);
       });
 
       test('surface_update with multiple widgets preserves all widgets', () async {
@@ -114,9 +116,10 @@ void main() {
 
         final surfaceUpdate = messages.first as SurfaceUpdate;
         expect(surfaceUpdate.components, hasLength(3));
-        expect(surfaceUpdate.components[0].id, 'Text');
-        expect(surfaceUpdate.components[1].id, 'Button');
-        expect(surfaceUpdate.components[2].id, 'Container');
+        // Type is the key in componentProperties, id is a UUID
+        expect(surfaceUpdate.components[0].componentProperties.containsKey('Text'), isTrue);
+        expect(surfaceUpdate.components[1].componentProperties.containsKey('Button'), isTrue);
+        expect(surfaceUpdate.components[2].componentProperties.containsKey('Container'), isTrue);
       });
 
       test('widget properties are preserved in Component', () async {
@@ -144,8 +147,10 @@ void main() {
 
         final surfaceUpdate = messages.first as SurfaceUpdate;
         final component = surfaceUpdate.components.first;
-        expect(component.componentProperties['text'], 'Test content');
-        expect(component.componentProperties['style'], 'bold');
+        // Type is the key, properties are nested inside
+        final textProps = component.componentProperties['Text']! as Map<String, dynamic>;
+        expect(textProps['text'], 'Test content');
+        expect(textProps['style'], 'bold');
       });
     });
 
@@ -207,7 +212,7 @@ void main() {
         await subscription.cancel();
 
         final dataModelUpdate = messages.first as DataModelUpdate;
-        expect(dataModelUpdate.surfaceId, 'default');
+        expect(dataModelUpdate.surfaceId, globalSurfaceId);
       });
     });
 
@@ -257,7 +262,8 @@ void main() {
 
         expect(beginRendering.surfaceId, 'complete-flow');
         expect(surfaceUpdate.surfaceId, 'complete-flow');
-        expect(surfaceUpdate.components.first.id, 'Text');
+        // Type is the key in componentProperties
+        expect(surfaceUpdate.components.first.componentProperties.containsKey('Text'), isTrue);
       });
 
       test('message order is preserved', () async {
@@ -283,11 +289,14 @@ void main() {
         expect(messages[0], isA<BeginRendering>());
         expect(messages[1], isA<SurfaceUpdate>());
 
-        // Widgets in order
+        // Widgets in order - type is key, properties are nested
         final surfaceUpdate = messages[1] as SurfaceUpdate;
-        expect(surfaceUpdate.components[0].componentProperties['text'], 'First');
-        expect(surfaceUpdate.components[1].componentProperties['text'], 'Second');
-        expect(surfaceUpdate.components[2].componentProperties['text'], 'Third');
+        final props0 = surfaceUpdate.components[0].componentProperties['Text']! as Map<String, dynamic>;
+        final props1 = surfaceUpdate.components[1].componentProperties['Text']! as Map<String, dynamic>;
+        final props2 = surfaceUpdate.components[2].componentProperties['Text']! as Map<String, dynamic>;
+        expect(props0['text'], 'First');
+        expect(props1['text'], 'Second');
+        expect(props2['text'], 'Third');
       });
     });
 

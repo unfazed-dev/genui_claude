@@ -39,6 +39,12 @@ sealed class A2uiMessageData with _$A2uiMessageData {
     /// Parent surface ID for nested surfaces.
     String? parentSurfaceId,
 
+    /// Optional root element ID for hierarchical rendering.
+    ///
+    /// When provided, specifies the root element identifier for the surface.
+    /// If not provided, defaults to 'root' in GenUI SDK conversion.
+    String? root,
+
     /// Additional metadata for the surface.
     Map<String, dynamic>? metadata,
   }) = BeginRenderingData;

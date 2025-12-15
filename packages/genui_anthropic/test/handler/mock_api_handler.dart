@@ -28,6 +28,18 @@ class MockApiHandler implements ApiHandler {
   /// Exception to throw from [createStream].
   Exception? _stubbedException;
 
+  /// Delay before emitting events.
+  Duration? _eventDelay;
+
+  /// Exception to throw after emitting some events (mid-stream error).
+  Exception? _midStreamError;
+
+  /// Number of events to emit before throwing mid-stream error.
+  int _eventsBeforeError = 0;
+
+  /// All captured requests (for multi-call tracking).
+  final List<ApiRequest> capturedRequests = [];
+
   /// Number of times [createStream] was called.
   int createStreamCallCount = 0;
 
@@ -68,10 +80,40 @@ class MockApiHandler implements ApiHandler {
     _stubbedException = error;
   }
 
+  /// Stubs events with a delay between each event.
+  ///
+  /// Useful for testing timing-sensitive behavior like cancellation.
+  void stubDelayedEvents(
+    List<Map<String, dynamic>> events, {
+    Duration delay = const Duration(milliseconds: 10),
+  }) {
+    _stubbedEvents = events;
+    _eventDelay = delay;
+    _stubbedException = null;
+    _midStreamError = null;
+  }
+
+  /// Stubs a mid-stream error that occurs after emitting some events.
+  ///
+  /// Useful for testing error recovery during streaming.
+  void stubStreamError(
+    Exception error, {
+    List<Map<String, dynamic>> eventsBeforeError = const [],
+  }) {
+    _stubbedEvents = eventsBeforeError;
+    _midStreamError = error;
+    _eventsBeforeError = eventsBeforeError.length;
+    _stubbedException = null;
+  }
+
   /// Resets all stubbed data and call tracking.
   void reset() {
     _stubbedEvents = [];
     _stubbedException = null;
+    _eventDelay = null;
+    _midStreamError = null;
+    _eventsBeforeError = 0;
+    capturedRequests.clear();
     createStreamCallCount = 0;
     lastRequest = null;
     disposed = false;
@@ -81,13 +123,29 @@ class MockApiHandler implements ApiHandler {
   Stream<Map<String, dynamic>> createStream(ApiRequest request) async* {
     createStreamCallCount++;
     lastRequest = request;
+    capturedRequests.add(request);
 
     if (_stubbedException != null) {
       throw _stubbedException!;
     }
 
+    var eventIndex = 0;
     for (final event in _stubbedEvents) {
+      if (_eventDelay != null) {
+        await Future<void>.delayed(_eventDelay!);
+      }
       yield event;
+      eventIndex++;
+
+      // Check for mid-stream error after emitting specified events
+      if (_midStreamError != null && eventIndex >= _eventsBeforeError) {
+        throw _midStreamError!;
+      }
+    }
+
+    // If mid-stream error but no events before it, throw now
+    if (_midStreamError != null && _eventsBeforeError == 0) {
+      throw _midStreamError!;
     }
   }
 
@@ -337,6 +395,208 @@ class MockEventFactory {
         },
       },
       {'type': 'content_block_stop', 'index': index},
+    ];
+  }
+
+  // ========== Edge Case Event Generators ==========
+
+  /// Creates a mixed text and A2UI tool response.
+  ///
+  /// Useful for testing interleaved text and widget content.
+  static List<Map<String, dynamic>> mixedTextAndWidgetResponse({
+    required String text,
+    required String surfaceId,
+    List<Map<String, dynamic>>? widgets,
+  }) {
+    final widgetList = widgets ??
+        [
+          {
+            'type': 'Text',
+            'properties': {'text': 'Widget content'},
+          },
+        ];
+
+    return [
+      // Text block first
+      {
+        'type': 'content_block_start',
+        'index': 0,
+        'content_block': {'type': 'text'},
+      },
+      {
+        'type': 'content_block_delta',
+        'index': 0,
+        'delta': {'type': 'text_delta', 'text': text},
+      },
+      {'type': 'content_block_stop', 'index': 0},
+      // Then A2UI tools
+      ..._a2uiToolResponseWithIndex(
+        'begin_rendering',
+        'tool-br-1',
+        {'surfaceId': surfaceId},
+        index: 1,
+      ),
+      ..._a2uiToolResponseWithIndex(
+        'surface_update',
+        'tool-su-1',
+        {'surfaceId': surfaceId, 'widgets': widgetList, 'append': false},
+        index: 2,
+      ),
+      {'type': 'message_stop'},
+    ];
+  }
+
+  /// Creates a response with nested surfaces.
+  static List<Map<String, dynamic>> nestedSurfaceResponse({
+    String parentSurfaceId = 'parent',
+    String childSurfaceId = 'child',
+  }) {
+    return [
+      ..._a2uiToolResponseWithIndex(
+        'begin_rendering',
+        'tool-br-parent',
+        {'surfaceId': parentSurfaceId},
+        index: 0,
+      ),
+      ..._a2uiToolResponseWithIndex(
+        'surface_update',
+        'tool-su-parent',
+        {
+          'surfaceId': parentSurfaceId,
+          'widgets': [
+            {'type': 'Container', 'properties': <String, dynamic>{}},
+          ],
+          'append': false,
+        },
+        index: 1,
+      ),
+      ..._a2uiToolResponseWithIndex(
+        'begin_rendering',
+        'tool-br-child',
+        {'surfaceId': childSurfaceId, 'parentSurfaceId': parentSurfaceId},
+        index: 2,
+      ),
+      ..._a2uiToolResponseWithIndex(
+        'surface_update',
+        'tool-su-child',
+        {
+          'surfaceId': childSurfaceId,
+          'widgets': [
+            {'type': 'Text', 'properties': {'text': 'Child content'}},
+          ],
+          'append': false,
+        },
+        index: 3,
+      ),
+      {'type': 'message_stop'},
+    ];
+  }
+
+  /// Creates a large widget response for stress testing.
+  static List<Map<String, dynamic>> largeWidgetResponse({
+    String surfaceId = 'main',
+    int widgetCount = 50,
+  }) {
+    final widgets = List.generate(
+      widgetCount,
+      (i) => {
+        'type': 'Text',
+        'properties': {'text': 'Widget $i'},
+      },
+    );
+
+    return [
+      ..._a2uiToolResponseWithIndex(
+        'begin_rendering',
+        'tool-br-1',
+        {'surfaceId': surfaceId},
+        index: 0,
+      ),
+      ..._a2uiToolResponseWithIndex(
+        'surface_update',
+        'tool-su-1',
+        {'surfaceId': surfaceId, 'widgets': widgets, 'append': false},
+        index: 1,
+      ),
+      {'type': 'message_stop'},
+    ];
+  }
+
+  /// Creates a complete surface lifecycle: create, update, delete.
+  static List<Map<String, dynamic>> surfaceLifecycleResponse({
+    String surfaceId = 'lifecycle-surface',
+  }) {
+    return [
+      ..._a2uiToolResponseWithIndex(
+        'begin_rendering',
+        'tool-br-1',
+        {'surfaceId': surfaceId},
+        index: 0,
+      ),
+      ..._a2uiToolResponseWithIndex(
+        'surface_update',
+        'tool-su-1',
+        {
+          'surfaceId': surfaceId,
+          'widgets': [
+            {'type': 'Text', 'properties': {'text': 'Initial'}},
+          ],
+          'append': false,
+        },
+        index: 1,
+      ),
+      ..._a2uiToolResponseWithIndex(
+        'surface_update',
+        'tool-su-2',
+        {
+          'surfaceId': surfaceId,
+          'widgets': [
+            {'type': 'Text', 'properties': {'text': 'Updated'}},
+          ],
+          'append': false,
+        },
+        index: 2,
+      ),
+      ..._a2uiToolResponseWithIndex(
+        'delete_surface',
+        'tool-ds-1',
+        {'surfaceId': surfaceId, 'cascade': true},
+        index: 3,
+      ),
+      {'type': 'message_stop'},
+    ];
+  }
+
+  /// Creates an incomplete/malformed response (no message_stop).
+  static List<Map<String, dynamic>> incompleteResponse(String text) {
+    return [
+      {
+        'type': 'content_block_start',
+        'index': 0,
+        'content_block': {'type': 'text'},
+      },
+      {
+        'type': 'content_block_delta',
+        'index': 0,
+        'delta': {'type': 'text_delta', 'text': text},
+      },
+      // Intentionally missing content_block_stop and message_stop
+    ];
+  }
+
+  /// Creates a response with unknown/invalid tool name.
+  static List<Map<String, dynamic>> unknownToolResponse({
+    String toolName = 'unknown_tool',
+    String toolId = 'tool-unknown-1',
+    Map<String, dynamic> input = const {},
+  }) {
+    return _a2uiToolResponse(toolName, toolId, input);
+  }
+
+  /// Creates an empty response (only message_stop).
+  static List<Map<String, dynamic>> emptyResponse() {
+    return [
+      {'type': 'message_stop'},
     ];
   }
 }

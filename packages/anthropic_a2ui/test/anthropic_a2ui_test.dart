@@ -43,6 +43,58 @@ void main() {
         expect(data.surfaceId, equals('surface-1'));
         expect(data.parentSurfaceId, equals('parent-1'));
       });
+
+      // NEW TESTS for optional root field
+      test('creates with optional root', () {
+        const data = BeginRenderingData(
+          surfaceId: 'surface-1',
+          root: 'custom-root',
+        );
+        expect(data.surfaceId, equals('surface-1'));
+        expect(data.root, equals('custom-root'));
+      });
+
+      test('root is null by default', () {
+        const data = BeginRenderingData(surfaceId: 'surface-1');
+        expect(data.root, isNull);
+      });
+
+      test('serializes root to JSON when present', () {
+        const data = BeginRenderingData(
+          surfaceId: 'surface-1',
+          root: 'my-root',
+        );
+        final json = data.toJson();
+        expect(json['root'], equals('my-root'));
+      });
+
+      test('deserializes root from JSON when present', () {
+        final data = BeginRenderingData.fromJson(const {
+          'surfaceId': 'surface-1',
+          'root': 'deserialized-root',
+        });
+        expect(data.root, equals('deserialized-root'));
+      });
+
+      test('deserializes without root from JSON', () {
+        final data = BeginRenderingData.fromJson(const {
+          'surfaceId': 'surface-1',
+        });
+        expect(data.root, isNull);
+      });
+
+      test('creates with all fields including root', () {
+        const data = BeginRenderingData(
+          surfaceId: 'surface-1',
+          parentSurfaceId: 'parent-1',
+          root: 'root-element',
+          metadata: {'key': 'value'},
+        );
+        expect(data.surfaceId, equals('surface-1'));
+        expect(data.parentSurfaceId, equals('parent-1'));
+        expect(data.root, equals('root-element'));
+        expect(data.metadata, equals({'key': 'value'}));
+      });
     });
 
     group('SurfaceUpdateData', () {
@@ -183,6 +235,59 @@ void main() {
       final copy = original.copyWith(type: 'button');
       expect(copy.type, equals('button'));
       expect(original.type, equals('text'));
+    });
+
+    // NEW TESTS for optional id field
+    test('creates with optional id', () {
+      const node = WidgetNode(
+        id: 'widget-123',
+        type: 'button',
+        properties: {'label': 'Click'},
+      );
+      expect(node.id, equals('widget-123'));
+      expect(node.type, equals('button'));
+    });
+
+    test('id is null by default', () {
+      const node = WidgetNode(type: 'text');
+      expect(node.id, isNull);
+    });
+
+    test('serializes id to JSON when present', () {
+      const node = WidgetNode(
+        id: 'unique-id',
+        type: 'text',
+        properties: {'text': 'Hello'},
+      );
+      final json = node.toJson();
+      expect(json['id'], equals('unique-id'));
+      expect(json['type'], equals('text'));
+    });
+
+    test('deserializes id from JSON when present', () {
+      final node = WidgetNode.fromJson(const {
+        'id': 'deserialized-id',
+        'type': 'button',
+        'properties': {'label': 'Test'},
+      });
+      expect(node.id, equals('deserialized-id'));
+      expect(node.type, equals('button'));
+    });
+
+    test('deserializes without id from JSON', () {
+      final node = WidgetNode.fromJson(const {
+        'type': 'button',
+        'properties': {'label': 'Test'},
+      });
+      expect(node.id, isNull);
+      expect(node.type, equals('button'));
+    });
+
+    test('copyWith id creates new instance with id', () {
+      const original = WidgetNode(type: 'text');
+      final copy = original.copyWith(id: 'new-id');
+      expect(copy.id, equals('new-id'));
+      expect(original.id, isNull);
     });
   });
 

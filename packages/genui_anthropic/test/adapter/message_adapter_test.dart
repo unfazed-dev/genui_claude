@@ -17,8 +17,22 @@ void main() {
         expect(result, isA<BeginRendering>());
         final beginRendering = result as BeginRendering;
         expect(beginRendering.surfaceId, 'test-surface');
-        expect(beginRendering.root, 'root');
+        expect(beginRendering.root, 'root'); // Default when root not provided
         expect(beginRendering.styles, {'key': 'value'});
+      });
+
+      test('converts BeginRenderingData with custom root', () {
+        const data = a2ui.BeginRenderingData(
+          surfaceId: 'surface-1',
+          root: 'custom-root',
+        );
+
+        final result = A2uiMessageAdapter.toGenUiMessage(data);
+
+        expect(result, isA<BeginRendering>());
+        final beginRendering = result as BeginRendering;
+        expect(beginRendering.surfaceId, 'surface-1');
+        expect(beginRendering.root, 'custom-root'); // Uses provided root
       });
 
       test('converts BeginRenderingData without metadata', () {
@@ -34,7 +48,7 @@ void main() {
         expect(beginRendering.styles, isNull);
       });
 
-      test('converts SurfaceUpdateData to SurfaceUpdate', () {
+      test('converts SurfaceUpdateData to SurfaceUpdate with UUID component id', () {
         const data = a2ui.SurfaceUpdateData(
           surfaceId: 'test-surface',
           widgets: [
@@ -51,14 +65,39 @@ void main() {
         final surfaceUpdate = result as SurfaceUpdate;
         expect(surfaceUpdate.surfaceId, 'test-surface');
         expect(surfaceUpdate.components.length, 1);
-        expect(surfaceUpdate.components.first.id, 'text_widget');
-        expect(
-          surfaceUpdate.components.first.componentProperties['text'],
-          'Hello, World!',
-        );
+
+        // Component.id should be a UUID (not the type)
+        final component = surfaceUpdate.components.first;
+        expect(component.id, isNot('text_widget'));
+        expect(component.id.length, greaterThan(0)); // UUID has content
+
+        // Type should be wrapped in componentProperties
+        expect(component.componentProperties.containsKey('text_widget'), isTrue);
+        final widgetProps =
+            component.componentProperties['text_widget']! as Map<String, dynamic>;
+        expect(widgetProps['text'], 'Hello, World!');
       });
 
-      test('converts SurfaceUpdateData with multiple widgets', () {
+      test('converts SurfaceUpdateData uses provided id when available', () {
+        const data = a2ui.SurfaceUpdateData(
+          surfaceId: 'test-surface',
+          widgets: [
+            a2ui.WidgetNode(
+              id: 'my-custom-id',
+              type: 'text_widget',
+              properties: {'text': 'Hello'},
+            ),
+          ],
+        );
+
+        final result = A2uiMessageAdapter.toGenUiMessage(data);
+
+        expect(result, isA<SurfaceUpdate>());
+        final surfaceUpdate = result as SurfaceUpdate;
+        expect(surfaceUpdate.components.first.id, 'my-custom-id');
+      });
+
+      test('converts SurfaceUpdateData with multiple widgets each with unique ids', () {
         const data = a2ui.SurfaceUpdateData(
           surfaceId: 'multi-widget-surface',
           widgets: [
@@ -82,9 +121,24 @@ void main() {
         expect(result, isA<SurfaceUpdate>());
         final surfaceUpdate = result as SurfaceUpdate;
         expect(surfaceUpdate.components.length, 3);
-        expect(surfaceUpdate.components[0].id, 'header');
-        expect(surfaceUpdate.components[1].id, 'button');
-        expect(surfaceUpdate.components[2].id, 'text');
+
+        // Each component should have a unique ID
+        final ids = surfaceUpdate.components.map((c) => c.id).toSet();
+        expect(ids.length, 3); // All unique
+
+        // Each component type should be wrapped in componentProperties
+        expect(
+          surfaceUpdate.components[0].componentProperties.containsKey('header'),
+          isTrue,
+        );
+        expect(
+          surfaceUpdate.components[1].componentProperties.containsKey('button'),
+          isTrue,
+        );
+        expect(
+          surfaceUpdate.components[2].componentProperties.containsKey('text'),
+          isTrue,
+        );
       });
 
       test('converts SurfaceUpdateData with empty widgets list', () {
@@ -117,7 +171,7 @@ void main() {
         expect(contents['age'], 30);
       });
 
-      test('converts DataModelUpdateData without scope uses default', () {
+      test('converts DataModelUpdateData without scope uses globalSurfaceId', () {
         const data = a2ui.DataModelUpdateData(
           updates: {'key': 'value'},
         );
@@ -126,7 +180,7 @@ void main() {
 
         expect(result, isA<DataModelUpdate>());
         final dataModelUpdate = result as DataModelUpdate;
-        expect(dataModelUpdate.surfaceId, 'default');
+        expect(dataModelUpdate.surfaceId, globalSurfaceId);
       });
 
       test('converts DataModelUpdateData with empty updates', () {
@@ -214,6 +268,11 @@ void main() {
     });
 
     group('widget properties conversion', () {
+      // Helper to extract widget properties from the new structure
+      Map<String, dynamic> getWidgetProps(Component component, String type) {
+        return component.componentProperties[type]! as Map<String, dynamic>;
+      }
+
       test('preserves string properties', () {
         const data = a2ui.SurfaceUpdateData(
           surfaceId: 'surface',
@@ -226,10 +285,10 @@ void main() {
         );
 
         final result = A2uiMessageAdapter.toGenUiMessage(data) as SurfaceUpdate;
-        final props = result.components.first.componentProperties;
+        final widgetProps = getWidgetProps(result.components.first, 'widget');
 
-        expect(props['name'], 'test');
-        expect(props['description'], 'A test widget');
+        expect(widgetProps['name'], 'test');
+        expect(widgetProps['description'], 'A test widget');
       });
 
       test('preserves numeric properties', () {
@@ -244,10 +303,10 @@ void main() {
         );
 
         final result = A2uiMessageAdapter.toGenUiMessage(data) as SurfaceUpdate;
-        final props = result.components.first.componentProperties;
+        final widgetProps = getWidgetProps(result.components.first, 'widget');
 
-        expect(props['count'], 42);
-        expect(props['price'], 19.99);
+        expect(widgetProps['count'], 42);
+        expect(widgetProps['price'], 19.99);
       });
 
       test('preserves boolean properties', () {
@@ -262,10 +321,10 @@ void main() {
         );
 
         final result = A2uiMessageAdapter.toGenUiMessage(data) as SurfaceUpdate;
-        final props = result.components.first.componentProperties;
+        final widgetProps = getWidgetProps(result.components.first, 'widget');
 
-        expect(props['enabled'], true);
-        expect(props['visible'], false);
+        expect(widgetProps['enabled'], true);
+        expect(widgetProps['visible'], false);
       });
 
       test('preserves list properties', () {
@@ -283,10 +342,10 @@ void main() {
         );
 
         final result = A2uiMessageAdapter.toGenUiMessage(data) as SurfaceUpdate;
-        final props = result.components.first.componentProperties;
+        final widgetProps = getWidgetProps(result.components.first, 'widget');
 
-        expect(props['items'], ['a', 'b', 'c']);
-        expect(props['numbers'], [1, 2, 3]);
+        expect(widgetProps['items'], ['a', 'b', 'c']);
+        expect(widgetProps['numbers'], [1, 2, 3]);
       });
 
       test('preserves nested object properties', () {
@@ -306,8 +365,8 @@ void main() {
         );
 
         final result = A2uiMessageAdapter.toGenUiMessage(data) as SurfaceUpdate;
-        final props = result.components.first.componentProperties;
-        final config = props['config']! as Map<String, dynamic>;
+        final widgetProps = getWidgetProps(result.components.first, 'widget');
+        final config = widgetProps['config'] as Map<String, dynamic>;
 
         expect(config['theme'], 'dark');
         expect((config['settings'] as Map)['autoSave'], true);
@@ -326,10 +385,10 @@ void main() {
         );
 
         final result = A2uiMessageAdapter.toGenUiMessage(data) as SurfaceUpdate;
-        final props = result.components.first.componentProperties;
+        final widgetProps = getWidgetProps(result.components.first, 'widget');
 
-        expect(props['value'], isNull);
-        expect(props['name'], 'test');
+        expect(widgetProps['value'], isNull);
+        expect(widgetProps['name'], 'test');
       });
 
       test('handles empty properties map', () {
@@ -343,9 +402,11 @@ void main() {
         );
 
         final result = A2uiMessageAdapter.toGenUiMessage(data) as SurfaceUpdate;
-        final props = result.components.first.componentProperties;
+        final component = result.components.first;
 
-        expect(props, isEmpty);
+        // componentProperties should have the type key with empty map
+        expect(component.componentProperties.containsKey('empty_widget'), isTrue);
+        expect(component.componentProperties['empty_widget'], isEmpty);
       });
     });
   });
