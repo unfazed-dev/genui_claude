@@ -1,96 +1,322 @@
 # Anthropic GenUI
 
-A Flutter monorepo workspace for Anthropic GenUI packages, managed with [Melos](https://melos.invertase.dev/).
+**Claude-powered generative UI for Flutter and Dart**
 
-## Project Structure
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Flutter](https://img.shields.io/badge/Flutter-%3E%3D3.10.0-02569B?logo=flutter)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-%3E%3D3.0.0-0175C2?logo=dart)](https://dart.dev)
+
+Build AI applications where Claude dynamically generates interactive UI components at runtime. Create chatbots with rich interfaces, AI agents that compose forms on-the-fly, and intelligent assistants that render data visualizations—all powered by natural language.
+
+## What is This?
+
+Anthropic GenUI bridges Claude AI with Flutter's [GenUI SDK](https://pub.dev/packages/genui), enabling **generative user interfaces**—UI that Claude creates dynamically based on user intent rather than predefined templates.
 
 ```
-anthropic_genui/
-├── melos.yaml                 # Melos configuration
-├── pubspec.yaml               # Root pubspec (workspace)
-├── analysis_options.yaml      # Shared linting rules
-├── packages/
-│   ├── anthropic_a2ui/        # Core UI components package
-│   └── genui_anthropic/       # GenUI package (depends on anthropic_a2ui)
-└── README.md
+┌─────────────────────────────────────────────────────────────────────┐
+│                         Your Application                            │
+│                                                                     │
+│   User: "Show me a login form"                                      │
+│                              │                                      │
+│                              ▼                                      │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │              AnthropicContentGenerator                      │   │
+│   │                                                             │   │
+│   │  ┌─────────────────┐    ┌────────────────────────────────┐  │   │
+│   │  │ genui_anthropic │───▶│       anthropic_a2ui           │  │   │
+│   │  │ (Flutter)       │    │ (Protocol Conversion)          │  │   │
+│   │  └─────────────────┘    └────────────────────────────────┘  │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│                              │                                      │
+│                              ▼                                      │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │  Claude generates A2UI messages:                            │   │
+│   │  • BeginRendering → SurfaceUpdate → widgets...              │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│                              │                                      │
+│                              ▼                                      │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │  Rendered UI:  ┌──────────────────────┐                     │   │
+│   │                │  Login               │                     │   │
+│   │                │  ┌────────────────┐  │                     │   │
+│   │                │  │ Email          │  │                     │   │
+│   │                │  └────────────────┘  │                     │   │
+│   │                │  ┌────────────────┐  │                     │   │
+│   │                │  │ Password       │  │                     │   │
+│   │                │  └────────────────┘  │                     │   │
+│   │                │  [ Sign In ]         │                     │   │
+│   │                └──────────────────────┘                     │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────┘
 ```
+
+### Use Cases
+
+- **AI Chat with Rich UI**: Chatbots that render interactive components, not just text
+- **Dynamic Forms**: AI agents that generate forms based on context
+- **Data Visualization**: Claude-driven charts, tables, and dashboards
+- **Adaptive Interfaces**: UI that evolves based on user conversation
+- **Rapid Prototyping**: Describe UI in natural language, see it rendered instantly
 
 ## Packages
 
-| Package | Description |
-|---------|-------------|
-| [`anthropic_a2ui`](packages/anthropic_a2ui) | Pure Dart package for converting between Claude API responses and A2UI protocol messages. No Flutter dependency - works in apps, CLI tools, servers, and edge functions. |
-| [`genui_anthropic`](packages/genui_anthropic) | Flutter `ContentGenerator` implementation for Claude-powered GenUI. Features dual-mode architecture (direct/proxy), streaming, circuit breaker, metrics, and comprehensive error handling. |
+| Package | Description | Platform |
+|---------|-------------|----------|
+| [`genui_anthropic`](packages/genui_anthropic) | Flutter `ContentGenerator` for Claude-powered GenUI. Features dual-mode architecture, streaming, circuit breaker, metrics, and comprehensive error handling. | Flutter |
+| [`anthropic_a2ui`](packages/anthropic_a2ui) | Pure Dart A2UI protocol conversion. Converts between Claude API responses and A2UI messages. No Flutter dependency. | Dart (any) |
 
-## Getting Started
+## Quick Start
 
-### Prerequisites
+### Flutter Application
 
-- Flutter SDK >= 3.10.0
-- Dart SDK >= 3.0.0
-- Melos CLI
+```dart
+import 'package:genui/genui.dart';
+import 'package:genui_anthropic/genui_anthropic.dart';
 
-### Install Melos
+// 1. Create your widget catalog
+final genUiManager = GenUiManager(catalog: MyCatalog());
 
-```bash
-dart pub global activate melos
+// 2. Create the content generator
+final contentGenerator = AnthropicContentGenerator(
+  apiKey: 'your-api-key',  // Use env vars in production!
+  systemInstruction: 'You are a helpful assistant that generates UI.',
+);
+
+// 3. Create the conversation
+final conversation = GenUiConversation(
+  contentGenerator: contentGenerator,
+  genUiManager: genUiManager,
+  onSurfaceAdded: (update) => handleNewSurface(update),
+  onTextResponse: (text) => updateTextMessage(text),
+);
+
+// 4. Send requests
+conversation.sendRequest(UserMessage.text('Create a contact form'));
 ```
 
-### Bootstrap the Project
+### Pure Dart (Backend, CLI, Edge Functions)
 
-```bash
-melos bootstrap
+```dart
+import 'package:anthropic_a2ui/anthropic_a2ui.dart';
+
+// Parse Claude responses into A2UI messages
+final result = ClaudeA2uiParser.parseMessage(response);
+
+for (final message in result.a2uiMessages) {
+  switch (message) {
+    case BeginRenderingData(:final surfaceId):
+      print('Begin: $surfaceId');
+    case SurfaceUpdateData(:final surfaceId, :final widgets):
+      print('Update $surfaceId with ${widgets.length} widgets');
+    case DataModelUpdateData(:final updates):
+      print('Data: ${updates.keys}');
+    case DeleteSurfaceData(:final surfaceId):
+      print('Delete: $surfaceId');
+  }
+}
 ```
 
-This will install all dependencies and link local packages.
+## Installation
 
-## Available Scripts
+### From Git (Current)
 
-| Script | Description |
-|--------|-------------|
-| `melos bootstrap` | Install dependencies and link packages |
-| `melos clean` | Clean all packages |
-| `melos run analyze` | Run dart analyze in all packages |
-| `melos run format` | Check formatting in all packages |
-| `melos run format:fix` | Apply dart format in all packages |
-| `melos run test` | Run tests in all packages |
-| `melos run test:coverage` | Run tests with coverage |
-| `melos run build:runner` | Run build_runner in all packages |
-| `melos run get` | Get dependencies for all packages |
-| `melos run upgrade` | Upgrade dependencies for all packages |
-| `melos run outdated` | Check outdated dependencies |
+```yaml
+# pubspec.yaml
+dependencies:
+  # For Flutter apps
+  genui: ^0.5.1
+  genui_anthropic:
+    git:
+      url: https://github.com/unfazed-dev/anthropic_genui.git
+      path: packages/genui_anthropic
+
+  # For pure Dart (CLI, server, edge functions)
+  anthropic_a2ui:
+    git:
+      url: https://github.com/unfazed-dev/anthropic_genui.git
+      path: packages/anthropic_a2ui
+```
+
+## Architecture
+
+### Direct vs Proxy Mode
+
+Choose the right mode for your deployment:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                      Which Mode Should I Use?                       │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│   Development / Prototyping?                                        │
+│        │                                                            │
+│        ├── YES ──▶  Direct Mode                                     │
+│        │           • API key in app (ok for dev)                    │
+│        │           • Simplest setup                                 │
+│        │           • Quick iteration                                │
+│        │                                                            │
+│        └── NO ───▶  Production?                                     │
+│                         │                                           │
+│                         └── YES ──▶  Proxy Mode                     │
+│                                      • API key on backend (secure)  │
+│                                      • Full resilience features     │
+│                                      • Rate limiting control        │
+│                                      • Usage tracking               │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Direct Mode** (Development):
+```dart
+final generator = AnthropicContentGenerator(
+  apiKey: 'your-api-key',
+  systemInstruction: 'You generate UI.',
+);
+```
+
+**Proxy Mode** (Production):
+```dart
+final generator = AnthropicContentGenerator.proxy(
+  proxyEndpoint: Uri.parse('https://your-backend.com/api/claude'),
+  authToken: userAuthToken,
+  proxyConfig: const ProxyConfig(
+    timeout: Duration(seconds: 120),
+    includeHistory: true,
+  ),
+);
+```
+
+### Package Relationship
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                      genui_anthropic                             │
+│                      (Flutter Package)                           │
+│                                                                  │
+│  • AnthropicContentGenerator (main entry point)                  │
+│  • A2uiMessageAdapter (message conversion)                       │
+│  • CatalogToolBridge (catalog → Claude tools)                    │
+│  • CircuitBreaker, Retry, Metrics                                │
+│                                                                  │
+│                            │                                     │
+│                            │ depends on                          │
+│                            ▼                                     │
+│  ┌────────────────────────────────────────────────────────────┐  │
+│  │                    anthropic_a2ui                          │  │
+│  │                    (Pure Dart Package)                     │  │
+│  │                                                            │  │
+│  │  • A2uiToolConverter (tool schema conversion)              │  │
+│  │  • ClaudeA2uiParser (response parsing)                     │  │
+│  │  • ClaudeStreamHandler (SSE streaming)                     │  │
+│  │  • A2UI message types (sealed classes)                     │  │
+│  └────────────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+## Key Features
+
+### Streaming Support
+Real-time progressive UI rendering as Claude generates responses:
+```dart
+contentGenerator.a2uiMessageStream.listen((message) {
+  // UI updates progressively as Claude responds
+});
+```
+
+### Production Resilience
+Built-in circuit breaker and retry with exponential backoff:
+```dart
+const config = AnthropicConfig(
+  retryAttempts: 3,
+  // Circuit breaker prevents cascade failures
+);
+```
+
+### Type-Safe Errors
+Sealed exception hierarchy with exhaustive pattern matching:
+```dart
+try {
+  await generator.sendRequest(...);
+} on RateLimitException catch (e) {
+  // Handle rate limiting
+} on NetworkException catch (e) {
+  if (e.isRetryable) { /* retry */ }
+}
+```
+
+### Observability
+Built-in metrics collection:
+```dart
+globalMetricsCollector.eventStream.listen((event) {
+  print('${event.eventType}: ${event.toMap()}');
+});
+
+final stats = globalMetricsCollector.stats;
+print('Success rate: ${stats.successRate}%');
+```
+
+## Creating a Widget Catalog
+
+Define the widgets Claude can generate:
+
+```dart
+class MyCatalog extends Catalog {
+  MyCatalog() : super(_items);
+
+  static final List<CatalogItem> _items = [
+    CatalogItem(
+      name: 'info_card',
+      dataSchema: S.object(
+        description: 'A card displaying information',
+        properties: {
+          'title': S.string(description: 'Card title'),
+          'content': S.string(description: 'Card content'),
+        },
+        required: ['title', 'content'],
+      ),
+      widgetBuilder: (context) {
+        final props = context.data as Map<String, dynamic>? ?? {};
+        return InfoCard(
+          title: props['title'] ?? '',
+          content: props['content'] ?? '',
+        );
+      },
+    ),
+    // Add more widgets...
+  ];
+}
+```
+
+## Documentation
+
+### genui_anthropic (Flutter)
+- [README](packages/genui_anthropic/README.md) - Quick start and overview
+- [API Reference](packages/genui_anthropic/doc/API_REFERENCE.md) - Complete class documentation
+- [Examples](packages/genui_anthropic/doc/EXAMPLES.md) - Practical code examples
+- [Production Guide](packages/genui_anthropic/doc/PRODUCTION_GUIDE.md) - Deployment and hardening
+
+### anthropic_a2ui (Pure Dart)
+- [README](packages/anthropic_a2ui/README.md) - Quick start and API overview
+- [Examples](packages/anthropic_a2ui/example/) - Tool conversion, parsing, streaming
 
 ## Development
 
-### Adding a New Package
-
-1. Create a new directory under `packages/`
-2. Add the package configuration to `melos.yaml` if needed
-3. Add the package to the workspace in root `pubspec.yaml`
-4. Run `melos bootstrap`
-
-### Cross-Package Dependencies
-
-Packages can reference each other using path dependencies:
-
-```yaml
-dependencies:
-  anthropic_a2ui:
-    path: ../anthropic_a2ui
-```
-
-Melos will automatically manage these dependencies during bootstrap.
-
-### Running Commands in Specific Packages
+This repository uses [Melos](https://melos.invertase.dev/) for monorepo management.
 
 ```bash
-melos exec --scope="anthropic_a2ui" -- flutter test
+# Install melos
+dart pub global activate melos
+
+# Bootstrap (install deps, link packages)
+melos bootstrap
+
+# Run tests
+melos run test
+
+# Run analyzer
+melos run analyze
 ```
 
-## IDE Configuration
+## License
 
-Melos automatically generates IDE configuration files for:
-- IntelliJ IDEA / Android Studio
-- Visual Studio Code
-
-These are regenerated on each `melos bootstrap`.
+MIT License - see [LICENSE](LICENSE) for details.
