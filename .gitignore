@@ -59,4 +59,9 @@ coverage/
 
 # Lock files (uncomment if you want to ignore)
 # pubspec.lock
-.claude/settings.local.json
+
+# Claude Code local config
+.claude/
+
+# Implementation trackers (local only)
+docs/trackers/
