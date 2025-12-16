@@ -323,4 +323,4 @@ BSD-3-Clause License - see [LICENSE](LICENSE) for details.
 
 ---
 
-Authored and orchestrated by **Evan Flavio Pierre Louis - (unfazed-dev)**, with pair programming powered by [Claude Code](https://claude.com/claude-code) from Anthropic.
+Authored and orchestrated by **Evan Pierre Louis - (unfazed-dev)**, with pair programming powered by [Claude Code](https://claude.com/claude-code) from Anthropic.
