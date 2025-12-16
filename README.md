@@ -2,7 +2,7 @@
 
 **Claude-powered generative UI for Flutter and Dart**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](LICENSE)
 [![Flutter](https://img.shields.io/badge/Flutter-%3E%3D3.10.0-02569B?logo=flutter)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-%3E%3D3.0.0-0175C2?logo=dart)](https://dart.dev)
 
@@ -319,4 +319,4 @@ melos run analyze
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+BSD-3-Clause License - see [LICENSE](LICENSE) for details.

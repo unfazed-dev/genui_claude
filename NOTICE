@@ -1,0 +1,37 @@
+Anthropic GenUI
+Copyright (c) 2025 Evan Flavio Pierre Louis (unfazed-dev)
+
+This project includes software developed by third parties:
+
+================================================================================
+genui - Flutter GenUI SDK
+================================================================================
+Copyright (c) 2025 The Flutter Authors
+Licensed under BSD-3-Clause License
+https://pub.dev/packages/genui
+
+================================================================================
+anthropic_sdk_dart - Anthropic Dart Client
+================================================================================
+Licensed under MIT License
+https://pub.dev/packages/anthropic_sdk_dart
+
+================================================================================
+Dart Team Packages (BSD-3-Clause)
+================================================================================
+The following packages are developed by the Dart project authors and
+licensed under the BSD-3-Clause License:
+
+- http (https://pub.dev/packages/http)
+- logging (https://pub.dev/packages/logging)
+- json_annotation (https://pub.dev/packages/json_annotation)
+- meta (https://pub.dev/packages/meta)
+- collection (https://pub.dev/packages/collection)
+
+Copyright (c) 2012-2025, the Dart project authors.
+
+================================================================================
+json_schema_builder
+================================================================================
+Licensed under BSD-3-Clause License
+https://pub.dev/packages/json_schema_builder
