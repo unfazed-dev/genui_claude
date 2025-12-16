@@ -258,6 +258,84 @@ Stream<StreamEvent> streamRequest({
 }
 ```
 
+### Stream Event Types
+
+The `ClaudeStreamHandler` emits a sealed `StreamEvent` hierarchy for type-safe stream handling:
+
+```dart
+sealed class StreamEvent {}
+
+/// Text content chunk from Claude
+class TextDeltaEvent extends StreamEvent {
+  final String text;
+}
+
+/// Parsed A2UI protocol message
+class A2uiMessageEvent extends StreamEvent {
+  final A2uiMessageData message;  // BeginRendering, SurfaceUpdate, etc.
+}
+
+/// Raw delta data (for debugging/custom handling)
+class DeltaEvent extends StreamEvent {
+  final Map<String, dynamic> data;
+}
+
+/// Stream completed successfully
+class CompleteEvent extends StreamEvent {}
+
+/// Error occurred during streaming
+class ErrorEvent extends StreamEvent {
+  final A2uiException error;
+}
+```
+
+**Pattern Matching on Stream Events:**
+
+```dart
+await for (final event in handler.streamRequest(messageStream: rawStream)) {
+  switch (event) {
+    case TextDeltaEvent(:final text):
+      // Append to text buffer for display
+      textBuffer.write(text);
+
+    case A2uiMessageEvent(:final message):
+      // Handle A2UI protocol messages
+      switch (message) {
+        case BeginRenderingData(:final surfaceId):
+          surfaceManager.createSurface(surfaceId);
+        case SurfaceUpdateData(:final surfaceId, :final widgets):
+          surfaceManager.updateWidgets(surfaceId, widgets);
+        case DataModelUpdateData(:final updates):
+          dataModel.update(updates);
+        case DeleteSurfaceData(:final surfaceId):
+          surfaceManager.deleteSurface(surfaceId);
+      }
+
+    case DeltaEvent(:final data):
+      // Log raw deltas for debugging
+      debugLog('Raw delta: $data');
+
+    case CompleteEvent():
+      // Finalize the response
+      onResponseComplete();
+
+    case ErrorEvent(:final error):
+      // Handle error
+      onError(error);
+  }
+}
+```
+
+**Stream Event Reference:**
+
+| Event | Description | Properties |
+|-------|-------------|------------|
+| `TextDeltaEvent` | Text content chunk | `String text` |
+| `A2uiMessageEvent` | Parsed A2UI message | `A2uiMessageData message` |
+| `DeltaEvent` | Raw delta data | `Map<String, dynamic> data` |
+| `CompleteEvent` | Stream finished | - |
+| `ErrorEvent` | Error occurred | `A2uiException error` |
+
 ## Message Conversion
 
 ### GenUI to Claude Format
@@ -314,21 +392,84 @@ final pruned = MessageConverter.pruneHistory(
 // - Proper conversation structure
 ```
 
-## Error Handling Patterns
+## Exception Hierarchy
 
-### ContentGeneratorError
+Sealed `AnthropicException` enables exhaustive error handling with pattern matching:
+
+```dart
+void handleError(AnthropicException exception) {
+  switch (exception) {
+    case NetworkException(:final message):
+      // DNS failures, connection refused - retryable
+      showError('Network error: $message');
+
+    case TimeoutException(:final timeout):
+      // Request exceeded timeout - retryable
+      showError('Request timed out after ${timeout.inSeconds}s');
+
+    case AuthenticationException(:final statusCode):
+      // HTTP 401/403 - not retryable
+      if (statusCode == 401) promptLogin();
+
+    case RateLimitException(:final retryAfter):
+      // HTTP 429 - wait for retryAfter duration
+      final wait = retryAfter ?? Duration(seconds: 60);
+      showError('Rate limited. Try again in ${wait.inSeconds}s');
+
+    case BadRequestException(:final message):
+      // HTTP 400 - not retryable (check your input)
+      log('Bad request: $message');
+
+    case ServerException(:final statusCode):
+      // HTTP 5xx - retryable
+      showError('Server error ($statusCode)');
+
+    case CircuitBreakerOpenException():
+      // Circuit breaker is open - wait for recovery
+      showError('Service temporarily unavailable');
+  }
+}
+```
+
+### Exception Properties
+
+All exceptions include common properties:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `message` | String | Human-readable error message |
+| `requestId` | String? | Request ID for debugging |
+| `statusCode` | int? | HTTP status code (if applicable) |
+| `originalError` | Object? | Underlying error |
+| `isRetryable` | bool | Whether retry might succeed |
+| `typeName` | String | Exception type name for logging |
+
+### Retryability Reference
+
+| Exception | Retryable | Reason |
+|-----------|-----------|--------|
+| `NetworkException` | Yes | Transient network issues |
+| `TimeoutException` | Yes | Server may be slow |
+| `AuthenticationException` | No | Invalid credentials |
+| `RateLimitException` | Yes | Respect retryAfter, then retry |
+| `BadRequestException` | No | Fix the request |
+| `ServerException` | Yes | Server issues are transient |
+| `CircuitBreakerOpenException` | Yes* | Wait for circuit recovery |
+
+### Error Stream Handling
 
 ```dart
 _generator.errorStream.listen((error) {
   final exception = error.error;
   final stackTrace = error.stackTrace;
 
-  if (exception is ApiException) {
-    // Handle API errors (rate limit, invalid key, etc.)
-    handleApiError(exception);
-  } else if (exception is TimeoutException) {
-    // Handle timeout
-    showTimeoutMessage();
+  if (exception is AnthropicException) {
+    // Check retryability
+    if (exception.isRetryable) {
+      scheduleRetry();
+    } else {
+      showPermanentError(exception.message);
+    }
   } else {
     // Generic error
     logError(exception, stackTrace);
@@ -350,7 +491,53 @@ Future<void> sendMessage(String text) async {
 }
 ```
 
-### Retry Pattern
+## Retry Configuration
+
+Built-in retry with exponential backoff and jitter:
+
+```dart
+// Use pre-defined configurations
+final generator = AnthropicContentGenerator.proxy(
+  proxyEndpoint: endpoint,
+  retryConfig: RetryConfig.defaults,  // 3 attempts, exponential backoff
+);
+
+// Or use aggressive retries for better UX
+final generator = AnthropicContentGenerator.proxy(
+  proxyEndpoint: endpoint,
+  retryConfig: RetryConfig.aggressive,  // 5 attempts, faster initial
+);
+```
+
+### Pre-defined Configurations
+
+| Config | Max Attempts | Initial Delay | Use Case |
+|--------|--------------|---------------|----------|
+| `RetryConfig.defaults` | 3 | 1s | Standard applications |
+| `RetryConfig.aggressive` | 5 | 500ms | User-facing features |
+| `RetryConfig.noRetry` | 0 | - | Testing, disable retries |
+
+### Custom Configuration
+
+```dart
+const config = RetryConfig(
+  maxAttempts: 3,                    // Total attempts
+  initialDelay: Duration(seconds: 1), // First retry delay
+  maxDelay: Duration(seconds: 30),   // Cap on delay
+  backoffMultiplier: 2.0,            // Exponential growth
+  jitterFactor: 0.1,                 // ±10% random jitter
+  retryableStatusCodes: {429, 500, 502, 503, 504},
+);
+
+final generator = AnthropicContentGenerator.proxy(
+  proxyEndpoint: endpoint,
+  retryConfig: config,
+);
+```
+
+### Manual Retry Pattern
+
+For custom retry logic outside the built-in mechanism:
 
 ```dart
 Future<void> sendWithRetry(ChatMessage message, {int maxRetries = 3}) async {
@@ -360,14 +547,41 @@ Future<void> sendWithRetry(ChatMessage message, {int maxRetries = 3}) async {
     try {
       await _conversation.sendRequest(message);
       return;
-    } catch (e) {
+    } on AnthropicException catch (e) {
       attempts++;
-      if (attempts >= maxRetries) rethrow;
-      await Future.delayed(Duration(seconds: attempts * 2));
+      if (!e.isRetryable || attempts >= maxRetries) rethrow;
+
+      // Handle rate limits specially
+      if (e is RateLimitException) {
+        await Future.delayed(e.retryAfter ?? Duration(seconds: 60));
+      } else {
+        await Future.delayed(Duration(seconds: attempts * 2));
+      }
     }
   }
 }
 ```
+
+## Stream Inactivity Timeout
+
+Prevents hanging connections when Claude streams stop unexpectedly:
+
+```dart
+// ProxyModeHandler automatically handles inactivity
+// Default: 30 seconds without data triggers timeout
+
+// Monitor inactivity events via metrics
+collector.eventStream
+  .whereType<StreamInactivityEvent>()
+  .listen((event) {
+    log('Stream inactive for ${event.inactiveFor.inSeconds}s');
+  });
+```
+
+When stream inactivity is detected:
+1. `StreamInactivityEvent` is emitted to metrics
+2. The stream is closed gracefully
+3. A `TimeoutException` may be thrown if configured
 
 ## Testing Patterns
 

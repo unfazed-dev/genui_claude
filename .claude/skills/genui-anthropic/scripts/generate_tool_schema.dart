@@ -31,6 +31,14 @@ class A2uiControlTools {
           'type': 'string',
           'description': 'Optional parent surface for nested UIs',
         },
+        'root': {
+          'type': 'string',
+          'description': 'Root element ID, defaults to "root"',
+        },
+        'metadata': {
+          'type': 'object',
+          'description': 'Additional surface metadata for custom handling',
+        },
       },
       'required': ['surfaceId'],
     },

@@ -57,6 +57,146 @@ CatalogItem(
 }
 ```
 
+## A2UI Tool Converter Utilities
+
+The `A2uiToolConverter` class provides utilities for schema validation, instruction generation, and tool format conversion.
+
+### Convert Schemas to Claude Tools
+
+```dart
+import 'package:anthropic_a2ui/anthropic_a2ui.dart';
+
+// Convert A2uiToolSchema list to Claude API format
+final widgetSchemas = [
+  A2uiToolSchema(
+    name: 'info_card',
+    description: 'Display information in a card',
+    inputSchema: {
+      'type': 'object',
+      'properties': {
+        'title': {'type': 'string'},
+        'content': {'type': 'string'},
+      },
+      'required': ['title', 'content'],
+    },
+  ),
+];
+
+final claudeTools = A2uiToolConverter.toClaudeTools(widgetSchemas);
+// Returns List<Map<String, dynamic>> ready for Claude API
+```
+
+### Generate System Prompt Instructions
+
+Automatically generate widget documentation for the system prompt:
+
+```dart
+final instructions = A2uiToolConverter.generateToolInstructions(widgetSchemas);
+
+// Output:
+// "Available widgets:
+//  - info_card: Display information in a card
+//    Required: title, content
+//  - action_button: A clickable button that triggers an action
+//    Required: label, action"
+
+// Use in system prompt
+final systemPrompt = '''
+You are a UI assistant.
+
+$instructions
+
+When generating UI:
+1. Always call begin_rendering first
+2. Use surface_update to provide the widget tree
+''';
+```
+
+### Validate Tool Input
+
+Validate Claude's tool input against the schema before processing:
+
+```dart
+// Validate tool input
+final validation = A2uiToolConverter.validateToolInput(
+  'info_card',
+  {'title': 'Hello'},  // Missing 'content' which is required
+  widgetSchemas,
+);
+
+if (!validation.isValid) {
+  print('Validation errors: ${validation.errors}');
+  // Output: ["Missing required property: content"]
+}
+
+// In stream handler
+case A2uiMessageEvent(:final message):
+  if (message is SurfaceUpdateData) {
+    for (final widget in message.widgets) {
+      final validation = A2uiToolConverter.validateToolInput(
+        widget.type,
+        widget.properties,
+        widgetSchemas,
+      );
+      if (!validation.isValid) {
+        log('Invalid widget: ${validation.errors}');
+      }
+    }
+  }
+```
+
+### ValidationResult Structure
+
+```dart
+class ValidationResult {
+  final bool isValid;
+  final List<String> errors;
+  final List<String> warnings;  // Non-fatal issues
+}
+```
+
+### Full Workflow Example
+
+```dart
+// 1. Define widget schemas
+final widgetSchemas = [
+  A2uiToolSchema(
+    name: 'info_card',
+    description: 'Display information in a card',
+    inputSchema: {...},
+  ),
+  A2uiToolSchema(
+    name: 'action_button',
+    description: 'A clickable button',
+    inputSchema: {...},
+  ),
+];
+
+// 2. Combine with A2UI control tools
+final allTools = A2uiControlTools.withWidgetTools(widgetSchemas);
+
+// 3. Generate instructions
+final instructions = A2uiToolConverter.generateToolInstructions(widgetSchemas);
+
+// 4. Create system prompt
+final systemPrompt = '''
+You are a helpful UI assistant.
+
+$instructions
+
+Guidelines:
+- Use begin_rendering before surface_update
+- Match widget types exactly
+''';
+
+// 5. In request handler, validate inputs
+final validation = A2uiToolConverter.validateToolInput(
+  toolName,
+  toolInput,
+  widgetSchemas,
+);
+```
+
 ## A2UI Control Tools
 
 Pre-defined tools Claude uses to manage UI surfaces.
@@ -84,6 +224,14 @@ A2uiControlTools.beginRendering
       "parentSurfaceId": {
         "type": "string",
         "description": "Optional parent surface for nested UIs"
+      },
+      "root": {
+        "type": "string",
+        "description": "Root element ID, defaults to 'root'"
+      },
+      "metadata": {
+        "type": "object",
+        "description": "Additional surface metadata for custom handling"
       }
     },
     "required": ["surfaceId"]
@@ -98,6 +246,22 @@ A2uiControlTools.beginRendering
   "name": "begin_rendering",
   "input": {
     "surfaceId": "card_123"
+  }
+}
+```
+
+**Example with metadata:**
+```json
+{
+  "type": "tool_use",
+  "name": "begin_rendering",
+  "input": {
+    "surfaceId": "form_456",
+    "root": "form_root",
+    "metadata": {
+      "source": "user_request",
+      "priority": "high"
+    }
   }
 }
 ```
@@ -363,8 +527,16 @@ Claude's tool calls are converted to GenUI messages:
 // Claude tool_use → A2uiMessageData → A2uiMessage
 
 // begin_rendering
-BeginRenderingData(surfaceId: 'product_surface_1')
-→ BeginRendering(surfaceId: 'product_surface_1', root: 'root')
+BeginRenderingData(
+  surfaceId: 'product_surface_1',
+  root: 'root',
+  metadata: {'source': 'user_request'},
+)
+→ BeginRendering(
+  surfaceId: 'product_surface_1',
+  root: 'root',
+  metadata: {'source': 'user_request'},
+)
 
 // surface_update
 SurfaceUpdateData(
@@ -391,6 +563,106 @@ class WidgetNode {
     String? dataBinding,               // Data model binding path
   }) = _WidgetNode;
 }
+```
+
+### Data Binding
+
+The `dataBinding` property connects widgets to the GenUI DataModel for reactive updates. When Claude generates a widget with a data binding, changes to the DataModel automatically update the widget.
+
+**Basic Data Binding:**
+
+```dart
+// Widget with data binding
+{
+  "type": "text_field",
+  "properties": {
+    "label": "Email Address",
+    "placeholder": "Enter your email"
+  },
+  "dataBinding": "user.email"  // Binds to DataModel path
+}
+```
+
+**How It Works:**
+
+```dart
+// 1. Claude creates widget with dataBinding
+final widgetNode = WidgetNode(
+  type: 'text_field',
+  properties: {'label': 'Name'},
+  dataBinding: 'form.name',
+);
+
+// 2. GenUI binds widget to DataModel
+// When user types in the field, DataModel is updated:
+dataModel.setValue('form.name', 'John Doe');
+
+// 3. Claude can update bound values via data_model_update
+// Tool call:
+{
+  "name": "data_model_update",
+  "input": {
+    "updates": {
+      "form.name": "Jane Smith"
+    }
+  }
+}
+// Widget automatically reflects the new value
+```
+
+**Nested Data Binding Paths:**
+
+```dart
+// Dot notation for nested objects
+"dataBinding": "user.profile.avatar"      // → dataModel['user']['profile']['avatar']
+"dataBinding": "cart.items.0.quantity"    // → dataModel['cart']['items'][0]['quantity']
+"dataBinding": "settings.theme.darkMode"  // → dataModel['settings']['theme']['darkMode']
+```
+
+**Form Example with Data Binding:**
+
+```json
+{
+  "type": "form_container",
+  "properties": {"title": "Contact Information"},
+  "children": [
+    {
+      "type": "text_field",
+      "properties": {"label": "Name"},
+      "dataBinding": "contact.name"
+    },
+    {
+      "type": "text_field",
+      "properties": {"label": "Email", "type": "email"},
+      "dataBinding": "contact.email"
+    },
+    {
+      "type": "text_field",
+      "properties": {"label": "Phone", "type": "tel"},
+      "dataBinding": "contact.phone"
+    }
+  ]
+}
+```
+
+**Retrieving Bound Values:**
+
+```dart
+// In widget builder
+CatalogItem(
+  name: 'text_field',
+  dataSchema: S.object(...),
+  widgetBuilder: (context) {
+    final binding = context.component.dataBinding;
+    if (binding != null) {
+      // Watch for changes
+      return context.dataModel.watchPath(binding, (value) {
+        controller.text = value ?? '';
+      });
+    }
+    return TextField(controller: controller);
+  },
+)
 ```
 
 ### Nested Widgets Example

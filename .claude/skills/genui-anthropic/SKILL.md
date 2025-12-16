@@ -264,6 +264,7 @@ See [test/helpers/mock_generators.dart](../../packages/genui_anthropic/test/help
 
 **Direct Mode:**
 ```dart
+// Custom configuration
 AnthropicConfig(
   maxTokens: 4096,           // Max response tokens
   timeout: Duration(seconds: 60),
@@ -271,10 +272,14 @@ AnthropicConfig(
   enableStreaming: true,
   headers: {'X-Custom': 'value'},
 )
+
+// Pre-defined
+AnthropicConfig.defaults  // 4096 tokens, 60s timeout, 3 retries
 ```
 
 **Proxy Mode:**
 ```dart
+// Custom configuration
 ProxyConfig(
   timeout: Duration(seconds: 120),
   retryAttempts: 3,
@@ -282,10 +287,50 @@ ProxyConfig(
   maxHistoryMessages: 20,
   headers: {'X-Custom': 'value'},
 )
+
+// Pre-defined
+ProxyConfig.defaults  // 120s timeout, history enabled
 ```
+
+## Resilience & Observability
+
+### Circuit Breaker
+
+Prevents cascading failures with three states: closed (normal), open (failing fast), half-open (testing recovery).
+
+| Config | Failures | Recovery | Use Case |
+|--------|----------|----------|----------|
+| `CircuitBreakerConfig.defaults` | 5 | 30s | Standard apps |
+| `CircuitBreakerConfig.lenient` | 10 | 60s | High-tolerance |
+| `CircuitBreakerConfig.strict` | 3 | 15s | Critical paths |
+
+### Retry Configuration
+
+Built-in retry strategies with exponential backoff and jitter:
+
+| Config | Attempts | Initial Delay | Use Case |
+|--------|----------|---------------|----------|
+| `RetryConfig.defaults` | 3 | 1s | Standard |
+| `RetryConfig.aggressive` | 5 | 500ms | User-facing |
+| `RetryConfig.noRetry` | 0 | - | Testing |
+
+### Metrics
+
+```dart
+final collector = MetricsCollector();
+collector.eventStream.listen((event) {
+  // RequestStartEvent, RequestSuccessEvent, RequestFailureEvent
+  // RetryAttemptEvent, RateLimitEvent, CircuitBreakerStateChangeEvent
+  analytics.track(event.eventType, event.toMap());
+});
+```
+
+See [references/resilience-patterns.md](references/resilience-patterns.md) for comprehensive resilience documentation.
 
 ## References
 
 - [API Patterns](references/api-patterns.md) - Handler patterns, stream processing, message conversion
 - [Widget Tools](references/widget-tools.md) - CatalogToolBridge, A2UI control tools, schema conversion
+- [Resilience Patterns](references/resilience-patterns.md) - Circuit breaker, retry, metrics, production checklist
 - [Supabase Edge Functions](references/supabase-edge.md) - Backend deployment, security patterns
+- [Standalone Usage](references/standalone-usage.md) - Pure Dart (anthropic_a2ui) for CLI, server, edge functions

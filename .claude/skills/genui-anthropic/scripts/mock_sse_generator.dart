@@ -108,10 +108,21 @@ class SseEventBuilder {
   }
 
   /// Add begin_rendering tool call
-  void addBeginRendering(String surfaceId, {String? parentSurfaceId}) {
+  void addBeginRendering(
+    String surfaceId, {
+    String? parentSurfaceId,
+    String? root,
+    Map<String, dynamic>? metadata,
+  }) {
     final input = <String, dynamic>{'surfaceId': surfaceId};
     if (parentSurfaceId != null) {
       input['parentSurfaceId'] = parentSurfaceId;
+    }
+    if (root != null) {
+      input['root'] = root;
+    }
+    if (metadata != null) {
+      input['metadata'] = metadata;
     }
     addToolUseBlock('begin_rendering', input);
   }
