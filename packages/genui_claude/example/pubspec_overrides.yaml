@@ -1,0 +1,6 @@
+# melos_managed_dependency_overrides: a2ui_claude,genui_claude
+dependency_overrides:
+  a2ui_claude:
+    path: ../../a2ui_claude
+  genui_claude:
+    path: ..

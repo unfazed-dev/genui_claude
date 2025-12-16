@@ -1,5 +1,5 @@
-name: anthropic_genui
-description: A Flutter monorepo workspace for Anthropic GenUI packages.
+name: genui_claude
+description: A Flutter monorepo workspace for Claude GenUI packages.
 version: 1.0.0
 publish_to: 'none'
 

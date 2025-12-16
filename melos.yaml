@@ -1,4 +1,4 @@
-name: anthropic_genui
+name: genui_claude
 
 packages:
   - packages/**

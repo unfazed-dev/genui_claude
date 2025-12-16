@@ -213,17 +213,17 @@ Naming pattern: `TRACKER-[kebab-case-description].md`
 
 ### Multiple Tracker Pattern (Subfolders)
 ```
-docs/trackers/anthropic-a2ui/                    # Package subfolder
-├── TRACKER-anthropic-a2ui-package.md            # Main tracker
+docs/trackers/a2ui-claude/                       # Package subfolder
+├── TRACKER-a2ui-claude-package.md               # Main tracker
 ├── TRACKER-a2ui-data-models.md                  # Component
 ├── TRACKER-a2ui-core-apis.md                    # Component
 └── TRACKER-a2ui-testing.md                      # Testing
 
-docs/trackers/genui-anthropic/                   # Another package
-├── TRACKER-genui-anthropic-package.md           # Main tracker
+docs/trackers/genui-claude/                      # Another package
+├── TRACKER-genui-claude-package.md              # Main tracker
 ├── TRACKER-genui-content-generator.md           # Component
 ├── TRACKER-genui-adapters.md                    # Component
-└── TRACKER-genui-anthropic-testing.md           # Testing
+└── TRACKER-genui-claude-testing.md              # Testing
 ```
 
 Subfolder naming: `[kebab-case-feature-name]/`

@@ -1,0 +1,23 @@
+name: genui_claude_example
+description: Example app demonstrating genui_claude package usage.
+publish_to: 'none'
+
+environment:
+  sdk: ^3.5.0
+  flutter: '>=3.22.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  genui: ^0.5.1
+  genui_claude:
+    path: ../
+
+  json_schema_builder: any
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

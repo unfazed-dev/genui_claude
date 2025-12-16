@@ -1,4 +1,4 @@
-# Anthropic GenUI
+# GenUI Claude
 
 **Claude-powered generative UI for Flutter and Dart**
 
@@ -10,7 +10,7 @@ Build AI applications where Claude dynamically generates interactive UI componen
 
 ## What is This?
 
-Anthropic GenUI bridges Claude AI with Flutter's [GenUI SDK](https://pub.dev/packages/genui), enabling **generative user interfaces**—UI that Claude creates dynamically based on user intent rather than predefined templates.
+GenUI Claude bridges Claude AI with Flutter's [GenUI SDK](https://pub.dev/packages/genui), enabling **generative user interfaces**—UI that Claude creates dynamically based on user intent rather than predefined templates.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -20,10 +20,10 @@ Anthropic GenUI bridges Claude AI with Flutter's [GenUI SDK](https://pub.dev/pac
 │                              │                                      │
 │                              ▼                                      │
 │   ┌─────────────────────────────────────────────────────────────┐   │
-│   │              AnthropicContentGenerator                      │   │
+│   │              ClaudeContentGenerator                         │   │
 │   │                                                             │   │
 │   │  ┌─────────────────┐    ┌────────────────────────────────┐  │   │
-│   │  │ genui_anthropic │───▶│       anthropic_a2ui           │  │   │
+│   │  │ genui_claude    │───▶│       a2ui_claude              │  │   │
 │   │  │ (Flutter)       │    │ (Protocol Conversion)          │  │   │
 │   │  └─────────────────┘    └────────────────────────────────┘  │   │
 │   └─────────────────────────────────────────────────────────────┘   │
@@ -62,8 +62,8 @@ Anthropic GenUI bridges Claude AI with Flutter's [GenUI SDK](https://pub.dev/pac
 
 | Package | Description | Platform |
 |---------|-------------|----------|
-| [`genui_anthropic`](packages/genui_anthropic) | Flutter `ContentGenerator` for Claude-powered GenUI. Features dual-mode architecture, streaming, circuit breaker, metrics, and comprehensive error handling. | Flutter |
-| [`anthropic_a2ui`](packages/anthropic_a2ui) | Pure Dart A2UI protocol conversion. Converts between Claude API responses and A2UI messages. No Flutter dependency. | Dart (any) |
+| [`genui_claude`](packages/genui_claude) | Flutter `ContentGenerator` for Claude-powered GenUI. Features dual-mode architecture, streaming, circuit breaker, metrics, and comprehensive error handling. | Flutter |
+| [`a2ui_claude`](packages/a2ui_claude) | Pure Dart A2UI protocol conversion. Converts between Claude API responses and A2UI messages. No Flutter dependency. | Dart (any) |
 
 ## Quick Start
 
@@ -71,13 +71,13 @@ Anthropic GenUI bridges Claude AI with Flutter's [GenUI SDK](https://pub.dev/pac
 
 ```dart
 import 'package:genui/genui.dart';
-import 'package:genui_anthropic/genui_anthropic.dart';
+import 'package:genui_claude/genui_claude.dart';
 
 // 1. Create your widget catalog
 final genUiManager = GenUiManager(catalog: MyCatalog());
 
 // 2. Create the content generator
-final contentGenerator = AnthropicContentGenerator(
+final contentGenerator = ClaudeContentGenerator(
   apiKey: 'your-api-key',  // Use env vars in production!
   systemInstruction: 'You are a helpful assistant that generates UI.',
 );
@@ -97,7 +97,7 @@ conversation.sendRequest(UserMessage.text('Create a contact form'));
 ### Pure Dart (Backend, CLI, Edge Functions)
 
 ```dart
-import 'package:anthropic_a2ui/anthropic_a2ui.dart';
+import 'package:a2ui_claude/a2ui_claude.dart';
 
 // Parse Claude responses into A2UI messages
 final result = ClaudeA2uiParser.parseMessage(response);
@@ -125,16 +125,16 @@ for (final message in result.a2uiMessages) {
 dependencies:
   # For Flutter apps
   genui: ^0.5.1
-  genui_anthropic:
+  genui_claude:
     git:
-      url: https://github.com/unfazed-dev/anthropic_genui.git
-      path: packages/genui_anthropic
+      url: https://github.com/unfazed-dev/genui_claude.git
+      path: packages/genui_claude
 
   # For pure Dart (CLI, server, edge functions)
-  anthropic_a2ui:
+  a2ui_claude:
     git:
-      url: https://github.com/unfazed-dev/anthropic_genui.git
-      path: packages/anthropic_a2ui
+      url: https://github.com/unfazed-dev/genui_claude.git
+      path: packages/a2ui_claude
 ```
 
 ## Architecture
@@ -168,7 +168,7 @@ Choose the right mode for your deployment:
 
 **Direct Mode** (Development):
 ```dart
-final generator = AnthropicContentGenerator(
+final generator = ClaudeContentGenerator(
   apiKey: 'your-api-key',
   systemInstruction: 'You generate UI.',
 );
@@ -176,7 +176,7 @@ final generator = AnthropicContentGenerator(
 
 **Proxy Mode** (Production):
 ```dart
-final generator = AnthropicContentGenerator.proxy(
+final generator = ClaudeContentGenerator.proxy(
   proxyEndpoint: Uri.parse('https://your-backend.com/api/claude'),
   authToken: userAuthToken,
   proxyConfig: const ProxyConfig(
@@ -190,10 +190,10 @@ final generator = AnthropicContentGenerator.proxy(
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│                      genui_anthropic                             │
+│                      genui_claude                                │
 │                      (Flutter Package)                           │
 │                                                                  │
-│  • AnthropicContentGenerator (main entry point)                  │
+│  • ClaudeContentGenerator (main entry point)                     │
 │  • A2uiMessageAdapter (message conversion)                       │
 │  • CatalogToolBridge (catalog → Claude tools)                    │
 │  • CircuitBreaker, Retry, Metrics                                │
@@ -202,7 +202,7 @@ final generator = AnthropicContentGenerator.proxy(
 │                            │ depends on                          │
 │                            ▼                                     │
 │  ┌────────────────────────────────────────────────────────────┐  │
-│  │                    anthropic_a2ui                          │  │
+│  │                    a2ui_claude                             │  │
 │  │                    (Pure Dart Package)                     │  │
 │  │                                                            │  │
 │  │  • A2uiToolConverter (tool schema conversion)              │  │
@@ -226,7 +226,7 @@ contentGenerator.a2uiMessageStream.listen((message) {
 ### Production Resilience
 Built-in circuit breaker and retry with exponential backoff:
 ```dart
-const config = AnthropicConfig(
+const config = ClaudeConfig(
   retryAttempts: 3,
   // Circuit breaker prevents cascade failures
 );
@@ -289,15 +289,15 @@ class MyCatalog extends Catalog {
 
 ## Documentation
 
-### genui_anthropic (Flutter)
-- [README](packages/genui_anthropic/README.md) - Quick start and overview
-- [API Reference](packages/genui_anthropic/doc/API_REFERENCE.md) - Complete class documentation
-- [Examples](packages/genui_anthropic/doc/EXAMPLES.md) - Practical code examples
-- [Production Guide](packages/genui_anthropic/doc/PRODUCTION_GUIDE.md) - Deployment and hardening
+### genui_claude (Flutter)
+- [README](packages/genui_claude/README.md) - Quick start and overview
+- [API Reference](packages/genui_claude/doc/API_REFERENCE.md) - Complete class documentation
+- [Examples](packages/genui_claude/doc/EXAMPLES.md) - Practical code examples
+- [Production Guide](packages/genui_claude/doc/PRODUCTION_GUIDE.md) - Deployment and hardening
 
-### anthropic_a2ui (Pure Dart)
-- [README](packages/anthropic_a2ui/README.md) - Quick start and API overview
-- [Examples](packages/anthropic_a2ui/example/) - Tool conversion, parsing, streaming
+### a2ui_claude (Pure Dart)
+- [README](packages/a2ui_claude/README.md) - Quick start and API overview
+- [Examples](packages/a2ui_claude/example/) - Tool conversion, parsing, streaming
 
 ## Development
 

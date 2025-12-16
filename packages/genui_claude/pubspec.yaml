@@ -1,0 +1,38 @@
+name: genui_claude
+description: >-
+  Flutter ContentGenerator implementation for Claude AI,
+  enabling Claude-powered generative UI with the GenUI SDK.
+version: 0.1.0
+publish_to: 'none'
+repository: https://github.com/unfazed-dev/genui_claude
+issue_tracker: https://github.com/unfazed-dev/genui_claude/issues
+
+environment:
+  sdk: ^3.5.0
+  flutter: '>=3.22.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  genui: ^0.5.1
+  # Reference to sibling package using path dependency
+  # Melos will manage this during bootstrap
+  a2ui_claude:
+    path: ../a2ui_claude
+  # API handlers
+  anthropic_sdk_dart: ^0.3.0
+  http: ^1.2.0
+  logging: ^1.2.0
+
+  json_schema_builder: ^0.1.3
+  uuid: ^4.5.1
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  mockito: ^5.4.0
+  build_runner: ^2.4.0
+
+flutter:
