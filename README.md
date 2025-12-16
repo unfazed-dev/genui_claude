@@ -320,3 +320,7 @@ melos run analyze
 ## License
 
 BSD-3-Clause License - see [LICENSE](LICENSE) for details.
+
+---
+
+Authored and orchestrated by **Evan Flavio Pierre Louis**, with pair programming powered by [Claude Code](https://claude.com/claude-code) from Anthropic.
