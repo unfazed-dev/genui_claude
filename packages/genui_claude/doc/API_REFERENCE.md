@@ -178,6 +178,14 @@ const ClaudeConfig({
   int retryAttempts = 3,
   bool enableStreaming = true,
   Map<String, String>? headers,
+  double? topP,
+  int? topK,
+  List<String>? stopSequences,
+  bool enableFineGrainedStreaming = false,
+  bool enableInterleavedThinking = false,
+  int? thinkingBudgetTokens,
+  bool enableToolSearch = false,
+  int maxLoadedToolsPerSession = 50,
 })
 ```
 
@@ -190,6 +198,14 @@ const ClaudeConfig({
 | `retryAttempts` | `int` | `3` | Retry attempts for transient failures |
 | `enableStreaming` | `bool` | `true` | Enable streaming responses |
 | `headers` | `Map<String, String>?` | `null` | Custom HTTP headers |
+| `topP` | `double?` | `null` | Nucleus sampling (0.0 < x ≤ 1.0). Controls cumulative probability cutoff. |
+| `topK` | `int?` | `null` | Top-k sampling (≥1). Limits token selection to k most likely. |
+| `stopSequences` | `List<String>?` | `null` | Sequences that stop generation (max 4, each ≤100 chars) |
+| `enableFineGrainedStreaming` | `bool` | `false` | Enable fine-grained tool streaming beta |
+| `enableInterleavedThinking` | `bool` | `false` | Enable interleaved thinking beta for Claude 4+ |
+| `thinkingBudgetTokens` | `int?` | `null` | Max tokens for thinking (when thinking enabled) |
+| `enableToolSearch` | `bool` | `false` | Enable dynamic tool discovery for large catalogs |
+| `maxLoadedToolsPerSession` | `int` | `50` | Max tools loadable per session (when tool search enabled) |
 
 #### Static Properties
 
@@ -208,6 +224,14 @@ ClaudeConfig copyWith({
   int? retryAttempts,
   bool? enableStreaming,
   Map<String, String>? headers,
+  double? topP,
+  int? topK,
+  List<String>? stopSequences,
+  bool? enableFineGrainedStreaming,
+  bool? enableInterleavedThinking,
+  int? thinkingBudgetTokens,
+  bool? enableToolSearch,
+  int? maxLoadedToolsPerSession,
 })
 ```
 
@@ -1448,6 +1472,12 @@ const ApiRequest({
   List<Map<String, dynamic>>? tools,
   String? model,
   double? temperature,
+  double? topP,
+  int? topK,
+  List<String>? stopSequences,
+  bool enableFineGrainedStreaming = false,
+  bool enableInterleavedThinking = false,
+  int? thinkingBudgetTokens,
 })
 ```
 
@@ -1461,6 +1491,12 @@ const ApiRequest({
 | `tools` | `List<Map<String, dynamic>>?` | Tools in Claude API format |
 | `model` | `String?` | Model ID |
 | `temperature` | `double?` | Temperature (0.0-1.0) |
+| `topP` | `double?` | Nucleus sampling parameter |
+| `topK` | `int?` | Top-k sampling parameter |
+| `stopSequences` | `List<String>?` | Sequences that stop generation |
+| `enableFineGrainedStreaming` | `bool` | Enable fine-grained tool streaming |
+| `enableInterleavedThinking` | `bool` | Enable interleaved thinking |
+| `thinkingBudgetTokens` | `int?` | Budget tokens for thinking |
 
 ---
 
