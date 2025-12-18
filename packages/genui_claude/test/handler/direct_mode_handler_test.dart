@@ -38,6 +38,21 @@ void main() {
 
         handler.dispose();
       });
+
+      test('creates handler with circuit breaker', () {
+        final circuitBreaker = CircuitBreaker(
+          name: 'direct-mode-test',
+        );
+
+        final handler = DirectModeHandler(
+          apiKey: 'test-api-key',
+          circuitBreaker: circuitBreaker,
+        );
+
+        expect(handler, isA<ApiHandler>());
+
+        handler.dispose();
+      });
     });
 
     group('dispose', () {

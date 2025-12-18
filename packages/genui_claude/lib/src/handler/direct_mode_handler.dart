@@ -3,6 +3,7 @@ import 'package:genui_claude/src/config/claude_config.dart';
 import 'package:genui_claude/src/exceptions/claude_exceptions.dart' as exc;
 import 'package:genui_claude/src/handler/api_handler.dart';
 import 'package:genui_claude/src/metrics/metrics_collector.dart';
+import 'package:genui_claude/src/resilience/circuit_breaker.dart';
 import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
 
@@ -41,20 +42,24 @@ class DirectModeHandler implements ApiHandler {
   /// - [apiKey]: Your Claude API key
   /// - [model]: Model to use (default: 'claude-sonnet-4-20250514')
   /// - [config]: Optional configuration for timeouts, retries, etc.
+  /// - [circuitBreaker]: Optional circuit breaker for resilience
   /// - [metricsCollector]: Optional metrics collector for observability
   DirectModeHandler({
     required String apiKey,
     this.model = 'claude-sonnet-4-20250514',
     ClaudeConfig config = ClaudeConfig.defaults,
+    CircuitBreaker? circuitBreaker,
     MetricsCollector? metricsCollector,
   })  : _client = sdk.AnthropicClient(
           apiKey: apiKey,
           headers: config.headers,
           retries: config.retryAttempts,
         ),
+        _circuitBreaker = circuitBreaker,
         _metricsCollector = metricsCollector;
 
   final sdk.AnthropicClient _client;
+  final CircuitBreaker? _circuitBreaker;
   final MetricsCollector? _metricsCollector;
 
   /// The default model to use for requests.
@@ -77,6 +82,32 @@ class DirectModeHandler implements ApiHandler {
       model: request.model ?? model,
     );
 
+    // Check circuit breaker state
+    if (_circuitBreaker != null) {
+      try {
+        _circuitBreaker.checkState();
+      } on exc.CircuitBreakerOpenException catch (e) {
+        _log.warning('[Request $requestId] Circuit breaker is open');
+        _metricsCollector?.recordRequestFailure(
+          requestId: requestId,
+          duration: DateTime.now().difference(startTime),
+          errorType: e.typeName,
+          errorMessage: e.message,
+          isRetryable: e.isRetryable,
+        );
+        yield {
+          'type': 'error',
+          'error': {
+            'message': e.message,
+            'type': e.typeName,
+            'retryable': e.isRetryable,
+          },
+          '_requestId': requestId,
+        };
+        return;
+      }
+    }
+
     try {
       // Build the SDK request
       final sdkRequest = sdk.CreateMessageRequest(
@@ -88,6 +119,9 @@ class DirectModeHandler implements ApiHandler {
             : null,
         tools: request.tools != null ? _convertTools(request.tools!) : null,
         temperature: request.temperature,
+        topP: request.topP,
+        topK: request.topK,
+        stopSequences: request.stopSequences,
         stream: true,
       );
 
@@ -99,12 +133,14 @@ class DirectModeHandler implements ApiHandler {
       }
 
       _log.fine('[Request $requestId] Request completed successfully');
+      _circuitBreaker?.recordSuccess();
       _metricsCollector?.recordRequestSuccess(
         requestId: requestId,
         duration: DateTime.now().difference(startTime),
       );
     } on Exception catch (e, stackTrace) {
       _log.warning('[Request $requestId] Claude API request failed', e, stackTrace);
+      _circuitBreaker?.recordFailure();
 
       // Map exception to our exception types based on message content
       final exception = _mapException(e, requestId, stackTrace);

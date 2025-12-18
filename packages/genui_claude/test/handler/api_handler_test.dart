@@ -47,6 +47,35 @@ void main() {
       expect(request.temperature, 0.7);
     });
 
+    test('creates with advanced model parameters (topP, topK, stopSequences)', () {
+      const request = ApiRequest(
+        messages: [
+          {'role': 'user', 'content': 'Hello'},
+        ],
+        maxTokens: 1024,
+        topP: 0.9,
+        topK: 40,
+        stopSequences: ['END', 'STOP'],
+      );
+
+      expect(request.topP, 0.9);
+      expect(request.topK, 40);
+      expect(request.stopSequences, ['END', 'STOP']);
+    });
+
+    test('advanced parameters default to null', () {
+      const request = ApiRequest(
+        messages: [
+          {'role': 'user', 'content': 'Hello'},
+        ],
+        maxTokens: 1024,
+      );
+
+      expect(request.topP, isNull);
+      expect(request.topK, isNull);
+      expect(request.stopSequences, isNull);
+    });
+
     group('toString', () {
       test('returns formatted string with message count', () {
         const request = ApiRequest(

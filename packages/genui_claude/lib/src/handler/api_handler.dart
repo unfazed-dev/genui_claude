@@ -14,6 +14,9 @@ class ApiRequest {
     this.tools,
     this.model,
     this.temperature,
+    this.topP,
+    this.topK,
+    this.stopSequences,
   });
 
   /// Messages in Claude API format (already converted from ChatMessage).
@@ -40,6 +43,24 @@ class ApiRequest {
 
   /// Temperature setting for response randomness (0.0 to 1.0).
   final double? temperature;
+
+  /// Nucleus sampling parameter (0.0 to 1.0).
+  ///
+  /// Controls diversity by limiting token selection to a cumulative probability.
+  /// Lower values make output more focused, higher values more diverse.
+  final double? topP;
+
+  /// Top-k sampling parameter.
+  ///
+  /// Limits token selection to the k most likely tokens.
+  /// Lower values make output more focused.
+  final int? topK;
+
+  /// Stop sequences that terminate generation.
+  ///
+  /// When Claude generates any of these sequences, it stops generating.
+  /// Maximum 4 sequences, each up to 100 characters.
+  final List<String>? stopSequences;
 
   @override
   String toString() {
