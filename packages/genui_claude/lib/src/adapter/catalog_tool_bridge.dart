@@ -1,6 +1,8 @@
 import 'package:a2ui_claude/a2ui_claude.dart';
 import 'package:genui/genui.dart';
 import 'package:genui_claude/src/adapter/a2ui_control_tools.dart';
+import 'package:genui_claude/src/search/catalog_search_tool.dart';
+import 'package:genui_claude/src/search/tool_catalog_index.dart';
 import 'package:json_schema_builder/json_schema_builder.dart';
 
 /// Bridges GenUI Catalog items to A2UI tool schemas.
@@ -28,6 +30,39 @@ class CatalogToolBridge {
   /// prepended to the widget tools list.
   static List<A2uiToolSchema> withA2uiTools(List<A2uiToolSchema> widgetTools) {
     return [...A2uiControlTools.all, ...widgetTools];
+  }
+
+  /// Creates a searchable index from tool schemas.
+  ///
+  /// Use this for large catalogs (100+ widgets) to enable dynamic tool
+  /// discovery via the search_catalog and load_tools tools.
+  static ToolCatalogIndex createIndex(List<A2uiToolSchema> tools) {
+    final index = ToolCatalogIndex();
+    index.addSchemas(tools);
+    return index;
+  }
+
+  /// Creates a searchable index directly from a [Catalog].
+  ///
+  /// Convenience method combining [fromCatalog] and [createIndex].
+  static ToolCatalogIndex createIndexFromCatalog(Catalog catalog) {
+    final tools = fromCatalog(catalog);
+    return createIndex(tools);
+  }
+
+  /// Returns the search mode tools (search_catalog and load_tools).
+  ///
+  /// Use these tools when enabling search mode for large catalogs.
+  static List<A2uiToolSchema> searchModeTools() {
+    return CatalogSearchTool.allTools;
+  }
+
+  /// Combines A2UI control tools with search mode tools.
+  ///
+  /// Use this instead of [withA2uiTools] when enabling search mode.
+  /// The search tools allow Claude to discover and load widgets dynamically.
+  static List<A2uiToolSchema> withSearchTools() {
+    return [...A2uiControlTools.all, ...CatalogSearchTool.allTools];
   }
 
   /// Converts a single [CatalogItem] to an [A2uiToolSchema].

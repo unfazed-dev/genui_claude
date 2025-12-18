@@ -422,6 +422,105 @@ void main() {
 
           handler.dispose();
         });
+
+        test('includes thinking config when interleaved thinking enabled', () async {
+          final handler = ProxyModeHandler(
+            endpoint: testEndpoint,
+            client: mockClient,
+          );
+
+          final mockResponse = _createMockStreamedResponse(
+            statusCode: 200,
+            body: 'data: {"type": "message_stop"}\n\n',
+          );
+          when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
+
+          const request = ApiRequest(
+            messages: [
+              {'role': 'user', 'content': 'Hello'},
+            ],
+            maxTokens: 1024,
+            enableInterleavedThinking: true,
+            thinkingBudgetTokens: 10000,
+          );
+
+          await handler.createStream(request).toList();
+
+          final captured = verify(mockClient.send(captureAny)).captured;
+          final sentRequest = captured.first as http.Request;
+          final body = jsonDecode(sentRequest.body) as Map<String, dynamic>;
+
+          expect(body.containsKey('thinking'), isTrue);
+          final thinking = body['thinking'] as Map<String, dynamic>;
+          expect(thinking['type'], equals('enabled'));
+          expect(thinking['budget_tokens'], equals(10000));
+
+          handler.dispose();
+        });
+
+        test('includes thinking without budget when thinkingBudgetTokens is null', () async {
+          final handler = ProxyModeHandler(
+            endpoint: testEndpoint,
+            client: mockClient,
+          );
+
+          final mockResponse = _createMockStreamedResponse(
+            statusCode: 200,
+            body: 'data: {"type": "message_stop"}\n\n',
+          );
+          when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
+
+          const request = ApiRequest(
+            messages: [
+              {'role': 'user', 'content': 'Hello'},
+            ],
+            maxTokens: 1024,
+            enableInterleavedThinking: true,
+          );
+
+          await handler.createStream(request).toList();
+
+          final captured = verify(mockClient.send(captureAny)).captured;
+          final sentRequest = captured.first as http.Request;
+          final body = jsonDecode(sentRequest.body) as Map<String, dynamic>;
+
+          expect(body.containsKey('thinking'), isTrue);
+          final thinking = body['thinking'] as Map<String, dynamic>;
+          expect(thinking['type'], equals('enabled'));
+          expect(thinking.containsKey('budget_tokens'), isFalse);
+
+          handler.dispose();
+        });
+
+        test('excludes thinking config when disabled', () async {
+          final handler = ProxyModeHandler(
+            endpoint: testEndpoint,
+            client: mockClient,
+          );
+
+          final mockResponse = _createMockStreamedResponse(
+            statusCode: 200,
+            body: 'data: {"type": "message_stop"}\n\n',
+          );
+          when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
+
+          const request = ApiRequest(
+            messages: [
+              {'role': 'user', 'content': 'Hello'},
+            ],
+            maxTokens: 1024,
+          );
+
+          await handler.createStream(request).toList();
+
+          final captured = verify(mockClient.send(captureAny)).captured;
+          final sentRequest = captured.first as http.Request;
+          final body = jsonDecode(sentRequest.body) as Map<String, dynamic>;
+
+          expect(body.containsKey('thinking'), isFalse);
+
+          handler.dispose();
+        });
       });
 
       group('SSE parsing', () {

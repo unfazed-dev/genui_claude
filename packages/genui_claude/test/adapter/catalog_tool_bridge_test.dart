@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:genui/genui.dart';
 import 'package:genui_claude/src/adapter/catalog_tool_bridge.dart';
+import 'package:genui_claude/src/search/catalog_search_tool.dart';
 import 'package:json_schema_builder/json_schema_builder.dart';
 
 void main() {
@@ -386,6 +387,124 @@ void main() {
         expect(toolNames, contains('surface_update'));
         expect(toolNames, contains('data_model_update'));
         expect(toolNames, contains('delete_surface'));
+      });
+    });
+
+    group('createIndex', () {
+      test('creates index from tool schemas', () {
+        final tools = CatalogToolBridge.fromItems([
+          CatalogItem(
+            name: 'date_picker',
+            dataSchema: S.object(
+              description: 'Calendar widget for selecting dates',
+              properties: {'date': S.string()},
+            ),
+            widgetBuilder: (_) => const SizedBox(),
+          ),
+          CatalogItem(
+            name: 'button',
+            dataSchema: S.object(
+              description: 'A clickable button',
+              properties: {'label': S.string()},
+            ),
+            widgetBuilder: (_) => const SizedBox(),
+          ),
+        ]);
+
+        final index = CatalogToolBridge.createIndex(tools);
+
+        expect(index.size, equals(2));
+        expect(index.allNames, containsAll(['date_picker', 'button']));
+      });
+
+      test('creates searchable index', () {
+        final tools = CatalogToolBridge.fromItems([
+          CatalogItem(
+            name: 'date_picker',
+            dataSchema: S.object(
+              description: 'Calendar widget for selecting dates',
+              properties: {'date': S.string()},
+            ),
+            widgetBuilder: (_) => const SizedBox(),
+          ),
+        ]);
+
+        final index = CatalogToolBridge.createIndex(tools);
+        final results = index.search('calendar');
+
+        expect(results, hasLength(1));
+        expect(results.first.name, equals('date_picker'));
+      });
+
+      test('creates empty index for empty tools', () {
+        final index = CatalogToolBridge.createIndex([]);
+
+        expect(index.size, equals(0));
+      });
+    });
+
+    group('createIndexFromCatalog', () {
+      test('creates index directly from catalog', () {
+        final catalog = Catalog([
+          CatalogItem(
+            name: 'test_widget',
+            dataSchema: S.object(
+              description: 'A test widget',
+              properties: {'value': S.string()},
+            ),
+            widgetBuilder: (_) => const SizedBox(),
+          ),
+        ]);
+
+        final index = CatalogToolBridge.createIndexFromCatalog(catalog);
+
+        expect(index.size, equals(1));
+        expect(index.allNames, contains('test_widget'));
+      });
+    });
+
+    group('searchModeTools', () {
+      test('returns search and load tools', () {
+        final tools = CatalogToolBridge.searchModeTools();
+
+        expect(tools, hasLength(2));
+        expect(
+          tools.map((t) => t.name),
+          containsAll([
+            CatalogSearchTool.searchCatalogName,
+            CatalogSearchTool.loadToolsName,
+          ]),
+        );
+      });
+
+      test('returns same tools as CatalogSearchTool.allTools', () {
+        final bridgeTools = CatalogToolBridge.searchModeTools();
+        final searchTools = CatalogSearchTool.allTools;
+
+        expect(bridgeTools, equals(searchTools));
+      });
+    });
+
+    group('withSearchTools', () {
+      test('adds search tools to A2UI control tools', () {
+        final tools = CatalogToolBridge.withSearchTools();
+
+        final toolNames = tools.map((t) => t.name).toList();
+
+        // Should have A2UI control tools
+        expect(toolNames, contains('begin_rendering'));
+        expect(toolNames, contains('surface_update'));
+
+        // Should have search tools
+        expect(toolNames, contains('search_catalog'));
+        expect(toolNames, contains('load_tools'));
+      });
+
+      test('does not include widget tools', () {
+        final tools = CatalogToolBridge.withSearchTools();
+
+        // Only control tools + search tools
+        expect(tools.length, greaterThanOrEqualTo(6));
       });
     });
   });

@@ -45,6 +45,17 @@ sealed class StreamEvent with _$StreamEvent {
     String text,
   ) = TextDeltaEvent;
 
+  /// Event containing Claude's thinking/reasoning content.
+  ///
+  /// Emitted when interleaved thinking is enabled (Claude 4+ models).
+  /// Contains partial or complete thinking blocks.
+  const factory StreamEvent.thinking(
+    /// The thinking content chunk.
+    String content, {
+    /// Whether this is the final thinking chunk for the current block.
+    @Default(false) bool isComplete,
+  }) = ThinkingEvent;
+
   /// Event indicating the stream has completed successfully.
   const factory StreamEvent.complete() = CompleteEvent;
 

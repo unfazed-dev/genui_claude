@@ -29,6 +29,9 @@ class ClaudeStreamHandler {
     final toolBuffers = <String, StringBuffer>{};
     final toolNames = <String, String>{};
 
+    // Thinking block tracking
+    final thinkingBlocks = <String>{};
+
     await for (final event in messageStream) {
       final type = event['type'] as String?;
 
@@ -36,10 +39,15 @@ class ClaudeStreamHandler {
         case 'content_block_start':
           final index = event['index']?.toString() ?? '0';
           final contentBlock = event['content_block'] as Map<String, dynamic>?;
-          if (contentBlock?['type'] == 'tool_use') {
+          final blockType = contentBlock?['type'] as String?;
+
+          if (blockType == 'tool_use') {
             // Start tracking this tool use block
             toolNames[index] = contentBlock!['name'] as String;
             toolBuffers[index] = StringBuffer();
+          } else if (blockType == 'thinking') {
+            // Start tracking this thinking block
+            thinkingBlocks.add(index);
           }
 
         case 'content_block_delta':
@@ -60,6 +68,12 @@ class ClaudeStreamHandler {
               if (partialJson != null) {
                 toolBuffers[index]?.write(partialJson);
               }
+            } else if (deltaType == 'thinking_delta') {
+              // Emit thinking delta events
+              final thinking = delta['thinking'] as String?;
+              if (thinking != null) {
+                yield ThinkingEvent(thinking);
+              }
             }
 
             yield DeltaEvent(delta);
@@ -69,6 +83,12 @@ class ClaudeStreamHandler {
           final index = event['index']?.toString() ?? '0';
           final toolName = toolNames[index];
           final buffer = toolBuffers[index];
+
+          // If this was a thinking block, emit completion event
+          if (thinkingBlocks.contains(index)) {
+            yield const ThinkingEvent('', isComplete: true);
+            thinkingBlocks.remove(index);
+          }
 
           // If this was a tool use block, parse and emit A2UI message
           if (toolName != null && buffer != null) {

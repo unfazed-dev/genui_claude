@@ -19,8 +19,17 @@ class ClaudeConfig {
     this.retryAttempts = 3,
     this.enableStreaming = true,
     this.headers,
+    this.enableFineGrainedStreaming = false,
+    this.enableInterleavedThinking = false,
+    this.thinkingBudgetTokens,
+    this.enableToolSearch = false,
+    this.maxLoadedToolsPerSession = 50,
   })  : assert(maxTokens > 0, 'maxTokens must be greater than 0'),
-        assert(retryAttempts >= 0, 'retryAttempts cannot be negative');
+        assert(retryAttempts >= 0, 'retryAttempts cannot be negative'),
+        assert(
+          maxLoadedToolsPerSession > 0,
+          'maxLoadedToolsPerSession must be greater than 0',
+        );
 
   /// Maximum tokens in response.
   final int maxTokens;
@@ -41,6 +50,39 @@ class ClaudeConfig {
   /// Custom HTTP headers.
   final Map<String, String>? headers;
 
+  /// Enable fine-grained tool streaming for progressive widget rendering.
+  ///
+  /// When enabled, adds the `fine-grained-tool-streaming-2025-05-14` beta header
+  /// to Claude API requests, allowing partial tool call JSON to be streamed
+  /// as it's generated.
+  final bool enableFineGrainedStreaming;
+
+  /// Enable interleaved thinking for Claude 4+ models.
+  ///
+  /// When enabled, adds the `interleaved-thinking-2025-05-14` beta header
+  /// and includes thinking configuration in the request body. This allows
+  /// Claude to emit thinking blocks interleaved with content.
+  final bool enableInterleavedThinking;
+
+  /// Budget tokens for thinking (required when [enableInterleavedThinking] is true).
+  ///
+  /// Specifies the maximum number of tokens Claude can use for thinking.
+  /// If null when thinking is enabled, Claude uses its default budget.
+  final int? thinkingBudgetTokens;
+
+  /// Enable tool search mode for large catalogs.
+  ///
+  /// When enabled, Claude will use the search_catalog and load_tools tools
+  /// to dynamically discover and load widgets from large catalogs (100+ items)
+  /// instead of receiving all tools upfront.
+  final bool enableToolSearch;
+
+  /// Maximum number of tools that can be loaded per session.
+  ///
+  /// Only applies when [enableToolSearch] is true. Limits the number of
+  /// widget tools that can be loaded dynamically during a single session.
+  final int maxLoadedToolsPerSession;
+
   /// Default configuration.
   static const ClaudeConfig defaults = ClaudeConfig();
 
@@ -51,6 +93,11 @@ class ClaudeConfig {
     int? retryAttempts,
     bool? enableStreaming,
     Map<String, String>? headers,
+    bool? enableFineGrainedStreaming,
+    bool? enableInterleavedThinking,
+    int? thinkingBudgetTokens,
+    bool? enableToolSearch,
+    int? maxLoadedToolsPerSession,
   }) {
     return ClaudeConfig(
       maxTokens: maxTokens ?? this.maxTokens,
@@ -58,6 +105,14 @@ class ClaudeConfig {
       retryAttempts: retryAttempts ?? this.retryAttempts,
       enableStreaming: enableStreaming ?? this.enableStreaming,
       headers: headers ?? this.headers,
+      enableFineGrainedStreaming:
+          enableFineGrainedStreaming ?? this.enableFineGrainedStreaming,
+      enableInterleavedThinking:
+          enableInterleavedThinking ?? this.enableInterleavedThinking,
+      thinkingBudgetTokens: thinkingBudgetTokens ?? this.thinkingBudgetTokens,
+      enableToolSearch: enableToolSearch ?? this.enableToolSearch,
+      maxLoadedToolsPerSession:
+          maxLoadedToolsPerSession ?? this.maxLoadedToolsPerSession,
     );
   }
 }

@@ -35,6 +35,36 @@ void main() {
 
         expect(config.headers, isNull);
       });
+
+      test('has correct default enableFineGrainedStreaming', () {
+        const config = ClaudeConfig();
+
+        expect(config.enableFineGrainedStreaming, isFalse);
+      });
+
+      test('has correct default enableInterleavedThinking', () {
+        const config = ClaudeConfig();
+
+        expect(config.enableInterleavedThinking, isFalse);
+      });
+
+      test('has null default thinkingBudgetTokens', () {
+        const config = ClaudeConfig();
+
+        expect(config.thinkingBudgetTokens, isNull);
+      });
+
+      test('has correct default enableToolSearch', () {
+        const config = ClaudeConfig();
+
+        expect(config.enableToolSearch, isFalse);
+      });
+
+      test('has correct default maxLoadedToolsPerSession', () {
+        const config = ClaudeConfig();
+
+        expect(config.maxLoadedToolsPerSession, equals(50));
+      });
     });
 
     group('custom values', () {
@@ -79,6 +109,48 @@ void main() {
 
         expect(config.maxTokens, equals(100000));
       });
+
+      test('accepts custom enableFineGrainedStreaming', () {
+        const config = ClaudeConfig(enableFineGrainedStreaming: true);
+
+        expect(config.enableFineGrainedStreaming, isTrue);
+      });
+
+      test('accepts custom enableInterleavedThinking', () {
+        const config = ClaudeConfig(enableInterleavedThinking: true);
+
+        expect(config.enableInterleavedThinking, isTrue);
+      });
+
+      test('accepts custom thinkingBudgetTokens', () {
+        const config = ClaudeConfig(thinkingBudgetTokens: 10000);
+
+        expect(config.thinkingBudgetTokens, equals(10000));
+      });
+
+      test('accepts both streaming features enabled', () {
+        const config = ClaudeConfig(
+          enableFineGrainedStreaming: true,
+          enableInterleavedThinking: true,
+          thinkingBudgetTokens: 5000,
+        );
+
+        expect(config.enableFineGrainedStreaming, isTrue);
+        expect(config.enableInterleavedThinking, isTrue);
+        expect(config.thinkingBudgetTokens, equals(5000));
+      });
+
+      test('accepts custom enableToolSearch', () {
+        const config = ClaudeConfig(enableToolSearch: true);
+
+        expect(config.enableToolSearch, isTrue);
+      });
+
+      test('accepts custom maxLoadedToolsPerSession', () {
+        const config = ClaudeConfig(maxLoadedToolsPerSession: 100);
+
+        expect(config.maxLoadedToolsPerSession, equals(100));
+      });
     });
 
     group('defaults preset', () {
@@ -90,6 +162,11 @@ void main() {
         expect(config.retryAttempts, equals(3));
         expect(config.enableStreaming, isTrue);
         expect(config.headers, isNull);
+        expect(config.enableFineGrainedStreaming, isFalse);
+        expect(config.enableInterleavedThinking, isFalse);
+        expect(config.thinkingBudgetTokens, isNull);
+        expect(config.enableToolSearch, isFalse);
+        expect(config.maxLoadedToolsPerSession, equals(50));
       });
     });
 
@@ -131,6 +208,29 @@ void main() {
         expect(copy.headers, equals({'Auth': 'token'}));
       });
 
+      test('copies with new enableFineGrainedStreaming', () {
+        const original = ClaudeConfig();
+        final copy = original.copyWith(enableFineGrainedStreaming: true);
+
+        expect(copy.enableFineGrainedStreaming, isTrue);
+        expect(copy.enableInterleavedThinking, isFalse);
+      });
+
+      test('copies with new enableInterleavedThinking', () {
+        const original = ClaudeConfig();
+        final copy = original.copyWith(enableInterleavedThinking: true);
+
+        expect(copy.enableInterleavedThinking, isTrue);
+        expect(copy.enableFineGrainedStreaming, isFalse);
+      });
+
+      test('copies with new thinkingBudgetTokens', () {
+        const original = ClaudeConfig();
+        final copy = original.copyWith(thinkingBudgetTokens: 8000);
+
+        expect(copy.thinkingBudgetTokens, equals(8000));
+      });
+
       test('copies all fields at once', () {
         const original = ClaudeConfig();
         final copy = original.copyWith(
@@ -139,6 +239,11 @@ void main() {
           retryAttempts: 1,
           enableStreaming: false,
           headers: {'X-Test': 'test'},
+          enableFineGrainedStreaming: true,
+          enableInterleavedThinking: true,
+          thinkingBudgetTokens: 5000,
+          enableToolSearch: true,
+          maxLoadedToolsPerSession: 75,
         );
 
         expect(copy.maxTokens, equals(1000));
@@ -146,6 +251,27 @@ void main() {
         expect(copy.retryAttempts, equals(1));
         expect(copy.enableStreaming, isFalse);
         expect(copy.headers, equals({'X-Test': 'test'}));
+        expect(copy.enableFineGrainedStreaming, isTrue);
+        expect(copy.enableInterleavedThinking, isTrue);
+        expect(copy.thinkingBudgetTokens, equals(5000));
+        expect(copy.enableToolSearch, isTrue);
+        expect(copy.maxLoadedToolsPerSession, equals(75));
+      });
+
+      test('copies with new enableToolSearch', () {
+        const original = ClaudeConfig();
+        final copy = original.copyWith(enableToolSearch: true);
+
+        expect(copy.enableToolSearch, isTrue);
+        expect(copy.maxLoadedToolsPerSession, equals(50));
+      });
+
+      test('copies with new maxLoadedToolsPerSession', () {
+        const original = ClaudeConfig();
+        final copy = original.copyWith(maxLoadedToolsPerSession: 25);
+
+        expect(copy.maxLoadedToolsPerSession, equals(25));
+        expect(copy.enableToolSearch, isFalse);
       });
     });
   });

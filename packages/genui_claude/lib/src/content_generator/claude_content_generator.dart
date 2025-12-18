@@ -178,6 +178,11 @@ class ClaudeContentGenerator implements ContentGenerator {
           case a2ui.CompleteEvent():
             // Stream complete
             break;
+
+          case a2ui.ThinkingEvent():
+            // Thinking events from Claude 4+ models - can be exposed via
+            // dedicated stream in future iterations if needed
+            break;
         }
       }
     } on Exception catch (e, stackTrace) {

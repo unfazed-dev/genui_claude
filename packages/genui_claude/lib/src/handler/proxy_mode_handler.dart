@@ -346,6 +346,11 @@ class ProxyModeHandler implements ApiHandler {
       if (request.topP != null) 'top_p': request.topP,
       if (request.topK != null) 'top_k': request.topK,
       if (request.stopSequences != null) 'stop_sequences': request.stopSequences,
+      if (request.enableInterleavedThinking) 'thinking': {
+        'type': 'enabled',
+        if (request.thinkingBudgetTokens != null)
+          'budget_tokens': request.thinkingBudgetTokens,
+      },
       'stream': true,
     };
   }

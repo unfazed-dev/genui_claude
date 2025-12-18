@@ -73,6 +73,15 @@ Future<void> _demonstrateStreaming(ClaudeStreamHandler handler) async {
         if (error is StreamException && error.isRetryable) {
           print('   -> Error is retryable');
         }
+
+      case ThinkingEvent(:final content, :final isComplete):
+        if (content.isNotEmpty) {
+          final preview = content.length > 50 ? '${content.substring(0, 50)}...' : content;
+          print('   [Thinking] "$preview"');
+        }
+        if (isComplete) {
+          print('   [Thinking] Block complete');
+        }
     }
   }
 }

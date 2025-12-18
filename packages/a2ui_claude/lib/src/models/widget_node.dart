@@ -26,8 +26,13 @@ abstract class WidgetNode with _$WidgetNode {
     /// Child widgets for container-type widgets.
     List<WidgetNode>? children,
 
-    /// Optional data binding key for dynamic content.
-    String? dataBinding,
+    /// Optional data binding specification for dynamic content.
+    ///
+    /// Can be either:
+    /// - A [String] path (e.g., 'form.email') for simple one-way binding
+    /// - A [Map] with property → path mappings (e.g., {'value': 'form.email'})
+    /// - A [Map] with property → binding config (e.g., {'value': {'path': 'form.email', 'mode': 'twoWay'}})
+    Object? dataBinding,
   }) = _WidgetNode;
 
   /// Creates a [WidgetNode] from a JSON map.

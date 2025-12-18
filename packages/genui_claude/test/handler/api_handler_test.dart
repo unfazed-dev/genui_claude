@@ -76,6 +76,61 @@ void main() {
       expect(request.stopSequences, isNull);
     });
 
+    test('streaming/thinking parameters default to false/null', () {
+      const request = ApiRequest(
+        messages: [
+          {'role': 'user', 'content': 'Hello'},
+        ],
+        maxTokens: 1024,
+      );
+
+      expect(request.enableFineGrainedStreaming, isFalse);
+      expect(request.enableInterleavedThinking, isFalse);
+      expect(request.thinkingBudgetTokens, isNull);
+    });
+
+    test('creates with fine-grained streaming enabled', () {
+      const request = ApiRequest(
+        messages: [
+          {'role': 'user', 'content': 'Hello'},
+        ],
+        maxTokens: 1024,
+        enableFineGrainedStreaming: true,
+      );
+
+      expect(request.enableFineGrainedStreaming, isTrue);
+    });
+
+    test('creates with interleaved thinking enabled', () {
+      const request = ApiRequest(
+        messages: [
+          {'role': 'user', 'content': 'Hello'},
+        ],
+        maxTokens: 1024,
+        enableInterleavedThinking: true,
+        thinkingBudgetTokens: 10000,
+      );
+
+      expect(request.enableInterleavedThinking, isTrue);
+      expect(request.thinkingBudgetTokens, 10000);
+    });
+
+    test('creates with both streaming features enabled', () {
+      const request = ApiRequest(
+        messages: [
+          {'role': 'user', 'content': 'Hello'},
+        ],
+        maxTokens: 1024,
+        enableFineGrainedStreaming: true,
+        enableInterleavedThinking: true,
+        thinkingBudgetTokens: 5000,
+      );
+
+      expect(request.enableFineGrainedStreaming, isTrue);
+      expect(request.enableInterleavedThinking, isTrue);
+      expect(request.thinkingBudgetTokens, 5000);
+    });
+
     group('toString', () {
       test('returns formatted string with message count', () {
         const request = ApiRequest(

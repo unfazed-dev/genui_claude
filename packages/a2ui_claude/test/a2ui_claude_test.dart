@@ -1863,6 +1863,7 @@ void main() {
           DeltaEvent() => 'delta',
           A2uiMessageEvent() => 'a2ui',
           TextDeltaEvent() => 'text',
+          ThinkingEvent() => 'thinking',
           CompleteEvent() => 'complete',
           ErrorEvent() => 'error',
         };
@@ -1881,6 +1882,10 @@ void main() {
         equals('text'),
       );
       expect(
+        matchEvent(const ThinkingEvent('thinking content')),
+        equals('thinking'),
+      );
+      expect(
         matchEvent(const CompleteEvent()),
         equals('complete'),
       );
@@ -1888,6 +1893,25 @@ void main() {
         matchEvent(const ErrorEvent(StreamException('err'))),
         equals('error'),
       );
+    });
+
+    group('ThinkingEvent', () {
+      test('creates with content only', () {
+        const event = ThinkingEvent('Claude is thinking...');
+        expect(event.content, equals('Claude is thinking...'));
+        expect(event.isComplete, isFalse);
+      });
+
+      test('creates with isComplete flag', () {
+        const event = ThinkingEvent('Done thinking', isComplete: true);
+        expect(event.content, equals('Done thinking'));
+        expect(event.isComplete, isTrue);
+      });
+
+      test('default isComplete is false', () {
+        const event = ThinkingEvent('partial thought');
+        expect(event.isComplete, isFalse);
+      });
     });
 
     test('streamRequest handles unknown event types gracefully', () async {
@@ -2041,6 +2065,135 @@ void main() {
       // No A2uiMessageEvent for unknown tool
       expect(events.whereType<A2uiMessageEvent>().length, equals(0));
       expect(events.whereType<CompleteEvent>().length, equals(1));
+    });
+
+    group('thinking blocks', () {
+      test('streamRequest yields ThinkingEvent for thinking_delta', () async {
+        final handler = ClaudeStreamHandler();
+        final inputEvents = [
+          {
+            'type': 'content_block_start',
+            'index': 0,
+            'content_block': {'type': 'thinking'},
+          },
+          {
+            'type': 'content_block_delta',
+            'index': 0,
+            'delta': {'type': 'thinking_delta', 'thinking': 'Let me analyze this...'},
+          },
+          {
+            'type': 'content_block_delta',
+            'index': 0,
+            'delta': {'type': 'thinking_delta', 'thinking': ' I should consider...'},
+          },
+          {
+            'type': 'content_block_stop',
+            'index': 0,
+          },
+          {'type': 'message_stop'},
+        ];
+
+        final events = <StreamEvent>[];
+        await for (final event in handler.streamRequest(
+          messageStream: Stream.fromIterable(inputEvents),
+        )) {
+          events.add(event);
+        }
+
+        final thinkingEvents = events.whereType<ThinkingEvent>().toList();
+        // 2 partial deltas + 1 completion event = 3 total
+        expect(thinkingEvents.length, equals(3));
+
+        // Check partial events
+        final partialEvents = thinkingEvents.where((e) => !e.isComplete).toList();
+        expect(partialEvents.length, equals(2));
+        expect(partialEvents[0].content, equals('Let me analyze this...'));
+        expect(partialEvents[1].content, equals(' I should consider...'));
+
+        // Check completion event
+        final completeEvents = thinkingEvents.where((e) => e.isComplete).toList();
+        expect(completeEvents.length, equals(1));
+      });
+
+      test('streamRequest emits ThinkingEvent with isComplete on block stop', () async {
+        final handler = ClaudeStreamHandler();
+        final inputEvents = [
+          {
+            'type': 'content_block_start',
+            'index': 0,
+            'content_block': {'type': 'thinking'},
+          },
+          {
+            'type': 'content_block_delta',
+            'index': 0,
+            'delta': {'type': 'thinking_delta', 'thinking': 'Thinking...'},
+          },
+          {
+            'type': 'content_block_stop',
+            'index': 0,
+          },
+        ];
+
+        final events = <StreamEvent>[];
+        await for (final event in handler.streamRequest(
+          messageStream: Stream.fromIterable(inputEvents),
+        )) {
+          events.add(event);
+        }
+
+        final thinkingEvents = events.whereType<ThinkingEvent>().toList();
+        // Should have a final thinking event with isComplete=true
+        expect(thinkingEvents.any((e) => e.isComplete), isTrue);
+      });
+
+      test('streamRequest handles interleaved thinking and text', () async {
+        final handler = ClaudeStreamHandler();
+        final inputEvents = [
+          {
+            'type': 'content_block_start',
+            'index': 0,
+            'content_block': {'type': 'thinking'},
+          },
+          {
+            'type': 'content_block_delta',
+            'index': 0,
+            'delta': {'type': 'thinking_delta', 'thinking': 'Thinking first...'},
+          },
+          {
+            'type': 'content_block_stop',
+            'index': 0,
+          },
+          {
+            'type': 'content_block_start',
+            'index': 1,
+            'content_block': {'type': 'text'},
+          },
+          {
+            'type': 'content_block_delta',
+            'index': 1,
+            'delta': {'type': 'text_delta', 'text': 'Here is my response.'},
+          },
+          {
+            'type': 'content_block_stop',
+            'index': 1,
+          },
+          {'type': 'message_stop'},
+        ];
+
+        final events = <StreamEvent>[];
+        await for (final event in handler.streamRequest(
+          messageStream: Stream.fromIterable(inputEvents),
+        )) {
+          events.add(event);
+        }
+
+        final thinkingEvents = events.whereType<ThinkingEvent>().toList();
+        final textEvents = events.whereType<TextDeltaEvent>().toList();
+
+        expect(thinkingEvents.length, greaterThan(0));
+        expect(textEvents.length, equals(1));
+        expect(textEvents[0].text, equals('Here is my response.'));
+      });
     });
   });
 }

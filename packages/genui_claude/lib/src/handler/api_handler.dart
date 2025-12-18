@@ -17,6 +17,9 @@ class ApiRequest {
     this.topP,
     this.topK,
     this.stopSequences,
+    this.enableFineGrainedStreaming = false,
+    this.enableInterleavedThinking = false,
+    this.thinkingBudgetTokens,
   });
 
   /// Messages in Claude API format (already converted from ChatMessage).
@@ -61,6 +64,24 @@ class ApiRequest {
   /// When Claude generates any of these sequences, it stops generating.
   /// Maximum 4 sequences, each up to 100 characters.
   final List<String>? stopSequences;
+
+  /// Enable fine-grained tool streaming for progressive widget rendering.
+  ///
+  /// When enabled, the handler adds the `fine-grained-tool-streaming-2025-05-14`
+  /// beta header, allowing partial tool call JSON to stream as it's generated.
+  final bool enableFineGrainedStreaming;
+
+  /// Enable interleaved thinking for Claude 4+ models.
+  ///
+  /// When enabled, adds the `interleaved-thinking-2025-05-14` beta header
+  /// and includes thinking configuration in the request body.
+  final bool enableInterleavedThinking;
+
+  /// Budget tokens for thinking (used when [enableInterleavedThinking] is true).
+  ///
+  /// Specifies the maximum number of tokens Claude can use for thinking.
+  /// If null when thinking is enabled, Claude uses its default budget.
+  final int? thinkingBudgetTokens;
 
   @override
   String toString() {
