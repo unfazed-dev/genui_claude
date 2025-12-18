@@ -3,6 +3,7 @@ import 'package:genui_claude_example/screens/advanced_config_chat.dart';
 import 'package:genui_claude_example/screens/basic_chat.dart';
 import 'package:genui_claude_example/screens/data_binding_demo.dart';
 import 'package:genui_claude_example/screens/production_chat.dart';
+import 'package:genui_claude_example/screens/resilience_metrics_demo.dart';
 import 'package:genui_claude_example/screens/tool_search_demo.dart';
 
 void main() {
@@ -101,6 +102,18 @@ class HomePage extends StatelessWidget {
               context,
               MaterialPageRoute<void>(
                 builder: (_) => const ToolSearchDemoScreen(),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          _ExampleTile(
+            title: 'Resilience & Metrics',
+            subtitle: 'Circuit breaker, exceptions, and metrics events',
+            icon: Icons.shield_outlined,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (_) => const ResilienceMetricsDemoScreen(),
               ),
             ),
           ),

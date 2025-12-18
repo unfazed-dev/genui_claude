@@ -14,6 +14,7 @@ dependencies:
     path: ../
 
   json_schema_builder: any
+  a2ui_claude: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
