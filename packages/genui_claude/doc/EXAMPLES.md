@@ -1073,6 +1073,28 @@ ValueListenableBuilder<bool>(
 
 ---
 
+## Interactive Demo Screens
+
+The example app includes interactive demo screens showcasing all package features:
+
+| Screen | File | Features Demonstrated |
+|--------|------|----------------------|
+| **Basic Chat** | `screens/basic_chat.dart` | Direct API mode, basic streaming |
+| **Production Chat** | `screens/production_chat.dart` | Proxy mode, auth token handling |
+| **Advanced Config** | `screens/advanced_config_chat.dart` | topP, topK, stopSequences, temperature, circuit breaker config, retry config, metrics, custom headers |
+| **Data Binding** | `screens/data_binding_demo.dart` | Binding modes (oneWay, twoWay, oneWayToSource), value transformers, path parsing, binding removal |
+| **Tool Search** | `screens/tool_search_demo.dart` | Keyword extraction, search with relevance, tool loading, session limits, index management |
+| **Resilience & Metrics** | `screens/resilience_metrics_demo.dart` | All 8 exception types, circuit breaker states, config presets, all 8 metrics events, live event logging |
+
+To run the example app:
+
+```bash
+cd packages/genui_claude/example
+flutter run --dart-define=CLAUDE_API_KEY=your-api-key
+```
+
+---
+
 ## See Also
 
 - [API_REFERENCE.md](API_REFERENCE.md) - Complete API documentation

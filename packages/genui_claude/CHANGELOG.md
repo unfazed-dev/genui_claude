@@ -66,6 +66,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Configurable timeout for stream inactivity detection
   - Emits `StreamInactivityEvent` when triggered
 
+- **Data Binding Engine**: Two-way data binding between widgets and data models
+  - `BindingPath`: JSON pointer path parsing with bracket/dot notation support
+  - `BindingDefinition`: Binding configuration with modes (oneWay, twoWay, oneWayToSource)
+  - `BindingRegistry`: Multi-index registry for efficient binding lookups
+  - `BindingController`: Orchestrates bindings with ValueNotifier integration
+  - `WidgetBinding`: Active binding representation with lifecycle management
+  - Value transformers: `toWidget` and `toModel` for data conversion
+  - Support for nested paths and array indices
+
+- **Tool Search**: Dynamic tool discovery for large widget catalogs
+  - `KeywordExtractor`: Automated keyword extraction from tool metadata
+  - `ToolCatalogIndex`: Inverted index with relevance-based search
+  - `IndexedCatalogItem`: Tool wrapper with extracted searchable keywords
+  - `CatalogSearchTool`: `search_catalog` and `load_tools` tool schemas
+  - `ToolSearchHandler`: Request processing for search operations
+  - `ToolUseInterceptor`: Local search request interception
+  - `CatalogToolBridge.searchModeTools()`: Creates search-enabled tool set
+  - Session limits via `maxLoadedToolsPerSession` configuration
+
+- **Advanced Model Parameters**: Fine-tuned sampling control
+  - `topP`: Nucleus sampling parameter (0.0-1.0)
+  - `topK`: Top-k token selection (≥1)
+  - `stopSequences`: Custom stop sequences (max 4)
+  - Added to `ClaudeConfig` and passed through handlers
+
 ### Changed
 
 - Enhanced logging with request ID correlation throughout handlers

@@ -14,6 +14,8 @@ Flutter ContentGenerator implementation for Claude AI, enabling Claude-powered g
 - **Production Resilience**: Circuit breaker pattern, retry with exponential backoff and jitter
 - **Observability**: Built-in metrics collection with event streaming and aggregated statistics
 - **Type-Safe Errors**: Sealed exception hierarchy with exhaustive pattern matching
+- **Data Binding Engine**: Two-way binding between widgets and data models with path expressions
+- **Tool Search**: Dynamic tool discovery for large catalogs with keyword-based search
 
 ## Installation
 

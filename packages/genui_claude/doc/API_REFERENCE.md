@@ -29,6 +29,17 @@ Complete API documentation for the `genui_claude` package.
   - [A2uiControlTools](#a2uicontroltools)
 - [Utility Classes](#utility-classes)
   - [MessageConverter](#messageconverter)
+- [Data Binding Classes](#data-binding-classes)
+  - [BindingController](#bindingcontroller)
+  - [BindingPath](#bindingpath)
+  - [BindingDefinition](#bindingdefinition)
+  - [BindingMode](#bindingmode)
+  - [BindingRegistry](#bindingregistry)
+- [Tool Search Classes](#tool-search-classes)
+  - [ToolCatalogIndex](#toolcatalogindex)
+  - [KeywordExtractor](#keywordextractor)
+  - [IndexedCatalogItem](#indexedcatalogitem)
+  - [ToolSearchHandler](#toolsearchhandler)
 - [Handler Classes](#handler-classes)
   - [ApiHandler](#apihandler)
   - [ApiRequest](#apirequest)
@@ -960,6 +971,429 @@ static String? extractSystemContext(List<ChatMessage> messages)
 ```
 
 Extracts system context from InternalMessages.
+
+---
+
+## Data Binding Classes
+
+### BindingController
+
+Orchestrates data binding between widgets and the data model.
+
+```dart
+BindingController({
+  required BindingRegistry registry,
+  required DataModelSubscribe subscribe,
+  required DataModelUpdate update,
+})
+```
+
+#### Type Definitions
+
+```dart
+/// Function to subscribe to data model paths
+typedef DataModelSubscribe = ValueNotifier<dynamic> Function(BindingPath path);
+
+/// Function to update data model values
+typedef DataModelUpdate = void Function(BindingPath path, dynamic value);
+```
+
+#### Methods
+
+##### processWidgetBindings
+
+```dart
+void processWidgetBindings({
+  required String surfaceId,
+  required String widgetId,
+  required dynamic dataBinding,
+})
+```
+
+Processes widget bindings from a `dataBinding` specification. Supports:
+- String path: `'form.email'` (binds to "value" property)
+- Map with paths: `{'value': 'form.email'}`
+- Map with config: `{'value': {'path': 'form.email', 'mode': 'twoWay'}}`
+
+##### getValueNotifier
+
+```dart
+ValueNotifier<dynamic>? getValueNotifier({
+  required String widgetId,
+  required String property,
+})
+```
+
+Gets the `ValueNotifier` for a specific widget property binding. Applies `toWidget` transformer if defined.
+
+##### updateFromWidget
+
+```dart
+void updateFromWidget({
+  required String widgetId,
+  required String property,
+  required dynamic value,
+})
+```
+
+Updates the data model from a widget change (two-way binding only). Applies `toModel` transformer if defined.
+
+##### unregisterWidget / unregisterSurface
+
+```dart
+void unregisterWidget(String widgetId)
+void unregisterSurface(String surfaceId)
+```
+
+Removes all bindings for a widget or surface.
+
+#### Example
+
+```dart
+final controller = BindingController(
+  registry: BindingRegistry(),
+  subscribe: dataModel.subscribe,
+  update: dataModel.update,
+);
+
+// Process bindings from SurfaceUpdate
+controller.processWidgetBindings(
+  surfaceId: 'form-surface',
+  widgetId: 'email-input',
+  dataBinding: {'value': {'path': 'form.email', 'mode': 'twoWay'}},
+);
+
+// Get reactive value for widget
+final notifier = controller.getValueNotifier(
+  widgetId: 'email-input',
+  property: 'value',
+);
+
+// Two-way binding: widget → model
+controller.updateFromWidget(
+  widgetId: 'email-input',
+  property: 'value',
+  value: 'new@example.com',
+);
+```
+
+---
+
+### BindingPath
+
+Represents a parsed binding path with support for dot and slash notation.
+
+#### Factory Constructors
+
+```dart
+// A2UI dot notation: "form.email", "items[0].name"
+factory BindingPath.fromDotNotation(String path)
+
+// GenUI slash notation: "/form/email", "/items/0/name"
+factory BindingPath.fromSlashNotation(String path)
+```
+
+#### Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `segments` | `List<String>` | Path segments (e.g., `['form', 'email']`) |
+| `isAbsolute` | `bool` | Whether path starts from root |
+| `parent` | `BindingPath?` | Parent path (null if single segment) |
+| `leaf` | `String` | Last segment (property name or index) |
+
+#### Methods
+
+```dart
+String toDotNotation()   // "form.items[0].name"
+String toSlashNotation() // "/form/items/0/name"
+BindingPath join(BindingPath other)
+bool startsWith(BindingPath other)
+```
+
+#### Example
+
+```dart
+final path = BindingPath.fromDotNotation('form.items[0].name');
+print(path.segments);      // ['form', 'items', '0', 'name']
+print(path.toSlashNotation()); // '/form/items/0/name'
+print(path.parent?.toDotNotation()); // 'form.items[0]'
+print(path.leaf);          // 'name'
+```
+
+---
+
+### BindingDefinition
+
+Defines how a widget property binds to a data model path.
+
+```dart
+const BindingDefinition({
+  required String property,
+  required BindingPath path,
+  BindingMode mode = BindingMode.oneWay,
+  ValueTransformer? toWidget,
+  ValueTransformer? toModel,
+})
+```
+
+#### Properties
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `property` | `String` | - | Widget property being bound (e.g., "value") |
+| `path` | `BindingPath` | - | Data model path to bind to |
+| `mode` | `BindingMode` | `oneWay` | Binding direction mode |
+| `toWidget` | `ValueTransformer?` | `null` | Model → widget value transformer |
+| `toModel` | `ValueTransformer?` | `null` | Widget → model value transformer |
+
+#### Static Methods
+
+```dart
+static List<BindingDefinition> parse(dynamic dataBinding)
+```
+
+Parses binding definitions from A2UI `dataBinding` field formats.
+
+---
+
+### BindingMode
+
+Enum representing binding direction.
+
+```dart
+enum BindingMode {
+  oneWay,        // Model → Widget only (default)
+  twoWay,        // Model ↔ Widget (bidirectional)
+  oneWayToSource, // Widget → Model only (rare)
+}
+```
+
+---
+
+### BindingRegistry
+
+Multi-index registry for efficient binding lookups.
+
+```dart
+BindingRegistry()
+```
+
+#### Methods
+
+| Method | Description |
+|--------|-------------|
+| `register(WidgetBinding)` | Registers a binding |
+| `getBindingForWidgetProperty(widgetId, property)` | Lookup by widget+property |
+| `getBindingsForWidget(widgetId)` | All bindings for a widget |
+| `getBindingsForSurface(surfaceId)` | All bindings for a surface |
+| `getBindingsForPath(BindingPath)` | All bindings for a data path |
+| `unregisterWidget(widgetId)` | Remove all widget bindings |
+| `unregisterSurface(surfaceId)` | Remove all surface bindings |
+| `clear()` | Remove all bindings |
+
+---
+
+## Tool Search Classes
+
+### ToolCatalogIndex
+
+A searchable index of tool schemas with relevance-based ranking.
+
+```dart
+ToolCatalogIndex([KeywordExtractor? extractor])
+```
+
+#### Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `size` | `int` | Number of indexed tools |
+| `allNames` | `List<String>` | All indexed tool names |
+
+#### Methods
+
+##### addSchema / addSchemas
+
+```dart
+void addSchema(A2uiToolSchema schema)
+void addSchemas(Iterable<A2uiToolSchema> schemas)
+```
+
+Adds schemas to the index. Automatically extracts keywords for searching.
+
+##### search
+
+```dart
+List<A2uiToolSchema> search(String query, {int maxResults = 10})
+```
+
+Searches for tools matching the query. Returns results ordered by relevance.
+
+```dart
+final index = ToolCatalogIndex();
+index.addSchemas(myCatalog.schemas);
+
+final results = index.search('date picker');
+// Returns: [date_picker, date_range_picker, calendar_widget, ...]
+```
+
+##### getSchemaByName / getSchemasByNames
+
+```dart
+A2uiToolSchema? getSchemaByName(String name)
+List<A2uiToolSchema> getSchemasByNames(Iterable<String> names)
+```
+
+Retrieves schemas by exact name.
+
+##### clear
+
+```dart
+void clear()
+```
+
+Clears all indexed items.
+
+---
+
+### KeywordExtractor
+
+Extracts searchable keywords from widget schemas and metadata.
+
+```dart
+KeywordExtractor()
+```
+
+#### Static Constants
+
+| Constant | Type | Description |
+|----------|------|-------------|
+| `stopWords` | `Set<String>` | Common words filtered out |
+| `minWordLength` | `int` | Minimum word length (2) |
+
+#### Methods
+
+```dart
+Set<String> extractFromName(String name)
+Set<String> extractFromDescription(String? description)
+Set<String> extractFromSchema(Map<String, dynamic>? schema)
+List<String> extractAll({
+  required String name,
+  String? description,
+  Map<String, dynamic>? schema,
+})
+```
+
+#### Name Tokenization
+
+Handles camelCase, snake_case, kebab-case, and PascalCase:
+
+```dart
+final extractor = KeywordExtractor();
+extractor.extractFromName('DateTimePicker'); // {'date', 'time', 'picker'}
+extractor.extractFromName('data_table');      // {'data', 'table'}
+```
+
+---
+
+### IndexedCatalogItem
+
+A catalog item enriched with searchable keywords.
+
+```dart
+factory IndexedCatalogItem.fromSchema(
+  A2uiToolSchema schema, [
+  KeywordExtractor? extractor,
+])
+```
+
+#### Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `name` | `String` | Tool name |
+| `schema` | `A2uiToolSchema` | Original tool schema |
+| `keywords` | `List<String>` | Extracted searchable keywords |
+
+#### Methods
+
+```dart
+bool matchesQuery(String query)
+int relevanceScore(List<String> queryTerms)
+```
+
+---
+
+### ToolSearchHandler
+
+Handles `search_catalog` and `load_tools` tool requests.
+
+```dart
+ToolSearchHandler({required ToolCatalogIndex index})
+```
+
+#### Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `loadedToolNames` | `Set<String>` | Currently loaded tool names |
+
+#### Methods
+
+##### handleSearchCatalog
+
+```dart
+SearchCatalogOutput handleSearchCatalog(SearchCatalogInput input)
+```
+
+Searches the index and returns results with relevance scores.
+
+##### handleLoadTools
+
+```dart
+LoadToolsResult handleLoadTools(LoadToolsInput input)
+```
+
+Loads requested tools from the index.
+
+##### getLoadedSchemas
+
+```dart
+List<A2uiToolSchema> getLoadedSchemas()
+```
+
+Returns schemas for all currently loaded tools.
+
+##### clearLoadedTools
+
+```dart
+void clearLoadedTools()
+```
+
+Clears all loaded tools.
+
+#### Example
+
+```dart
+final index = ToolCatalogIndex();
+index.addSchemas(largeCatalog.schemas);
+
+final handler = ToolSearchHandler(index: index);
+
+// Search
+final searchResult = handler.handleSearchCatalog(
+  SearchCatalogInput(query: 'date picker', maxResults: 5),
+);
+print(searchResult.results); // [{name: 'date_picker', relevance: 0.9}, ...]
+
+// Load tools
+final loadResult = handler.handleLoadTools(
+  LoadToolsInput(toolNames: ['date_picker', 'calendar']),
+);
+print(loadResult.output.loaded); // ['date_picker', 'calendar']
+print(handler.loadedToolNames);  // {'date_picker', 'calendar'}
+```
 
 ---
 
