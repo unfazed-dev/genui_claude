@@ -65,6 +65,9 @@ class BindingController {
   /// Tracks the last value set for each binding to prevent update loops.
   final Map<String, dynamic> _lastWidgetValues = {};
 
+  /// Cache of transformed notifiers for toWidget transformers.
+  final Map<String, ValueNotifier<dynamic>> _transformedNotifiers = {};
+
   /// Whether this controller has been disposed.
   bool _isDisposed = false;
 
@@ -98,6 +101,10 @@ class BindingController {
 
   /// Gets the [ValueNotifier] for a specific widget property binding.
   ///
+  /// If the binding has a [BindingDefinition.toWidget] transformer, returns
+  /// a transformed notifier that applies the transform to values from the
+  /// data model.
+  ///
   /// Returns `null` if no binding exists for the given widget and property.
   ValueNotifier<dynamic>? getValueNotifier({
     required String widgetId,
@@ -106,13 +113,48 @@ class BindingController {
     if (_isDisposed) return null;
 
     final binding = _registry.getBindingForWidgetProperty(widgetId, property);
-    return binding?.subscription;
+    if (binding == null) return null;
+
+    final toWidget = binding.definition.toWidget;
+
+    // No transformer - return raw subscription
+    if (toWidget == null) {
+      return binding.subscription;
+    }
+
+    // Check cache for existing transformed notifier
+    final cacheKey = '$widgetId:$property';
+    final cached = _transformedNotifiers[cacheKey];
+    if (cached != null) {
+      return cached;
+    }
+
+    // Create transformed notifier that applies toWidget transform
+    final source = binding.subscription;
+    final transformed = ValueNotifier<dynamic>(toWidget(source.value));
+
+    // Listen to source and propagate transformed values
+    void listener() {
+      if (!_isDisposed) {
+        transformed.value = toWidget(source.value);
+      }
+    }
+
+    source.addListener(listener);
+
+    // Cache for reuse and cleanup
+    _transformedNotifiers[cacheKey] = transformed;
+
+    return transformed;
   }
 
   /// Updates the data model from a widget change (two-way binding).
   ///
   /// This method should be called when a widget's value changes and
   /// needs to propagate back to the data model.
+  ///
+  /// If the binding has a [BindingDefinition.toModel] transformer, it will
+  /// be applied to the value before updating the data model.
   ///
   /// Only two-way bindings will actually update the data model.
   /// One-way bindings are ignored.
@@ -126,12 +168,16 @@ class BindingController {
     final binding = _registry.getBindingForWidgetProperty(widgetId, property);
     if (binding == null || !binding.isTwoWay) return;
 
+    // Apply toModel transformer if present
+    final toModel = binding.definition.toModel;
+    final transformedValue = toModel != null ? toModel(value) : value;
+
     // Prevent update loops by checking if value actually changed
     final key = '$widgetId:$property';
-    if (_lastWidgetValues[key] == value) return;
-    _lastWidgetValues[key] = value;
+    if (_lastWidgetValues[key] == transformedValue) return;
+    _lastWidgetValues[key] = transformedValue;
 
-    _update(binding.path, value);
+    _update(binding.path, transformedValue);
   }
 
   /// Unregisters all bindings for a specific widget.
@@ -140,8 +186,14 @@ class BindingController {
 
     final bindings = _registry.getBindingsForWidget(widgetId);
     for (final binding in bindings) {
+      final key = '${binding.widgetId}:${binding.property}';
+
+      // Dispose transformed notifier if exists
+      final transformed = _transformedNotifiers.remove(key);
+      transformed?.dispose();
+
       binding.dispose();
-      _lastWidgetValues.remove('${binding.widgetId}:${binding.property}');
+      _lastWidgetValues.remove(key);
     }
     _registry.unregisterWidget(widgetId);
   }
@@ -152,8 +204,14 @@ class BindingController {
 
     final bindings = _registry.getBindingsForSurface(surfaceId);
     for (final binding in bindings) {
+      final key = '${binding.widgetId}:${binding.property}';
+
+      // Dispose transformed notifier if exists
+      final transformed = _transformedNotifiers.remove(key);
+      transformed?.dispose();
+
       binding.dispose();
-      _lastWidgetValues.remove('${binding.widgetId}:${binding.property}');
+      _lastWidgetValues.remove(key);
     }
     _registry.unregisterSurface(surfaceId);
   }
@@ -164,6 +222,12 @@ class BindingController {
   void dispose() {
     if (_isDisposed) return;
     _isDisposed = true;
+
+    // Dispose all transformed notifiers
+    for (final notifier in _transformedNotifiers.values) {
+      notifier.dispose();
+    }
+    _transformedNotifiers.clear();
 
     // Registry.clear() handles disposing all bindings
     _registry.clear();

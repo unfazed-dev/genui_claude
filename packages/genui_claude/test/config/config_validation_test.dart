@@ -65,6 +65,24 @@ void main() {
 
         expect(config.maxLoadedToolsPerSession, equals(50));
       });
+
+      test('has null default topP', () {
+        const config = ClaudeConfig();
+
+        expect(config.topP, isNull);
+      });
+
+      test('has null default topK', () {
+        const config = ClaudeConfig();
+
+        expect(config.topK, isNull);
+      });
+
+      test('has null default stopSequences', () {
+        const config = ClaudeConfig();
+
+        expect(config.stopSequences, isNull);
+      });
     });
 
     group('custom values', () {
@@ -150,6 +168,78 @@ void main() {
         const config = ClaudeConfig(maxLoadedToolsPerSession: 100);
 
         expect(config.maxLoadedToolsPerSession, equals(100));
+      });
+
+      test('accepts custom topP', () {
+        const config = ClaudeConfig(topP: 0.9);
+
+        expect(config.topP, equals(0.9));
+      });
+
+      test('accepts topP at maximum (1.0)', () {
+        const config = ClaudeConfig(topP: 1);
+
+        expect(config.topP, equals(1.0));
+      });
+
+      test('accepts topP at near-minimum', () {
+        const config = ClaudeConfig(topP: 0.01);
+
+        expect(config.topP, equals(0.01));
+      });
+
+      test('accepts custom topK', () {
+        const config = ClaudeConfig(topK: 40);
+
+        expect(config.topK, equals(40));
+      });
+
+      test('accepts topK at minimum (1)', () {
+        const config = ClaudeConfig(topK: 1);
+
+        expect(config.topK, equals(1));
+      });
+
+      test('accepts large topK', () {
+        const config = ClaudeConfig(topK: 1000);
+
+        expect(config.topK, equals(1000));
+      });
+
+      test('accepts custom stopSequences', () {
+        const config = ClaudeConfig(stopSequences: ['END', 'STOP']);
+
+        expect(config.stopSequences, equals(['END', 'STOP']));
+      });
+
+      test('accepts single stopSequence', () {
+        const config = ClaudeConfig(stopSequences: ['END']);
+
+        expect(config.stopSequences, equals(['END']));
+      });
+
+      test('accepts four stopSequences (max)', () {
+        const config = ClaudeConfig(stopSequences: ['A', 'B', 'C', 'D']);
+
+        expect(config.stopSequences, equals(['A', 'B', 'C', 'D']));
+      });
+
+      test('accepts empty stopSequences', () {
+        const config = ClaudeConfig(stopSequences: []);
+
+        expect(config.stopSequences, equals([]));
+      });
+
+      test('accepts all sampling parameters together', () {
+        const config = ClaudeConfig(
+          topP: 0.95,
+          topK: 50,
+          stopSequences: ['END'],
+        );
+
+        expect(config.topP, equals(0.95));
+        expect(config.topK, equals(50));
+        expect(config.stopSequences, equals(['END']));
       });
     });
 
@@ -272,6 +362,42 @@ void main() {
 
         expect(copy.maxLoadedToolsPerSession, equals(25));
         expect(copy.enableToolSearch, isFalse);
+      });
+
+      test('copies with new topP', () {
+        const original = ClaudeConfig();
+        final copy = original.copyWith(topP: 0.85);
+
+        expect(copy.topP, equals(0.85));
+        expect(copy.topK, isNull);
+      });
+
+      test('copies with new topK', () {
+        const original = ClaudeConfig();
+        final copy = original.copyWith(topK: 30);
+
+        expect(copy.topK, equals(30));
+        expect(copy.topP, isNull);
+      });
+
+      test('copies with new stopSequences', () {
+        const original = ClaudeConfig();
+        final copy = original.copyWith(stopSequences: ['END', 'DONE']);
+
+        expect(copy.stopSequences, equals(['END', 'DONE']));
+      });
+
+      test('copies all sampling parameters at once', () {
+        const original = ClaudeConfig();
+        final copy = original.copyWith(
+          topP: 0.9,
+          topK: 50,
+          stopSequences: ['STOP'],
+        );
+
+        expect(copy.topP, equals(0.9));
+        expect(copy.topK, equals(50));
+        expect(copy.stopSequences, equals(['STOP']));
       });
     });
   });
@@ -601,6 +727,41 @@ void main() {
     test('throws on negative retryAttempts', () {
       expect(
         () => ClaudeConfig(retryAttempts: -1),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('throws on topP of zero', () {
+      expect(
+        () => ClaudeConfig(topP: 0),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('throws on negative topP', () {
+      expect(
+        () => ClaudeConfig(topP: -0.1),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('throws on topP greater than 1', () {
+      expect(
+        () => ClaudeConfig(topP: 1.1),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('throws on topK of zero', () {
+      expect(
+        () => ClaudeConfig(topK: 0),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('throws on negative topK', () {
+      expect(
+        () => ClaudeConfig(topK: -1),
         throwsA(isA<AssertionError>()),
       );
     });

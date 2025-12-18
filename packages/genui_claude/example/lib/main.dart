@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:genui_claude_example/screens/advanced_config_chat.dart';
 import 'package:genui_claude_example/screens/basic_chat.dart';
+import 'package:genui_claude_example/screens/data_binding_demo.dart';
 import 'package:genui_claude_example/screens/production_chat.dart';
+import 'package:genui_claude_example/screens/tool_search_demo.dart';
 
 void main() {
   runApp(const GenUiClaudeExampleApp());
@@ -56,6 +59,49 @@ class HomePage extends StatelessWidget {
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute<void>(builder: (_) => const ProductionChatScreen()),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Advanced Features',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _ExampleTile(
+            title: 'Advanced Config',
+            subtitle: 'Model parameters: topP, topK, stop sequences',
+            icon: Icons.tune,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (_) => const AdvancedConfigChatScreen(),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          _ExampleTile(
+            title: 'Data Binding',
+            subtitle: 'Two-way binding between widgets and data model',
+            icon: Icons.sync_alt,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (_) => const DataBindingDemoScreen(),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          _ExampleTile(
+            title: 'Tool Search',
+            subtitle: 'Dynamic tool discovery for large catalogs',
+            icon: Icons.search,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (_) => const ToolSearchDemoScreen(),
+              ),
             ),
           ),
           const SizedBox(height: 24),

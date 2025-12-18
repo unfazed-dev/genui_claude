@@ -4,7 +4,8 @@
 /// widgets to automatically update when data model values change.
 library;
 
-export 'binding_controller.dart';
+// Hide DataModelUpdate to avoid conflict with genui package's DataModelUpdate
+export 'binding_controller.dart' hide DataModelUpdate;
 export 'binding_definition.dart';
 export 'binding_path.dart';
 export 'binding_registry.dart';

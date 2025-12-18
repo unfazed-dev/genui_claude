@@ -4,6 +4,7 @@ import 'package:genui_claude/src/binding/binding_controller.dart';
 import 'package:genui_claude/src/binding/binding_definition.dart';
 import 'package:genui_claude/src/binding/binding_path.dart';
 import 'package:genui_claude/src/binding/binding_registry.dart';
+import 'package:genui_claude/src/binding/widget_binding.dart';
 
 /// Mock DataModel for testing.
 ///
@@ -531,6 +532,192 @@ void main() {
         );
 
         expect(notificationCount, equals(1));
+      });
+    });
+
+    group('value transformers', () {
+      test('toWidget transformer applies to getValueNotifier result', () {
+        // Create binding with toWidget transformer
+        final path = BindingPath.fromDotNotation('form.email');
+        final definition = BindingDefinition(
+          property: 'value',
+          path: path,
+          toWidget: (value) => (value as String).toUpperCase(),
+        );
+        final subscription = mockDataModel.subscribe(path);
+        final binding = WidgetBinding(
+          widgetId: 'email-input',
+          surfaceId: 'form-surface',
+          definition: definition,
+          subscription: subscription,
+        );
+        registry.register(binding);
+
+        final notifier = controller.getValueNotifier(
+          widgetId: 'email-input',
+          property: 'value',
+        )!;
+
+        // Should be transformed to uppercase
+        expect(notifier.value, equals('TEST@EXAMPLE.COM'));
+      });
+
+      test('toWidget transformer updates when source changes', () {
+        final path = BindingPath.fromDotNotation('form.email');
+        final definition = BindingDefinition(
+          property: 'value',
+          path: path,
+          toWidget: (value) => 'PREFIX: $value',
+        );
+        final subscription = mockDataModel.subscribe(path);
+        final binding = WidgetBinding(
+          widgetId: 'email-input',
+          surfaceId: 'form-surface',
+          definition: definition,
+          subscription: subscription,
+        );
+        registry.register(binding);
+
+        final notifier = controller.getValueNotifier(
+          widgetId: 'email-input',
+          property: 'value',
+        )!;
+
+        expect(notifier.value, equals('PREFIX: test@example.com'));
+
+        // Update source
+        mockDataModel.update(path, 'new@example.com');
+
+        expect(notifier.value, equals('PREFIX: new@example.com'));
+      });
+
+      test('toWidget transformed notifier is cached', () {
+        final path = BindingPath.fromDotNotation('form.email');
+        final definition = BindingDefinition(
+          property: 'value',
+          path: path,
+          toWidget: (value) => value.toString().toUpperCase(),
+        );
+        final subscription = mockDataModel.subscribe(path);
+        final binding = WidgetBinding(
+          widgetId: 'email-input',
+          surfaceId: 'form-surface',
+          definition: definition,
+          subscription: subscription,
+        );
+        registry.register(binding);
+
+        final notifier1 = controller.getValueNotifier(
+          widgetId: 'email-input',
+          property: 'value',
+        );
+        final notifier2 = controller.getValueNotifier(
+          widgetId: 'email-input',
+          property: 'value',
+        );
+
+        // Same instance returned
+        expect(identical(notifier1, notifier2), isTrue);
+      });
+
+      test('toModel transformer applies in updateFromWidget', () {
+        final path = BindingPath.fromDotNotation('form.email');
+        final definition = BindingDefinition(
+          property: 'value',
+          path: path,
+          mode: BindingMode.twoWay,
+          toModel: (value) => (value as String).toLowerCase(),
+        );
+        final subscription = mockDataModel.subscribe(path);
+        final binding = WidgetBinding(
+          widgetId: 'email-input',
+          surfaceId: 'form-surface',
+          definition: definition,
+          subscription: subscription,
+        );
+        registry.register(binding);
+
+        controller.updateFromWidget(
+          widgetId: 'email-input',
+          property: 'value',
+          value: 'USER@EXAMPLE.COM',
+        );
+
+        // Should be transformed to lowercase before updating model
+        expect(subscription.value, equals('user@example.com'));
+      });
+
+      test('toWidget and toModel work together for two-way binding', () {
+        final path = BindingPath.fromDotNotation('form.email');
+
+        final definition = BindingDefinition(
+          property: 'value',
+          path: path,
+          mode: BindingMode.twoWay,
+          toWidget: (value) => (value as String).toUpperCase(), // to uppercase
+          toModel: (value) => (value as String).toLowerCase(), // to lowercase
+        );
+        final subscription = mockDataModel.subscribe(path);
+        final binding = WidgetBinding(
+          widgetId: 'email-input',
+          surfaceId: 'form-surface',
+          definition: definition,
+          subscription: subscription,
+        );
+        registry.register(binding);
+
+        // toWidget transforms to uppercase
+        final notifier = controller.getValueNotifier(
+          widgetId: 'email-input',
+          property: 'value',
+        )!;
+        expect(notifier.value, equals('TEST@EXAMPLE.COM'));
+
+        // toModel transforms to lowercase
+        controller.updateFromWidget(
+          widgetId: 'email-input',
+          property: 'value',
+          value: 'NEW@EXAMPLE.COM',
+        );
+        expect(subscription.value, equals('new@example.com'));
+      });
+
+      test('transformed notifiers disposed on unregisterWidget', () {
+        final path = BindingPath.fromDotNotation('form.email');
+        final definition = BindingDefinition(
+          property: 'value',
+          path: path,
+          toWidget: (value) => value.toString().toUpperCase(),
+        );
+        final subscription = mockDataModel.subscribe(path);
+        final binding = WidgetBinding(
+          widgetId: 'email-input',
+          surfaceId: 'form-surface',
+          definition: definition,
+          subscription: subscription,
+        );
+        registry.register(binding);
+
+        // Get transformed notifier (creates it)
+        final notifier = controller.getValueNotifier(
+          widgetId: 'email-input',
+          property: 'value',
+        )!;
+
+        // Verify it was created
+        expect(notifier.value, equals('TEST@EXAMPLE.COM'));
+
+        // Unregister widget
+        controller.unregisterWidget('email-input');
+
+        // Getting notifier again returns null (binding gone)
+        expect(
+          controller.getValueNotifier(
+            widgetId: 'email-input',
+            property: 'value',
+          ),
+          isNull,
+        );
       });
     });
   });

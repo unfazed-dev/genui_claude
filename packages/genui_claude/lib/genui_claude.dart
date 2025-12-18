@@ -35,6 +35,7 @@ import 'package:genui_claude/genui_claude.dart' show ClaudeContentGenerator, Cla
 export 'src/adapter/a2ui_control_tools.dart';
 export 'src/adapter/catalog_tool_bridge.dart';
 export 'src/adapter/message_adapter.dart';
+export 'src/binding/binding.dart';
 export 'src/config/claude_config.dart';
 export 'src/config/retry_config.dart';
 export 'src/content_generator/claude_content_generator.dart';
@@ -42,4 +43,5 @@ export 'src/exceptions/claude_exceptions.dart';
 export 'src/handler/handler.dart';
 export 'src/metrics/metrics.dart';
 export 'src/resilience/circuit_breaker.dart';
+export 'src/search/search.dart';
 export 'src/utils/message_converter.dart';

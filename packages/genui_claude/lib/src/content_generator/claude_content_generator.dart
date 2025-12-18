@@ -8,6 +8,7 @@ import 'package:genui_claude/src/config/claude_config.dart';
 import 'package:genui_claude/src/handler/api_handler.dart';
 import 'package:genui_claude/src/handler/direct_mode_handler.dart';
 import 'package:genui_claude/src/handler/proxy_mode_handler.dart';
+import 'package:genui_claude/src/search/tool_use_interceptor.dart';
 import 'package:genui_claude/src/utils/message_converter.dart';
 
 /// A [ContentGenerator] implementation for Claude AI.
@@ -27,10 +28,16 @@ class ClaudeContentGenerator implements ContentGenerator {
   ///
   /// Use this constructor for development and prototyping.
   /// For production, consider using [ClaudeContentGenerator.proxy].
+  ///
+  /// - [tools]: Optional list of tools to make available to Claude.
+  /// - [toolInterceptor]: Optional interceptor for handling tool calls locally
+  ///   (e.g., for search_catalog and load_tools with tool search enabled).
   ClaudeContentGenerator({
     required String apiKey,
     String model = 'claude-sonnet-4-20250514',
     this.systemInstruction,
+    this.tools,
+    this.toolInterceptor,
     ClaudeConfig config = ClaudeConfig.defaults,
   })  : _handler = DirectModeHandler(
           apiKey: apiKey,
@@ -49,6 +56,8 @@ class ClaudeContentGenerator implements ContentGenerator {
     required Uri proxyEndpoint,
     String? authToken,
     ProxyConfig proxyConfig = ProxyConfig.defaults,
+    this.tools,
+    this.toolInterceptor,
   })  : _handler = ProxyModeHandler(
           endpoint: proxyEndpoint,
           authToken: authToken,
@@ -68,6 +77,8 @@ class ClaudeContentGenerator implements ContentGenerator {
     required ApiHandler handler,
     String? model,
     this.systemInstruction,
+    this.tools,
+    this.toolInterceptor,
   })  : _handler = handler,
         _model = model,
         _config = null,
@@ -81,6 +92,22 @@ class ClaudeContentGenerator implements ContentGenerator {
 
   /// System instruction for requests.
   final String? systemInstruction;
+
+  /// Optional tools to make available to Claude.
+  ///
+  /// These are passed to the API as available tool definitions.
+  /// When Claude calls a tool, the result needs to be handled by the consumer.
+  final List<Map<String, dynamic>>? tools;
+
+  /// Optional interceptor for handling certain tool calls locally.
+  ///
+  /// When provided, tool calls that match [ToolUseInterceptor.shouldIntercept]
+  /// can be processed locally without sending to the API. This is used for
+  /// search_catalog and load_tools when tool search is enabled.
+  ///
+  /// Note: Full automatic tool interception requires implementing a
+  /// conversation loop. Currently, this is provided for advanced use cases.
+  final ToolUseInterceptor? toolInterceptor;
 
   /// Configuration for direct mode.
   final ClaudeConfig? _config;
@@ -141,6 +168,10 @@ class ClaudeContentGenerator implements ContentGenerator {
         maxTokens: _config?.maxTokens ?? 4096,
         systemInstruction: systemInstruction,
         model: _model,
+        tools: tools,
+        topP: _config?.topP,
+        topK: _config?.topK,
+        stopSequences: _config?.stopSequences,
       );
 
       // Get stream from handler

@@ -19,6 +19,9 @@ class ClaudeConfig {
     this.retryAttempts = 3,
     this.enableStreaming = true,
     this.headers,
+    this.topP,
+    this.topK,
+    this.stopSequences,
     this.enableFineGrainedStreaming = false,
     this.enableInterleavedThinking = false,
     this.thinkingBudgetTokens,
@@ -26,6 +29,16 @@ class ClaudeConfig {
     this.maxLoadedToolsPerSession = 50,
   })  : assert(maxTokens > 0, 'maxTokens must be greater than 0'),
         assert(retryAttempts >= 0, 'retryAttempts cannot be negative'),
+        assert(
+          topP == null || (topP > 0.0 && topP <= 1.0),
+          'topP must be between 0.0 (exclusive) and 1.0 (inclusive)',
+        ),
+        assert(
+          topK == null || topK >= 1,
+          'topK must be at least 1',
+        ),
+        // Note: stopSequences length validation (max 4) is done at runtime
+        // when making API calls, as List.length cannot be accessed in const
         assert(
           maxLoadedToolsPerSession > 0,
           'maxLoadedToolsPerSession must be greater than 0',
@@ -49,6 +62,35 @@ class ClaudeConfig {
 
   /// Custom HTTP headers.
   final Map<String, String>? headers;
+
+  /// Nucleus sampling parameter for response diversity.
+  ///
+  /// Controls the cumulative probability cutoff for token selection.
+  /// Lower values make output more focused/deterministic, higher values
+  /// make it more diverse/creative. Must be between 0.0 (exclusive) and 1.0 (inclusive).
+  ///
+  /// Only one of [topP] or [topK] should typically be used, not both.
+  /// If null, Claude uses its default value.
+  final double? topP;
+
+  /// Top-k sampling parameter for response diversity.
+  ///
+  /// Limits token selection to the k most likely tokens at each step.
+  /// Lower values make output more focused, higher values allow more variety.
+  /// Must be at least 1.
+  ///
+  /// Only one of [topP] or [topK] should typically be used, not both.
+  /// If null, Claude uses its default value.
+  final int? topK;
+
+  /// Sequences that will cause the model to stop generating.
+  ///
+  /// When the model generates any of these sequences, it will stop
+  /// and the sequence will be included in the response. Maximum of 4
+  /// sequences allowed, each up to 100 characters.
+  ///
+  /// Useful for structured output where you want to stop at specific markers.
+  final List<String>? stopSequences;
 
   /// Enable fine-grained tool streaming for progressive widget rendering.
   ///
@@ -93,6 +135,9 @@ class ClaudeConfig {
     int? retryAttempts,
     bool? enableStreaming,
     Map<String, String>? headers,
+    double? topP,
+    int? topK,
+    List<String>? stopSequences,
     bool? enableFineGrainedStreaming,
     bool? enableInterleavedThinking,
     int? thinkingBudgetTokens,
@@ -105,6 +150,9 @@ class ClaudeConfig {
       retryAttempts: retryAttempts ?? this.retryAttempts,
       enableStreaming: enableStreaming ?? this.enableStreaming,
       headers: headers ?? this.headers,
+      topP: topP ?? this.topP,
+      topK: topK ?? this.topK,
+      stopSequences: stopSequences ?? this.stopSequences,
       enableFineGrainedStreaming:
           enableFineGrainedStreaming ?? this.enableFineGrainedStreaming,
       enableInterleavedThinking:
