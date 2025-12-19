@@ -89,6 +89,158 @@ void main() {
         expect(handler, isA<ApiHandler>());
         handler.dispose();
       });
+
+      group('circuit breaker defaults', () {
+        test('creates circuit breaker by default', () async {
+          // With default config, circuit breaker should be created and active
+          final handler = ProxyModeHandler(
+            endpoint: testEndpoint,
+            client: mockClient,
+          );
+
+          // Simulate multiple failures to trigger circuit breaker
+          when(mockClient.send(any)).thenThrow(
+            Exception('Network error'),
+          );
+
+          const request = ApiRequest(
+            messages: [
+              {'role': 'user', 'content': 'Hello'},
+            ],
+            maxTokens: 1024,
+          );
+
+          // Make enough requests to trip the circuit breaker (default threshold is 5)
+          for (var i = 0; i < 6; i++) {
+            await handler.createStream(request).toList();
+          }
+
+          // Next request should be rejected by circuit breaker immediately
+          final events = await handler.createStream(request).toList();
+          expect(events, hasLength(1));
+          expect(events[0]['type'], equals('error'));
+          final errorData = events[0]['error'] as Map<String, dynamic>;
+          expect(errorData['type'], equals('CircuitBreakerOpenException'));
+
+          handler.dispose();
+        });
+
+        test('circuit breaker can be disabled via config', () async {
+          final handler = ProxyModeHandler(
+            endpoint: testEndpoint,
+            config: const ProxyConfig(disableCircuitBreaker: true),
+            client: mockClient,
+            retryConfig: RetryConfig.noRetry,
+          );
+
+          when(mockClient.send(any)).thenThrow(
+            Exception('Network error'),
+          );
+
+          const request = ApiRequest(
+            messages: [
+              {'role': 'user', 'content': 'Hello'},
+            ],
+            maxTokens: 1024,
+          );
+
+          // Make many failures - circuit breaker should not trip
+          for (var i = 0; i < 10; i++) {
+            final events = await handler.createStream(request).toList();
+            expect(events, hasLength(1));
+            expect(events[0]['type'], equals('error'));
+            final errorData = events[0]['error'] as Map<String, dynamic>;
+            // Should be network error, not circuit breaker error
+            expect(errorData['type'], isNot(equals('circuit_breaker_open')));
+          }
+
+          handler.dispose();
+        });
+
+        test('uses custom circuit breaker config from ProxyConfig', () async {
+          // Use strict config with failureThreshold of 3
+          final handler = ProxyModeHandler(
+            endpoint: testEndpoint,
+            config: const ProxyConfig(
+              circuitBreakerConfig: CircuitBreakerConfig.strict,
+            ),
+            client: mockClient,
+            retryConfig: RetryConfig.noRetry,
+          );
+
+          when(mockClient.send(any)).thenThrow(
+            Exception('Network error'),
+          );
+
+          const request = ApiRequest(
+            messages: [
+              {'role': 'user', 'content': 'Hello'},
+            ],
+            maxTokens: 1024,
+          );
+
+          // Strict config has failureThreshold of 3
+          for (var i = 0; i < 4; i++) {
+            await handler.createStream(request).toList();
+          }
+
+          // Circuit should now be open
+          final events = await handler.createStream(request).toList();
+          expect(events, hasLength(1));
+          expect(events[0]['type'], equals('error'));
+          final errorData = events[0]['error'] as Map<String, dynamic>;
+          expect(errorData['type'], equals('CircuitBreakerOpenException'));
+
+          handler.dispose();
+        });
+
+        test('explicit circuit breaker overrides config', () async {
+          // Provide explicit circuit breaker, should use it instead of config
+          final customBreaker = CircuitBreaker(
+            config: const CircuitBreakerConfig(
+              failureThreshold: 2,
+              recoveryTimeout: Duration(seconds: 10),
+              halfOpenSuccessThreshold: 1,
+            ),
+          );
+
+          final handler = ProxyModeHandler(
+            endpoint: testEndpoint,
+            config: const ProxyConfig(
+              // This should be ignored
+              circuitBreakerConfig: CircuitBreakerConfig.lenient,
+            ),
+            circuitBreaker: customBreaker,
+            client: mockClient,
+            retryConfig: RetryConfig.noRetry,
+          );
+
+          when(mockClient.send(any)).thenThrow(
+            Exception('Network error'),
+          );
+
+          const request = ApiRequest(
+            messages: [
+              {'role': 'user', 'content': 'Hello'},
+            ],
+            maxTokens: 1024,
+          );
+
+          // Custom breaker has threshold of 2
+          for (var i = 0; i < 3; i++) {
+            await handler.createStream(request).toList();
+          }
+
+          // Circuit should now be open
+          final events = await handler.createStream(request).toList();
+          expect(events, hasLength(1));
+          expect(events[0]['type'], equals('error'));
+          final errorData = events[0]['error'] as Map<String, dynamic>;
+          expect(errorData['type'], equals('CircuitBreakerOpenException'));
+
+          handler.dispose();
+        });
+      });
     });
 
     group('createStream', () {

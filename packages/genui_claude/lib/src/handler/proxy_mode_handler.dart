@@ -53,9 +53,11 @@ class ProxyModeHandler implements ApiHandler {
   ///
   /// - [endpoint]: The backend proxy URL (must have http or https scheme)
   /// - [authToken]: Optional auth token (sent as Bearer token)
-  /// - [config]: Optional configuration for timeouts, retries, headers
+  /// - [config]: Optional configuration for timeouts, retries, headers.
+  ///   By default, a circuit breaker is enabled via [ProxyConfig.circuitBreakerConfig].
+  ///   Set [ProxyConfig.disableCircuitBreaker] to true to opt-out.
   /// - [retryConfig]: Optional retry configuration
-  /// - [circuitBreaker]: Optional circuit breaker instance
+  /// - [circuitBreaker]: Optional circuit breaker instance (overrides config)
   /// - [streamInactivityTimeout]: Timeout for stream inactivity
   /// - [metricsCollector]: Optional metrics collector for observability
   /// - [client]: Optional HTTP client for testing/customization
@@ -80,7 +82,12 @@ class ProxyModeHandler implements ApiHandler {
         // Use explicit retryConfig if provided, otherwise create one from ProxyConfig
         _retryConfig = retryConfig ??
             RetryConfig(maxAttempts: config.retryAttempts),
-        _circuitBreaker = circuitBreaker,
+        // Use explicit circuitBreaker if provided, otherwise create from config
+        // unless disabled
+        _circuitBreaker = circuitBreaker ??
+            (config.disableCircuitBreaker
+                ? null
+                : CircuitBreaker(config: config.circuitBreakerConfig)),
         _streamInactivityTimeout =
             streamInactivityTimeout ?? const Duration(seconds: 60),
         _metricsCollector = metricsCollector,

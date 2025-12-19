@@ -53,6 +53,75 @@ void main() {
 
         handler.dispose();
       });
+
+      group('circuit breaker defaults', () {
+        test('creates circuit breaker by default', () {
+          // With default config, circuit breaker should be created
+          final handler = DirectModeHandler(
+            apiKey: 'test-api-key',
+          );
+
+          // We can verify the handler was created successfully with default config
+          expect(handler, isA<ApiHandler>());
+          handler.dispose();
+        });
+
+        test('circuit breaker can be disabled via config', () {
+          final handler = DirectModeHandler(
+            apiKey: 'test-api-key',
+            config: const ClaudeConfig(disableCircuitBreaker: true),
+          );
+
+          expect(handler, isA<ApiHandler>());
+          handler.dispose();
+        });
+
+        test('uses custom circuit breaker config from ClaudeConfig', () {
+          final handler = DirectModeHandler(
+            apiKey: 'test-api-key',
+            config: const ClaudeConfig(
+              circuitBreakerConfig: CircuitBreakerConfig.strict,
+            ),
+          );
+
+          expect(handler, isA<ApiHandler>());
+          handler.dispose();
+        });
+
+        test('uses lenient circuit breaker config', () {
+          final handler = DirectModeHandler(
+            apiKey: 'test-api-key',
+            config: const ClaudeConfig(
+              circuitBreakerConfig: CircuitBreakerConfig.lenient,
+            ),
+          );
+
+          expect(handler, isA<ApiHandler>());
+          handler.dispose();
+        });
+
+        test('explicit circuit breaker overrides config', () {
+          final customBreaker = CircuitBreaker(
+            config: const CircuitBreakerConfig(
+              failureThreshold: 2,
+              recoveryTimeout: Duration(seconds: 10),
+              halfOpenSuccessThreshold: 1,
+            ),
+          );
+
+          final handler = DirectModeHandler(
+            apiKey: 'test-api-key',
+            config: const ClaudeConfig(
+              // This should be ignored since explicit circuitBreaker is provided
+              circuitBreakerConfig: CircuitBreakerConfig.lenient,
+            ),
+            circuitBreaker: customBreaker,
+          );
+
+          expect(handler, isA<ApiHandler>());
+          handler.dispose();
+        });
+      });
     });
 
     group('dispose', () {

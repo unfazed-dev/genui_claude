@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:genui_claude/genui_claude.dart' show RetryConfig, ProxyModeHandler;
+import 'package:genui_claude/genui_claude.dart'
+    show CircuitBreakerConfig, RetryConfig, ProxyModeHandler;
 
 /// Configuration for direct Claude API mode.
 @immutable
@@ -27,6 +28,8 @@ class ClaudeConfig {
     this.thinkingBudgetTokens,
     this.enableToolSearch = false,
     this.maxLoadedToolsPerSession = 50,
+    this.circuitBreakerConfig = CircuitBreakerConfig.defaults,
+    this.disableCircuitBreaker = false,
   })  : assert(maxTokens > 0, 'maxTokens must be greater than 0'),
         assert(retryAttempts >= 0, 'retryAttempts cannot be negative'),
         assert(
@@ -125,6 +128,23 @@ class ClaudeConfig {
   /// widget tools that can be loaded dynamically during a single session.
   final int maxLoadedToolsPerSession;
 
+  /// Configuration for the circuit breaker.
+  ///
+  /// The circuit breaker prevents cascading failures by temporarily stopping
+  /// requests when too many failures occur. Use presets like
+  /// [CircuitBreakerConfig.defaults], [CircuitBreakerConfig.lenient], or
+  /// [CircuitBreakerConfig.strict].
+  ///
+  /// Only used if [disableCircuitBreaker] is false (the default).
+  final CircuitBreakerConfig circuitBreakerConfig;
+
+  /// Whether to disable the circuit breaker.
+  ///
+  /// By default, a circuit breaker is automatically created and enabled for
+  /// production resilience. Set this to true to opt-out of circuit breaker
+  /// protection (not recommended for production).
+  final bool disableCircuitBreaker;
+
   /// Default configuration.
   static const ClaudeConfig defaults = ClaudeConfig();
 
@@ -143,6 +163,8 @@ class ClaudeConfig {
     int? thinkingBudgetTokens,
     bool? enableToolSearch,
     int? maxLoadedToolsPerSession,
+    CircuitBreakerConfig? circuitBreakerConfig,
+    bool? disableCircuitBreaker,
   }) {
     return ClaudeConfig(
       maxTokens: maxTokens ?? this.maxTokens,
@@ -161,6 +183,9 @@ class ClaudeConfig {
       enableToolSearch: enableToolSearch ?? this.enableToolSearch,
       maxLoadedToolsPerSession:
           maxLoadedToolsPerSession ?? this.maxLoadedToolsPerSession,
+      circuitBreakerConfig: circuitBreakerConfig ?? this.circuitBreakerConfig,
+      disableCircuitBreaker:
+          disableCircuitBreaker ?? this.disableCircuitBreaker,
     );
   }
 }
@@ -182,6 +207,8 @@ class ProxyConfig {
     this.headers,
     this.includeHistory = true,
     this.maxHistoryMessages = 20,
+    this.circuitBreakerConfig = CircuitBreakerConfig.defaults,
+    this.disableCircuitBreaker = false,
   })  : assert(retryAttempts >= 0, 'retryAttempts cannot be negative'),
         assert(maxHistoryMessages >= 0, 'maxHistoryMessages cannot be negative');
 
@@ -210,6 +237,23 @@ class ProxyConfig {
   /// Maximum history messages to include.
   final int maxHistoryMessages;
 
+  /// Configuration for the circuit breaker.
+  ///
+  /// The circuit breaker prevents cascading failures by temporarily stopping
+  /// requests when too many failures occur. Use presets like
+  /// [CircuitBreakerConfig.defaults], [CircuitBreakerConfig.lenient], or
+  /// [CircuitBreakerConfig.strict].
+  ///
+  /// Only used if [disableCircuitBreaker] is false (the default).
+  final CircuitBreakerConfig circuitBreakerConfig;
+
+  /// Whether to disable the circuit breaker.
+  ///
+  /// By default, a circuit breaker is automatically created and enabled for
+  /// production resilience. Set this to true to opt-out of circuit breaker
+  /// protection (not recommended for production).
+  final bool disableCircuitBreaker;
+
   /// Default configuration.
   static const ProxyConfig defaults = ProxyConfig();
 
@@ -220,6 +264,8 @@ class ProxyConfig {
     Map<String, String>? headers,
     bool? includeHistory,
     int? maxHistoryMessages,
+    CircuitBreakerConfig? circuitBreakerConfig,
+    bool? disableCircuitBreaker,
   }) {
     return ProxyConfig(
       timeout: timeout ?? this.timeout,
@@ -227,6 +273,9 @@ class ProxyConfig {
       headers: headers ?? this.headers,
       includeHistory: includeHistory ?? this.includeHistory,
       maxHistoryMessages: maxHistoryMessages ?? this.maxHistoryMessages,
+      circuitBreakerConfig: circuitBreakerConfig ?? this.circuitBreakerConfig,
+      disableCircuitBreaker:
+          disableCircuitBreaker ?? this.disableCircuitBreaker,
     );
   }
 }

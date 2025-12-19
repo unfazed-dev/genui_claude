@@ -91,11 +91,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `stopSequences`: Custom stop sequences (max 4)
   - Added to `ClaudeConfig` and passed through handlers
 
+- **Circuit Breaker Enabled by Default**: Safer production defaults
+  - `ProxyConfig.circuitBreakerConfig`: Configure circuit breaker (default: `CircuitBreakerConfig.defaults`)
+  - `ProxyConfig.disableCircuitBreaker`: Opt-out flag (default: `false`)
+  - `ClaudeConfig.circuitBreakerConfig`: Configure circuit breaker for direct mode
+  - `ClaudeConfig.disableCircuitBreaker`: Opt-out flag for direct mode
+  - Both handlers now create circuit breaker automatically unless explicitly disabled
+  - Explicit `circuitBreaker` parameter still overrides config
+
 ### Changed
 
 - Enhanced logging with request ID correlation throughout handlers
 - Improved error handling with structured exception mapping
 - Production hardening improvements across all components
+- **Breaking (behavior)**: Handlers now create circuit breakers by default. To preserve
+  old behavior without circuit breaker, set `disableCircuitBreaker: true` in config.
 
 ## [0.1.0] - 2025-12-14
 

@@ -42,7 +42,9 @@ class DirectModeHandler implements ApiHandler {
   /// - [apiKey]: Your Claude API key
   /// - [model]: Model to use (default: 'claude-sonnet-4-20250514')
   /// - [config]: Optional configuration for timeouts, retries, etc.
-  /// - [circuitBreaker]: Optional circuit breaker for resilience
+  ///   By default, a circuit breaker is enabled via [ClaudeConfig.circuitBreakerConfig].
+  ///   Set [ClaudeConfig.disableCircuitBreaker] to true to opt-out.
+  /// - [circuitBreaker]: Optional circuit breaker instance (overrides config)
   /// - [metricsCollector]: Optional metrics collector for observability
   DirectModeHandler({
     required String apiKey,
@@ -55,7 +57,12 @@ class DirectModeHandler implements ApiHandler {
           headers: config.headers,
           retries: config.retryAttempts,
         ),
-        _circuitBreaker = circuitBreaker,
+        // Use explicit circuitBreaker if provided, otherwise create from config
+        // unless disabled
+        _circuitBreaker = circuitBreaker ??
+            (config.disableCircuitBreaker
+                ? null
+                : CircuitBreaker(config: config.circuitBreakerConfig)),
         _metricsCollector = metricsCollector;
 
   final sdk.AnthropicClient _client;
