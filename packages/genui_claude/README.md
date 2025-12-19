@@ -23,7 +23,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  genui: ^0.5.1
+  genui: ^0.6.0
   genui_claude:
     git:
       url: https://github.com/unfazed-dev/genui_claude.git
@@ -38,8 +38,8 @@ dependencies:
 import 'package:genui/genui.dart';
 import 'package:genui_claude/genui_claude.dart';
 
-// Create the GenUI manager with your catalog
-final genUiManager = GenUiManager(catalog: MyCatalog());
+// Create the A2UI message processor with your catalog
+final a2uiProcessor = A2uiMessageProcessor(catalogs: [MyCatalog()]);
 
 // Create the content generator with direct API access
 final contentGenerator = ClaudeContentGenerator(
@@ -50,7 +50,7 @@ final contentGenerator = ClaudeContentGenerator(
 // Create the conversation
 final conversation = GenUiConversation(
   contentGenerator: contentGenerator,
-  genUiManager: genUiManager,
+  a2uiMessageProcessor: a2uiProcessor,
   onSurfaceAdded: (update) {
     // Handle new UI surface
   },
@@ -88,9 +88,9 @@ final contentGenerator = ClaudeContentGenerator.proxy(
 │  ┌───────────────────────────────────────────────────────────────┐  │
 │  │                    GenUiConversation                          │  │
 │  │  ┌─────────────────┐  ┌────────────────────────────────────┐  │  │
-│  │  │  GenUiManager   │  │  ClaudeContentGenerator         │  │  │
-│  │  │  (Catalog)      │  │  ┌──────────────────────────────┐  │  │  │
-│  │  │                 │  │  │  a2ui_claude              │  │  │  │
+│  │  │ A2uiMessage-    │  │  ClaudeContentGenerator         │  │  │
+│  │  │ Processor       │  │  ┌──────────────────────────────┐  │  │  │
+│  │  │ (Catalogs)      │  │  │  a2ui_claude              │  │  │  │
 │  │  │  - Widgets      │──│  │  - Tool Conversion           │  │  │  │
 │  │  │  - Data Model   │  │  │  - Message Parsing           │  │  │  │
 │  │  │  - Surfaces     │  │  │  - Stream Handling           │  │  │  │

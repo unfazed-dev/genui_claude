@@ -17,7 +17,7 @@ This guide helps you migrate between versions of the `genui_claude` package.
 
 | genui_claude | genui | anthropic_sdk_dart | a2ui_claude | Dart SDK | Flutter |
 |-----------------|-------|--------------------|----------------|----------|---------|
-| 0.1.x | ^0.5.1 | ^0.3.0 | ^0.1.0 | ^3.6.0 | ^3.27.0 |
+| 0.1.x | ^0.6.0 | ^0.3.0 | ^0.1.0 | ^3.6.0 | ^3.27.0 |
 
 ### Dependency Notes
 

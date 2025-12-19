@@ -101,6 +101,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **genui SDK 0.6.0 Migration**: Updated to use new API naming conventions
+  - `GenUiManager` → `A2uiMessageProcessor`
+  - `catalog:` parameter → `catalogs:` (now accepts a List)
+  - `genUiManager:` parameter → `a2uiMessageProcessor:` in GenUiConversation
+  - Added `clientCapabilities` parameter to `sendRequest` override
 - Enhanced logging with request ID correlation throughout handlers
 - Improved error handling with structured exception mapping
 - Production hardening improvements across all components
@@ -145,7 +150,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Dependencies
 
-- Requires `genui: ^0.5.1`
+- Requires `genui: ^0.6.0`
 - Requires `a2ui_claude` (sibling package)
 - Flutter SDK `>=3.22.0`
 - Dart SDK `^3.5.0`

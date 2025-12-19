@@ -52,7 +52,7 @@ Complete API documentation for the `genui_claude` package.
 
 ```yaml
 dependencies:
-  genui: ^0.5.1
+  genui: ^0.6.0
   genui_claude:
     git:
       url: https://github.com/unfazed-dev/genui_claude.git

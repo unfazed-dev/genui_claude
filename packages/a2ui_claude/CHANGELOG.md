@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **ProactiveRateLimiter**: Proactive rate limiting with sliding window algorithm
+  - Prevents hitting API rate limits by tracking request patterns
+  - `maxRequests`: Maximum requests allowed in window
+  - `window`: Duration of sliding window
+  - `minInterval`: Optional minimum interval between requests
+  - Methods: `waitForCapacity()`, `recordRequest()`, `isWithinLimits`
+  - Automatic cleanup of expired request timestamps
+
+- **RequestDeduplication**: Prevents duplicate API calls for identical requests
+  - Uses content-addressable hashing with TTL-based cache
+  - `cacheTtl`: Time-to-live for cached request hashes (default: 30 seconds)
+  - Methods: `isDuplicate()`, `recordRequest()`, `clear()`
+  - Automatic expiration of stale entries
+
+### Changed
+
+- Upgraded dev dependencies (lints 4.0.0 → 6.0.0)
+
 ## [1.0.0] - 2024-12-14
 
 ### Added

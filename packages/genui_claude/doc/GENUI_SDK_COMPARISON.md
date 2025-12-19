@@ -1,12 +1,12 @@
 # GenUI SDK vs genui_claude: Deep-Dive Comparison
 
-This document provides a comprehensive comparison between the GenUI SDK (`genui: ^0.5.1`) and the `genui_claude` package, detailing how each GenUI SDK feature is implemented.
+This document provides a comprehensive comparison between the GenUI SDK (`genui: ^0.6.0`) and the `genui_claude` package, detailing how each GenUI SDK feature is implemented.
 
 ## Overview
 
 | Package | Purpose | Version |
 |---------|---------|---------|
-| `genui` | Flutter SDK for generative UI with LLM backends | ^0.5.1 |
+| `genui` | Flutter SDK for generative UI with LLM backends | ^0.6.0 |
 | `genui_claude` | ContentGenerator implementation for Claude AI | 0.1.0 |
 
 The `genui_claude` package implements the GenUI SDK's `ContentGenerator` interface, enabling Claude-powered generative UI in Flutter applications.
@@ -40,7 +40,7 @@ The `genui_claude` package implements the GenUI SDK's `ContentGenerator` interfa
 ```yaml
 # pubspec.yaml
 dependencies:
-  genui: ^0.5.1
+  genui: ^0.6.0
   genui_claude: ^0.1.0
 ```
 

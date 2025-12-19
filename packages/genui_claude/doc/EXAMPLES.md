@@ -104,7 +104,7 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   late final ClaudeContentGenerator _generator;
-  late final GenUiManager _genUiManager;
+  late final A2uiMessageProcessor _a2uiProcessor;
   late final GenUiConversation _conversation;
 
   final _messageController = TextEditingController();
@@ -118,7 +118,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
 
-    _genUiManager = GenUiManager(catalog: MyCatalog());
+    _a2uiProcessor = A2uiMessageProcessor(catalogs: [MyCatalog()]);
 
     _generator = ClaudeContentGenerator(
       apiKey: _apiKey,
@@ -131,7 +131,7 @@ Available tools: info_card, action_button.
 
     _conversation = GenUiConversation(
       contentGenerator: _generator,
-      genUiManager: _genUiManager,
+      a2uiMessageProcessor: _a2uiProcessor,
       onSurfaceAdded: _handleSurfaceAdded,
       onTextResponse: _handleTextResponse,
       onError: _handleError,
@@ -271,7 +271,7 @@ Available tools: info_card, action_button.
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: GenUiSurface(
-          host: _genUiManager,
+          host: _a2uiProcessor,
           surfaceId: surfaceId,
           defaultBuilder: (_) => const CircularProgressIndicator(),
         ),
@@ -1010,7 +1010,7 @@ void main() {
 1. **Check GenUiSurface setup**
    ```dart
    GenUiSurface(
-     host: genUiManager, // Must be the same manager
+     host: a2uiProcessor, // Must be the same processor
      surfaceId: surfaceId, // Must match the emitted ID
      defaultBuilder: (_) => const Text('Loading...'),
    )
