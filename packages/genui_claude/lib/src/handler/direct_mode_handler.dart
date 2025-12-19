@@ -1,3 +1,5 @@
+import 'dart:async' as async;
+
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart' as sdk;
 import 'package:genui_claude/src/config/claude_config.dart';
 import 'package:genui_claude/src/exceptions/claude_exceptions.dart' as exc;
@@ -184,34 +186,127 @@ class DirectModeHandler implements ApiHandler {
   // methods would require mocking SDK types which provides limited value.
 
   /// Maps exceptions to our exception hierarchy.
+  ///
+  /// Uses multiple detection strategies for robust error classification:
+  /// 1. Check for dart:async TimeoutException
+  /// 2. Semantic classification based on error message content
+  /// 3. Regex-based status code extraction as fallback
+  /// 4. Default to NetworkException for unknown errors
   exc.ClaudeException _mapException(
     Exception e,
     String requestId,
     StackTrace stackTrace,
   ) {
-    final message = e.toString();
+    // 1. Check for dart:async TimeoutException
+    if (e is async.TimeoutException) {
+      return exc.TimeoutException(
+        message: 'Request timed out',
+        timeout: e.duration ?? const Duration(seconds: 60),
+        requestId: requestId,
+        originalError: e,
+        stackTrace: stackTrace,
+      );
+    }
 
-    // Try to extract status code from message if available
-    final statusMatch =
-        RegExp(r'status(?:Code)?[:\s]+(\d{3})').firstMatch(message);
-    if (statusMatch != null) {
-      final statusCode = int.tryParse(statusMatch.group(1) ?? '');
-      if (statusCode != null) {
-        return exc.ExceptionFactory.fromHttpStatus(
-          statusCode: statusCode,
-          body: message,
+    final message = e.toString();
+    final messageLower = message.toLowerCase();
+
+    // 2. Semantic classification based on error message content
+    // Authentication errors
+    if (messageLower.contains('401') ||
+        messageLower.contains('unauthorized') ||
+        messageLower.contains('invalid api key') ||
+        messageLower.contains('invalid_api_key') ||
+        messageLower.contains('authentication')) {
+      return exc.AuthenticationException(
+        message: message,
+        statusCode: 401,
+        requestId: requestId,
+        originalError: e,
+        stackTrace: stackTrace,
+      );
+    }
+
+    // Rate limiting
+    if (messageLower.contains('429') ||
+        messageLower.contains('rate limit') ||
+        messageLower.contains('rate_limit') ||
+        messageLower.contains('too many requests')) {
+      return exc.RateLimitException(
+        message: message,
+        requestId: requestId,
+        originalError: e,
+        stackTrace: stackTrace,
+      );
+    }
+
+    // Server errors
+    if (messageLower.contains('500') ||
+        messageLower.contains('502') ||
+        messageLower.contains('503') ||
+        messageLower.contains('504') ||
+        messageLower.contains('internal server error') ||
+        messageLower.contains('service unavailable') ||
+        messageLower.contains('bad gateway') ||
+        messageLower.contains('gateway timeout')) {
+      return exc.ServerException(
+        message: message,
+        statusCode: _extractStatusCode(messageLower) ?? 500,
+        requestId: requestId,
+        originalError: e,
+        stackTrace: stackTrace,
+      );
+    }
+
+    // Validation errors
+    if (messageLower.contains('400') ||
+        messageLower.contains('422') ||
+        messageLower.contains('invalid') ||
+        messageLower.contains('validation')) {
+      final extractedCode = _extractStatusCode(messageLower);
+      if (extractedCode != null && (extractedCode == 400 || extractedCode == 422)) {
+        return exc.ValidationException(
+          message: message,
+          statusCode: extractedCode,
           requestId: requestId,
+          originalError: e,
+          stackTrace: stackTrace,
         );
       }
     }
 
-    // Network or unknown error
+    // 3. Fallback: Extract status code with regex
+    final statusCode = _extractStatusCode(messageLower);
+    if (statusCode != null) {
+      return exc.ExceptionFactory.fromHttpStatus(
+        statusCode: statusCode,
+        body: message,
+        requestId: requestId,
+      );
+    }
+
+    // 4. Network or unknown error
     return exc.NetworkException(
       message: message,
       requestId: requestId,
       originalError: e,
       stackTrace: stackTrace,
     );
+  }
+
+  /// Extracts HTTP status code from an error message.
+  int? _extractStatusCode(String message) {
+    final statusMatch =
+        RegExp(r'(?:status|code|error)[:\s]*(\d{3})').firstMatch(message);
+    if (statusMatch != null) {
+      return int.tryParse(statusMatch.group(1) ?? '');
+    }
+    // Also check for standalone 3-digit codes that look like HTTP status
+    final standaloneMatch = RegExp(r'\b([45]\d{2})\b').firstMatch(message);
+    if (standaloneMatch != null) {
+      return int.tryParse(standaloneMatch.group(1) ?? '');
+    }
+    return null;
   }
 
   /// Converts message maps to SDK Message objects.

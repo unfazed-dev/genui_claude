@@ -722,5 +722,135 @@ void main() {
         );
       });
     });
+
+    group('LRU cache eviction', () {
+      test('constructor accepts custom maxCacheSize', () {
+        final customController = BindingController(
+          registry: BindingRegistry(),
+          subscribe: mockDataModel.subscribe,
+          update: mockDataModel.update,
+          maxCacheSize: 50,
+        );
+        // Controller created successfully with custom cache size
+        expect(customController, isNotNull);
+        customController.dispose();
+      });
+
+      test('evicts oldest entries when cache exceeds maxCacheSize', () {
+        // Create controller with small cache size for testing
+        final testRegistry = BindingRegistry();
+        final testController = BindingController(
+          registry: testRegistry,
+          subscribe: mockDataModel.subscribe,
+          update: mockDataModel.update,
+          maxCacheSize: 3,
+        );
+
+        // Create 4 bindings with toWidget transformers to populate cache
+        for (var i = 0; i < 4; i++) {
+          final path = BindingPath.fromDotNotation('field$i');
+          mockDataModel.update(path, 'value$i');
+          final definition = BindingDefinition(
+            property: 'value',
+            path: path,
+            toWidget: (value) => 'transformed:$value',
+          );
+          final subscription = mockDataModel.subscribe(path);
+          final binding = WidgetBinding(
+            widgetId: 'widget$i',
+            surfaceId: 'surface',
+            definition: definition,
+            subscription: subscription,
+          );
+          testRegistry.register(binding);
+
+          // Access to create cached transformed notifier
+          testController.getValueNotifier(
+            widgetId: 'widget$i',
+            property: 'value',
+          );
+        }
+
+        // First widget's cached notifier should have been evicted
+        // Getting it again should still work (creates new cache entry)
+        final notifier0 = testController.getValueNotifier(
+          widgetId: 'widget0',
+          property: 'value',
+        );
+        expect(notifier0, isNotNull);
+        expect(notifier0!.value, equals('transformed:value0'));
+
+        testController.dispose();
+      });
+
+      test('accessing cached entry updates LRU order', () {
+        final testRegistry = BindingRegistry();
+        final testController = BindingController(
+          registry: testRegistry,
+          subscribe: mockDataModel.subscribe,
+          update: mockDataModel.update,
+          maxCacheSize: 3,
+        );
+
+        // Create 3 bindings
+        for (var i = 0; i < 3; i++) {
+          final path = BindingPath.fromDotNotation('field$i');
+          mockDataModel.update(path, 'value$i');
+          final definition = BindingDefinition(
+            property: 'value',
+            path: path,
+            toWidget: (value) => 'transformed:$value',
+          );
+          final subscription = mockDataModel.subscribe(path);
+          final binding = WidgetBinding(
+            widgetId: 'widget$i',
+            surfaceId: 'surface',
+            definition: definition,
+            subscription: subscription,
+          );
+          testRegistry.register(binding);
+          testController.getValueNotifier(
+            widgetId: 'widget$i',
+            property: 'value',
+          );
+        }
+
+        // Access widget0 to move it to end of LRU
+        final notifier0First = testController.getValueNotifier(
+          widgetId: 'widget0',
+          property: 'value',
+        );
+
+        // Add widget3, which should evict widget1 (now oldest)
+        final path3 = BindingPath.fromDotNotation('field3');
+        mockDataModel.update(path3, 'value3');
+        final definition3 = BindingDefinition(
+          property: 'value',
+          path: path3,
+          toWidget: (value) => 'transformed:$value',
+        );
+        final subscription3 = mockDataModel.subscribe(path3);
+        final binding3 = WidgetBinding(
+          widgetId: 'widget3',
+          surfaceId: 'surface',
+          definition: definition3,
+          subscription: subscription3,
+        );
+        testRegistry.register(binding3);
+        testController.getValueNotifier(
+          widgetId: 'widget3',
+          property: 'value',
+        );
+
+        // widget0 should still be cached (was accessed recently)
+        final notifier0Second = testController.getValueNotifier(
+          widgetId: 'widget0',
+          property: 'value',
+        );
+        expect(identical(notifier0First, notifier0Second), isTrue);
+
+        testController.dispose();
+      });
+    });
   });
 }

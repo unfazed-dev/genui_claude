@@ -61,9 +61,13 @@ class MetricsCollector {
   ///
   /// Set [enabled] to false to disable metrics collection entirely.
   /// This is useful for reducing overhead in performance-critical scenarios.
+  ///
+  /// The [staleRequestThreshold] controls how long a request can remain
+  /// tracked before being considered stale and cleaned up. Default is 5 minutes.
   MetricsCollector({
     this.enabled = true,
     this.aggregationEnabled = true,
+    this.staleRequestThreshold = const Duration(minutes: 5),
   });
 
   /// Whether metrics collection is enabled.
@@ -71,6 +75,10 @@ class MetricsCollector {
 
   /// Whether to maintain aggregated statistics.
   final bool aggregationEnabled;
+
+  /// Threshold after which unfinished requests are considered stale
+  /// and removed from tracking to prevent memory leaks.
+  final Duration staleRequestThreshold;
 
   final _eventController = StreamController<MetricsEvent>.broadcast();
   final _stats = _MetricsStats();
@@ -159,6 +167,9 @@ class MetricsCollector {
     _emit(event);
 
     if (aggregationEnabled) {
+      // Clean up stale requests before adding new entry to prevent memory leaks
+      _stats._cleanupStaleRequests(staleRequestThreshold);
+
       _stats._totalRequests++;
       _stats._activeRequests++;
       _stats._requestStartTimes[requestId] = DateTime.now();
@@ -340,6 +351,10 @@ abstract class MetricsStats {
   /// Number of stream inactivity events.
   int get streamInactivityEvents;
 
+  /// Number of stale requests that were cleaned up.
+  /// These are requests that started but never completed within the threshold.
+  int get staleRequestsCleanedUp;
+
   /// Success rate as a percentage (0-100).
   double get successRate;
 
@@ -376,10 +391,32 @@ class _MetricsStats implements MetricsStats {
   // Keep last 1000 latencies for percentile calculation
   static const _maxLatencies = 1000;
 
+  // Track stale requests that were cleaned up for monitoring
+  int _staleRequestsCleanedUp = 0;
+
   void _recordLatency(int latencyMs) {
     _latencies.add(latencyMs);
     if (_latencies.length > _maxLatencies) {
       _latencies.removeAt(0);
+    }
+  }
+
+  /// Removes request start times older than the threshold.
+  /// This prevents memory leaks from requests that never complete.
+  void _cleanupStaleRequests(Duration threshold) {
+    final now = DateTime.now();
+    final staleKeys = <String>[];
+
+    for (final entry in _requestStartTimes.entries) {
+      if (now.difference(entry.value) > threshold) {
+        staleKeys.add(entry.key);
+      }
+    }
+
+    for (final key in staleKeys) {
+      _requestStartTimes.remove(key);
+      _activeRequests--;
+      _staleRequestsCleanedUp++;
     }
   }
 
@@ -393,6 +430,7 @@ class _MetricsStats implements MetricsStats {
     _circuitBreakerEvents = 0;
     _circuitBreakerOpens = 0;
     _streamInactivityEvents = 0;
+    _staleRequestsCleanedUp = 0;
     _latencies.clear();
     _requestStartTimes.clear();
   }
@@ -423,6 +461,9 @@ class _MetricsStats implements MetricsStats {
 
   @override
   int get streamInactivityEvents => _streamInactivityEvents;
+
+  @override
+  int get staleRequestsCleanedUp => _staleRequestsCleanedUp;
 
   @override
   double get successRate {
@@ -464,6 +505,7 @@ class _MetricsStats implements MetricsStats {
         'circuit_breaker_events': _circuitBreakerEvents,
         'circuit_breaker_opens': _circuitBreakerOpens,
         'stream_inactivity_events': _streamInactivityEvents,
+        'stale_requests_cleaned_up': _staleRequestsCleanedUp,
         'success_rate': successRate,
         'average_latency_ms': averageLatencyMs,
         'p50_latency_ms': p50LatencyMs,

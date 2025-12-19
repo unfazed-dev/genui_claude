@@ -550,7 +550,35 @@ void main() {
         expect(collector.stats.circuitBreakerEvents, equals(0));
         expect(collector.stats.circuitBreakerOpens, equals(0));
         expect(collector.stats.streamInactivityEvents, equals(0));
+        expect(collector.stats.staleRequestsCleanedUp, equals(0));
         expect(collector.stats.averageLatencyMs, equals(0.0));
+      });
+    });
+
+    group('stale request cleanup', () {
+      test('constructor accepts custom staleRequestThreshold', () {
+        final c = MetricsCollector(
+          staleRequestThreshold: const Duration(minutes: 10),
+        );
+        expect(c.staleRequestThreshold, equals(const Duration(minutes: 10)));
+        c.dispose();
+      });
+
+      test('default staleRequestThreshold is 5 minutes', () {
+        expect(
+          collector.staleRequestThreshold,
+          equals(const Duration(minutes: 5)),
+        );
+      });
+
+      test('staleRequestsCleanedUp is included in toMap', () {
+        final map = collector.stats.toMap();
+        expect(map.containsKey('stale_requests_cleaned_up'), isTrue);
+        expect(map['stale_requests_cleaned_up'], equals(0));
+      });
+
+      test('staleRequestsCleanedUp starts at 0', () {
+        expect(collector.stats.staleRequestsCleanedUp, equals(0));
       });
     });
 

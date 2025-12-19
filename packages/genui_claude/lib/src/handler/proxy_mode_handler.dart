@@ -377,19 +377,24 @@ class ProxyModeHandler implements ApiHandler {
     async.Timer? inactivityTimer;
     final completer = async.Completer<void>();
 
+    // Track when the last event was received for accurate metric reporting
+    var lastEventTime = DateTime.now();
+
     // coverage:ignore-start
     // NOTE: Inactivity timer callback fires asynchronously during stream gaps.
     // Testing requires precise timing control that's difficult in unit tests.
     void resetInactivityTimer() {
       inactivityTimer?.cancel();
-      final timerStartTime = DateTime.now();
+      lastEventTime = DateTime.now();
       inactivityTimer = async.Timer(_streamInactivityTimeout, () {
+        // Calculate actual inactivity duration from last event
+        final actualInactivity = DateTime.now().difference(lastEventTime);
         _log.warning(
-          '[Request $requestId] Stream inactivity timeout after $_streamInactivityTimeout',
+          '[Request $requestId] Stream inactivity timeout after $actualInactivity',
         );
         _metricsCollector?.recordStreamInactivity(
           timeout: _streamInactivityTimeout,
-          lastActivity: DateTime.now().difference(timerStartTime),
+          lastActivity: actualInactivity,
           requestId: requestId,
         );
         completer.completeError(

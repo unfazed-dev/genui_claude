@@ -50,23 +50,30 @@ class BindingController {
   /// - [registry]: The binding registry for tracking active bindings
   /// - [subscribe]: Function to subscribe to data model paths
   /// - [update]: Function to update data model values
+  /// - [maxCacheSize]: Maximum number of transformed notifiers to cache (default: 100)
   BindingController({
     required BindingRegistry registry,
     required DataModelSubscribe subscribe,
     required DataModelUpdate update,
+    int maxCacheSize = 100,
   })  : _registry = registry,
         _subscribe = subscribe,
-        _update = update;
+        _update = update,
+        _maxCacheSize = maxCacheSize;
 
   final BindingRegistry _registry;
   final DataModelSubscribe _subscribe;
   final DataModelUpdate _update;
+  final int _maxCacheSize;
 
   /// Tracks the last value set for each binding to prevent update loops.
   final Map<String, dynamic> _lastWidgetValues = {};
 
   /// Cache of transformed notifiers for toWidget transformers.
   final Map<String, ValueNotifier<dynamic>> _transformedNotifiers = {};
+
+  /// Tracks access order for LRU eviction of transformed notifiers.
+  final List<String> _cacheAccessOrder = [];
 
   /// Whether this controller has been disposed.
   bool _isDisposed = false;
@@ -126,6 +133,8 @@ class BindingController {
     final cacheKey = '$widgetId:$property';
     final cached = _transformedNotifiers[cacheKey];
     if (cached != null) {
+      // Update LRU access order
+      _trackCacheAccess(cacheKey);
       return cached;
     }
 
@@ -142,10 +151,31 @@ class BindingController {
 
     source.addListener(listener);
 
+    // Evict oldest entries if cache is full before adding new entry
+    _evictIfNeeded();
+
     // Cache for reuse and cleanup
     _transformedNotifiers[cacheKey] = transformed;
+    _cacheAccessOrder.add(cacheKey);
 
     return transformed;
+  }
+
+  /// Updates LRU access order for a cache key.
+  void _trackCacheAccess(String cacheKey) {
+    _cacheAccessOrder.remove(cacheKey);
+    _cacheAccessOrder.add(cacheKey);
+  }
+
+  /// Evicts oldest cache entries when over the max cache size.
+  void _evictIfNeeded() {
+    while (_transformedNotifiers.length >= _maxCacheSize &&
+        _cacheAccessOrder.isNotEmpty) {
+      final oldest = _cacheAccessOrder.removeAt(0);
+      final notifier = _transformedNotifiers.remove(oldest);
+      notifier?.dispose();
+      _lastWidgetValues.remove(oldest);
+    }
   }
 
   /// Updates the data model from a widget change (two-way binding).
@@ -191,6 +221,7 @@ class BindingController {
       // Dispose transformed notifier if exists
       final transformed = _transformedNotifiers.remove(key);
       transformed?.dispose();
+      _cacheAccessOrder.remove(key);
 
       binding.dispose();
       _lastWidgetValues.remove(key);
@@ -209,6 +240,7 @@ class BindingController {
       // Dispose transformed notifier if exists
       final transformed = _transformedNotifiers.remove(key);
       transformed?.dispose();
+      _cacheAccessOrder.remove(key);
 
       binding.dispose();
       _lastWidgetValues.remove(key);
@@ -228,6 +260,7 @@ class BindingController {
       notifier.dispose();
     }
     _transformedNotifiers.clear();
+    _cacheAccessOrder.clear();
 
     // Registry.clear() handles disposing all bindings
     _registry.clear();
