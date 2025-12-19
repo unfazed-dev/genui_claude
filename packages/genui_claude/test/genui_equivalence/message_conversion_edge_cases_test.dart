@@ -48,7 +48,7 @@ void main() {
       test('converts UserMessage with URL image', () {
         final message = UserMessage([
           const TextPart('Check this out:'),
-          ImagePart.fromUrl(Uri.parse('https://example.com/image.jpg')),
+          ImagePart.fromUrl(Uri.parse('https://example.com/image.jpg'), mimeType: 'image/jpeg'),
         ]);
 
         final result = MessageConverter.toClaudeMessages([message]);
@@ -68,9 +68,9 @@ void main() {
       test('converts UserMessage with multiple images', () {
         final message = UserMessage([
           const TextPart('Compare these:'),
-          ImagePart.fromUrl(Uri.parse('https://example.com/a.jpg')),
+          ImagePart.fromUrl(Uri.parse('https://example.com/a.jpg'), mimeType: 'image/jpeg'),
           const TextPart('vs'),
-          ImagePart.fromUrl(Uri.parse('https://example.com/b.jpg')),
+          ImagePart.fromUrl(Uri.parse('https://example.com/b.jpg'), mimeType: 'image/jpeg'),
         ]);
 
         final result = MessageConverter.toClaudeMessages([message]);

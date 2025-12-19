@@ -140,6 +140,7 @@ class ClaudeContentGenerator implements ContentGenerator {
   Future<void> sendRequest(
     ChatMessage message, {
     Iterable<ChatMessage>? history,
+    A2UiClientCapabilities? clientCapabilities,
   }) async {
     // coverage:ignore-start
     // NOTE: Race condition guard - difficult to trigger in tests as it requires

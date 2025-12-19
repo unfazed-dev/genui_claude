@@ -21,11 +21,11 @@ void main() {
         final generator = ClaudeContentGenerator.withHandler(
           handler: mockHandler,
         );
-        final genUiManager = GenUiManager(catalog: TestCatalog());
+        final a2uiProcessor = A2uiMessageProcessor(catalogs: [TestCatalog()]);
 
         final conversation = GenUiConversation(
           contentGenerator: generator,
-          genUiManager: genUiManager,
+          a2uiMessageProcessor: a2uiProcessor,
         );
 
         expect(conversation, isNotNull);
@@ -40,11 +40,11 @@ void main() {
         final generator = ClaudeContentGenerator.withHandler(
           handler: mockHandler,
         );
-        final genUiManager = GenUiManager(catalog: TestCatalog());
+        final a2uiProcessor = A2uiMessageProcessor(catalogs: [TestCatalog()]);
 
         final conversation = GenUiConversation(
           contentGenerator: generator,
-          genUiManager: genUiManager,
+          a2uiMessageProcessor: a2uiProcessor,
           onSurfaceAdded: (update) {},
           onTextResponse: (text) {},
           onError: (error) {},
@@ -63,10 +63,10 @@ void main() {
         final generator = ClaudeContentGenerator.withHandler(
           handler: mockHandler,
         );
-        final genUiManager = GenUiManager(catalog: TestCatalog());
+        final a2uiProcessor = A2uiMessageProcessor(catalogs: [TestCatalog()]);
         final conversation = GenUiConversation(
           contentGenerator: generator,
-          genUiManager: genUiManager,
+          a2uiMessageProcessor: a2uiProcessor,
         );
 
         mockHandler.stubTextResponse('Response');
@@ -85,10 +85,10 @@ void main() {
         final generator = ClaudeContentGenerator.withHandler(
           handler: mockHandler,
         );
-        final genUiManager = GenUiManager(catalog: TestCatalog());
+        final a2uiProcessor = A2uiMessageProcessor(catalogs: [TestCatalog()]);
         final conversation = GenUiConversation(
           contentGenerator: generator,
-          genUiManager: genUiManager,
+          a2uiMessageProcessor: a2uiProcessor,
         );
 
         mockHandler.stubTextResponse('Response');
@@ -110,14 +110,14 @@ void main() {
         final generator = ClaudeContentGenerator.withHandler(
           handler: mockHandler,
         );
-        final genUiManager = GenUiManager(catalog: TestCatalog());
+        final a2uiProcessor = A2uiMessageProcessor(catalogs: [TestCatalog()]);
 
         mockHandler.stubTextResponse('Hello from Claude!');
 
         final textResponses = <String>[];
         final conversation = GenUiConversation(
           contentGenerator: generator,
-          genUiManager: genUiManager,
+          a2uiMessageProcessor: a2uiProcessor,
           onTextResponse: textResponses.add,
         );
 
@@ -138,7 +138,7 @@ void main() {
         final generator = ClaudeContentGenerator.withHandler(
           handler: mockHandler,
         );
-        final genUiManager = GenUiManager(catalog: TestCatalog());
+        final a2uiProcessor = A2uiMessageProcessor(catalogs: [TestCatalog()]);
 
         mockHandler.stubEvents(
           MockEventFactory.streamingTextResponse(['Hel', 'lo ', 'World', '!']),
@@ -147,7 +147,7 @@ void main() {
         final textChunks = <String>[];
         final conversation = GenUiConversation(
           contentGenerator: generator,
-          genUiManager: genUiManager,
+          a2uiMessageProcessor: a2uiProcessor,
           onTextResponse: textChunks.add,
         );
 
@@ -169,14 +169,14 @@ void main() {
         final generator = ClaudeContentGenerator.withHandler(
           handler: mockHandler,
         );
-        final genUiManager = GenUiManager(catalog: TestCatalog());
+        final a2uiProcessor = A2uiMessageProcessor(catalogs: [TestCatalog()]);
 
         mockHandler.stubError(Exception('Test error'));
 
         ContentGeneratorError? receivedError;
         final conversation = GenUiConversation(
           contentGenerator: generator,
-          genUiManager: genUiManager,
+          a2uiMessageProcessor: a2uiProcessor,
           onError: (ContentGeneratorError error) => receivedError = error,
         );
 
@@ -199,7 +199,7 @@ void main() {
         final generator = ClaudeContentGenerator.withHandler(
           handler: mockHandler,
         );
-        final genUiManager = GenUiManager(catalog: TestCatalog());
+        final a2uiProcessor = A2uiMessageProcessor(catalogs: [TestCatalog()]);
 
         mockHandler.stubEvents(
           MockEventFactory.widgetRenderingResponse(
@@ -211,7 +211,7 @@ void main() {
         final addedSurfaces = <SurfaceAdded>[];
         final conversation = GenUiConversation(
           contentGenerator: generator,
-          genUiManager: genUiManager,
+          a2uiMessageProcessor: a2uiProcessor,
           onSurfaceAdded: addedSurfaces.add,
         );
 
@@ -226,7 +226,7 @@ void main() {
         // Verify the surface exists in the manager as a fallback
         if (addedSurfaces.isEmpty) {
           // Surface should at least be in the manager
-          expect(genUiManager.surfaces.containsKey('new-surface'), isTrue);
+          expect(a2uiProcessor.surfaces.containsKey('new-surface'), isTrue);
         } else {
           expect(addedSurfaces, hasLength(1));
           expect(addedSurfaces.first.surfaceId, 'new-surface');
@@ -236,15 +236,15 @@ void main() {
         conversation.dispose();
       });
 
-      test('surface is registered with GenUiManager', () async {
+      test('surface is registered with A2uiMessageProcessor', () async {
         final mockHandler = MockApiHandler();
         final generator = ClaudeContentGenerator.withHandler(
           handler: mockHandler,
         );
-        final genUiManager = GenUiManager(catalog: TestCatalog());
+        final a2uiProcessor = A2uiMessageProcessor(catalogs: [TestCatalog()]);
         final conversation = GenUiConversation(
           contentGenerator: generator,
-          genUiManager: genUiManager,
+          a2uiMessageProcessor: a2uiProcessor,
         );
 
         mockHandler.stubEvents(
@@ -260,7 +260,7 @@ void main() {
         await Future<void>.delayed(const Duration(milliseconds: 100));
 
         // The surface should exist in the manager
-        expect(genUiManager.surfaces.containsKey('registered-surface'), isTrue);
+        expect(a2uiProcessor.surfaces.containsKey('registered-surface'), isTrue);
 
         // GenUiConversation.dispose() internally disposes the contentGenerator
         conversation.dispose();
@@ -269,8 +269,8 @@ void main() {
 
     group('Widget Catalog Integration', () {
       test('catalog widgets are available for rendering', () {
-        final genUiManager = GenUiManager(catalog: TestCatalog());
-        final catalog = genUiManager.catalog;
+        final a2uiProcessor = A2uiMessageProcessor(catalogs: [TestCatalog()]);
+        final catalog = a2uiProcessor.catalogs.first;
         expect(catalog.items, isNotEmpty);
 
         // Check our test widgets are available
@@ -288,10 +288,10 @@ void main() {
         final generator = ClaudeContentGenerator.withHandler(
           handler: mockHandler,
         );
-        final genUiManager = GenUiManager(catalog: TestCatalog());
+        final a2uiProcessor = A2uiMessageProcessor(catalogs: [TestCatalog()]);
         final conversation = GenUiConversation(
           contentGenerator: generator,
-          genUiManager: genUiManager,
+          a2uiMessageProcessor: a2uiProcessor,
         );
 
         mockHandler.stubEvents(
@@ -318,10 +318,10 @@ void main() {
         final generator = ClaudeContentGenerator.withHandler(
           handler: mockHandler,
         );
-        final genUiManager = GenUiManager(catalog: TestCatalog());
+        final a2uiProcessor = A2uiMessageProcessor(catalogs: [TestCatalog()]);
         final conversation = GenUiConversation(
           contentGenerator: generator,
-          genUiManager: genUiManager,
+          a2uiMessageProcessor: a2uiProcessor,
         );
 
         expect(generator.isProcessing.value, isFalse);
@@ -351,10 +351,10 @@ void main() {
         final testGenerator = ClaudeContentGenerator.withHandler(
           handler: testHandler,
         );
-        final testManager = GenUiManager(catalog: TestCatalog());
+        final testProcessor = A2uiMessageProcessor(catalogs: [TestCatalog()]);
         final testConversation = GenUiConversation(
           contentGenerator: testGenerator,
-          genUiManager: testManager,
+          a2uiMessageProcessor: testProcessor,
         );
 
         // Should not throw
@@ -369,7 +369,7 @@ void main() {
         final generator = ClaudeContentGenerator.withHandler(
           handler: mockHandler,
         );
-        final genUiManager = GenUiManager(catalog: TestCatalog());
+        final a2uiProcessor = A2uiMessageProcessor(catalogs: [TestCatalog()]);
 
         mockHandler.stubEvents(
           MockEventFactory.widgetRenderingResponse(
@@ -380,7 +380,7 @@ void main() {
 
         final conversation = GenUiConversation(
           contentGenerator: generator,
-          genUiManager: genUiManager,
+          a2uiMessageProcessor: a2uiProcessor,
         );
 
         await conversation.sendRequest(UserMessage.text('Render'));
@@ -389,11 +389,11 @@ void main() {
         await tester.pump(const Duration(milliseconds: 500));
 
         // The surface should be registered in the manager
-        final surfaceExists = genUiManager.surfaces.containsKey('full-cycle');
+        final surfaceExists = a2uiProcessor.surfaces.containsKey('full-cycle');
         expect(
           surfaceExists,
           isTrue,
-          reason: 'Surface should be registered in GenUiManager',
+          reason: 'Surface should be registered in A2uiMessageProcessor',
         );
 
         // Build the surface widget
@@ -401,7 +401,7 @@ void main() {
           MaterialApp(
             home: Scaffold(
               body: GenUiSurface(
-                host: genUiManager,
+                host: a2uiProcessor,
                 surfaceId: 'full-cycle',
                 defaultBuilder: (_) => const CircularProgressIndicator(),
               ),

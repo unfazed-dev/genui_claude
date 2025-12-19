@@ -27,4 +27,4 @@ dev_dependencies:
   freezed: ^3.0.6
   json_serializable: ^6.9.0
   coverage: ^1.6.0
-  lints: ^4.0.0
+  lints: ^6.0.0

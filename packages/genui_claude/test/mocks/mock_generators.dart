@@ -36,6 +36,7 @@ class MockClaudeContentGenerator implements ContentGenerator {
   Future<void> sendRequest(
     ChatMessage message, {
     Iterable<ChatMessage>? history,
+    A2UiClientCapabilities? clientCapabilities,
   }) async {
     _isProcessing.value = true;
 

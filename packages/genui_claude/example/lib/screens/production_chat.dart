@@ -17,7 +17,7 @@ class ProductionChatScreen extends StatefulWidget {
 
 class _ProductionChatScreenState extends State<ProductionChatScreen> {
   late final ClaudeContentGenerator _contentGenerator;
-  late final GenUiManager _genUiManager;
+  late final A2uiMessageProcessor _a2uiProcessor;
   late final GenUiConversation _conversation;
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
@@ -38,8 +38,8 @@ class _ProductionChatScreenState extends State<ProductionChatScreen> {
   void initState() {
     super.initState();
 
-    // Create the GenUI manager with the catalog
-    _genUiManager = GenUiManager(catalog: DemoCatalog());
+    // Create the A2UI message processor with the catalog
+    _a2uiProcessor = A2uiMessageProcessor(catalogs: [DemoCatalog()]);
 
     // Create the content generator with proxy mode
     _contentGenerator = ClaudeContentGenerator.proxy(
@@ -50,7 +50,7 @@ class _ProductionChatScreenState extends State<ProductionChatScreen> {
     // Create the GenUI conversation
     _conversation = GenUiConversation(
       contentGenerator: _contentGenerator,
-      genUiManager: _genUiManager,
+      a2uiMessageProcessor: _a2uiProcessor,
       onSurfaceAdded: _handleSurfaceAdded,
       onTextResponse: _handleTextResponse,
       onError: _handleError,
@@ -273,7 +273,7 @@ class _ProductionChatScreenState extends State<ProductionChatScreen> {
       case _ChatEntryType.surface:
         return _SurfaceContainer(
           surfaceId: entry.surfaceId!,
-          genUiManager: _genUiManager,
+          a2uiProcessor: _a2uiProcessor,
         );
     }
   }
@@ -426,11 +426,11 @@ class _AiMessageBubble extends StatelessWidget {
 class _SurfaceContainer extends StatelessWidget {
   const _SurfaceContainer({
     required this.surfaceId,
-    required this.genUiManager,
+    required this.a2uiProcessor,
   });
 
   final String surfaceId;
-  final GenUiManager genUiManager;
+  final A2uiMessageProcessor a2uiProcessor;
 
   @override
   Widget build(BuildContext context) {
@@ -450,7 +450,7 @@ class _SurfaceContainer extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: GenUiSurface(
-                  host: genUiManager,
+                  host: a2uiProcessor,
                   surfaceId: surfaceId,
                   defaultBuilder: (_) => const Center(
                     child: CircularProgressIndicator(),

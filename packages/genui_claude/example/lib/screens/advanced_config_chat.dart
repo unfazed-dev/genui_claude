@@ -27,7 +27,7 @@ class AdvancedConfigChatScreen extends StatefulWidget {
 
 class _AdvancedConfigChatScreenState extends State<AdvancedConfigChatScreen> {
   ClaudeContentGenerator? _contentGenerator;
-  late GenUiManager? _genUiManager;
+  late A2uiMessageProcessor? _a2uiProcessor;
   GenUiConversation? _conversation;
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
@@ -86,8 +86,8 @@ class _AdvancedConfigChatScreenState extends State<AdvancedConfigChatScreen> {
     _conversation?.dispose();
     _contentGenerator?.dispose();
 
-    // Create the GenUI manager with the catalog
-    _genUiManager = GenUiManager(catalog: DemoCatalog());
+    // Create the A2UI message processor with the catalog
+    _a2uiProcessor = A2uiMessageProcessor(catalogs: [DemoCatalog()]);
 
     // Create metrics collector (standalone for demonstration)
     _metricsCollector = _enableMetrics ? MetricsCollector() : null;
@@ -163,7 +163,7 @@ progress_indicator, input_field, image_display, divider, spacer, container.
     // Create the GenUI conversation
     _conversation = GenUiConversation(
       contentGenerator: _contentGenerator!,
-      genUiManager: _genUiManager!,
+      a2uiMessageProcessor: _a2uiProcessor!,
       onSurfaceAdded: _handleSurfaceAdded,
       onTextResponse: _handleTextResponse,
       onError: _handleError,
@@ -1012,7 +1012,7 @@ progress_indicator, input_field, image_display, divider, spacer, container.
       case _ChatEntryType.surface:
         return _SurfaceContainer(
           surfaceId: entry.surfaceId!,
-          genUiManager: _genUiManager!,
+          a2uiProcessor: _a2uiProcessor,
         );
     }
   }
@@ -1297,11 +1297,11 @@ class _AiMessageBubble extends StatelessWidget {
 class _SurfaceContainer extends StatelessWidget {
   const _SurfaceContainer({
     required this.surfaceId,
-    required this.genUiManager,
+    required this.a2uiProcessor,
   });
 
   final String surfaceId;
-  final GenUiManager genUiManager;
+  final A2uiMessageProcessor? a2uiProcessor;
 
   @override
   Widget build(BuildContext context) {
@@ -1321,7 +1321,7 @@ class _SurfaceContainer extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: GenUiSurface(
-                  host: genUiManager,
+                  host: a2uiProcessor!,
                   surfaceId: surfaceId,
                   defaultBuilder: (_) => const Center(
                     child: CircularProgressIndicator(),

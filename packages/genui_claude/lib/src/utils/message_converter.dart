@@ -125,7 +125,7 @@ class MessageConverter {
         case TextPart(:final text):
           blocks.add({'type': 'text', 'text': text});
         case ImagePart(:final base64, :final mimeType, :final url):
-          if (base64 != null && mimeType != null) {
+          if (base64 != null) {
             blocks.add({
               'type': 'image',
               'source': {
