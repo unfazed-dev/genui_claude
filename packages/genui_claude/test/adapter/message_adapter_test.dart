@@ -48,7 +48,8 @@ void main() {
         expect(beginRendering.styles, isNull);
       });
 
-      test('converts SurfaceUpdateData to SurfaceUpdate with UUID component id', () {
+      test('converts SurfaceUpdateData to SurfaceUpdate with UUID component id',
+          () {
         const data = a2ui.SurfaceUpdateData(
           surfaceId: 'test-surface',
           widgets: [
@@ -72,9 +73,10 @@ void main() {
         expect(component.id.length, greaterThan(0)); // UUID has content
 
         // Type should be wrapped in componentProperties
-        expect(component.componentProperties.containsKey('text_widget'), isTrue);
-        final widgetProps =
-            component.componentProperties['text_widget']! as Map<String, dynamic>;
+        expect(
+            component.componentProperties.containsKey('text_widget'), isTrue,);
+        final widgetProps = component.componentProperties['text_widget']!
+            as Map<String, dynamic>;
         expect(widgetProps['text'], 'Hello, World!');
       });
 
@@ -97,7 +99,9 @@ void main() {
         expect(surfaceUpdate.components.first.id, 'my-custom-id');
       });
 
-      test('converts SurfaceUpdateData with multiple widgets each with unique ids', () {
+      test(
+          'converts SurfaceUpdateData with multiple widgets each with unique ids',
+          () {
         const data = a2ui.SurfaceUpdateData(
           surfaceId: 'multi-widget-surface',
           widgets: [
@@ -171,7 +175,8 @@ void main() {
         expect(contents['age'], 30);
       });
 
-      test('converts DataModelUpdateData without scope uses globalSurfaceId', () {
+      test('converts DataModelUpdateData without scope uses globalSurfaceId',
+          () {
         const data = a2ui.DataModelUpdateData(
           updates: {'key': 'value'},
         );
@@ -405,7 +410,8 @@ void main() {
         final component = result.components.first;
 
         // componentProperties should have the type key with empty map
-        expect(component.componentProperties.containsKey('empty_widget'), isTrue);
+        expect(
+            component.componentProperties.containsKey('empty_widget'), isTrue,);
         expect(component.componentProperties['empty_widget'], isEmpty);
       });
     });

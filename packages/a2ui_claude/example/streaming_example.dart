@@ -76,7 +76,9 @@ Future<void> _demonstrateStreaming(ClaudeStreamHandler handler) async {
 
       case ThinkingEvent(:final content, :final isComplete):
         if (content.isNotEmpty) {
-          final preview = content.length > 50 ? '${content.substring(0, 50)}...' : content;
+          final preview = content.length > 50
+              ? '${content.substring(0, 50)}...'
+              : content;
           print('   [Thinking] "$preview"');
         }
         if (isComplete) {
@@ -136,10 +138,7 @@ Stream<Map<String, dynamic>> _createMockStream() async* {
   };
 
   // Tool block stop
-  yield <String, dynamic>{
-    'type': 'content_block_stop',
-    'index': 1,
-  };
+  yield <String, dynamic>{'type': 'content_block_stop', 'index': 1};
 
   // Another tool use
   yield <String, dynamic>{
@@ -176,10 +175,7 @@ Stream<Map<String, dynamic>> _createMockStream() async* {
     },
   };
 
-  yield <String, dynamic>{
-    'type': 'content_block_stop',
-    'index': 2,
-  };
+  yield <String, dynamic>{'type': 'content_block_stop', 'index': 2};
 
   // Message stop
   yield <String, dynamic>{'type': 'message_stop'};

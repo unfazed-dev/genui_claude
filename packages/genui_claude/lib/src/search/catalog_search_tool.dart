@@ -67,7 +67,8 @@ class CatalogSearchTool {
   );
 
   /// All search-related tools.
-  static List<A2uiToolSchema> get allTools => [searchCatalogTool, loadToolsTool];
+  static List<A2uiToolSchema> get allTools =>
+      [searchCatalogTool, loadToolsTool];
 
   /// Names of all search-related tools.
   static Set<String> get toolNames => {searchCatalogName, loadToolsName};

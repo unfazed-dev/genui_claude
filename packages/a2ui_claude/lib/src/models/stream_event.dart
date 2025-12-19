@@ -52,6 +52,7 @@ sealed class StreamEvent with _$StreamEvent {
   const factory StreamEvent.thinking(
     /// The thinking content chunk.
     String content, {
+
     /// Whether this is the final thinking chunk for the current block.
     @Default(false) bool isComplete,
   }) = ThinkingEvent;

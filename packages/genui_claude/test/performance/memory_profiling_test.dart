@@ -38,7 +38,10 @@ void main() {
         // Build a large message history
         final messages = List.generate(
           100,
-          (i) => {'role': i.isEven ? 'user' : 'assistant', 'content': 'Message $i'},
+          (i) => {
+            'role': i.isEven ? 'user' : 'assistant',
+            'content': 'Message $i',
+          },
         );
 
         final request = ApiRequest(
@@ -257,7 +260,8 @@ data: {"type": "message_stop"}
         metricsCollector.dispose();
       });
 
-      test('metrics stats remain accurate under mixed success/failure', () async {
+      test('metrics stats remain accurate under mixed success/failure',
+          () async {
         final metricsCollector = MetricsCollector();
 
         final handler = ProxyModeHandler(

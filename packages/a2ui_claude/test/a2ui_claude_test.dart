@@ -114,7 +114,7 @@ void main() {
         const data = SurfaceUpdateData(
           surfaceId: 'surface-1',
           widgets: [
-             WidgetNode(type: 'text', properties: {'text': 'Hello'}),
+            WidgetNode(type: 'text', properties: {'text': 'Hello'}),
           ],
           append: true,
         );
@@ -127,9 +127,7 @@ void main() {
 
     group('DataModelUpdateData', () {
       test('creates with updates', () {
-        const data = DataModelUpdateData(
-          updates: {'name': 'John', 'age': 30},
-        );
+        const data = DataModelUpdateData(updates: {'name': 'John', 'age': 30});
         expect(data.updates['name'], equals('John'));
         expect(data.updates['age'], equals(30));
         expect(data.scope, isNull);
@@ -175,7 +173,10 @@ void main() {
           'type': 'surface_update',
           'surfaceId': 'surface-1',
           'widgets': [
-            {'type': 'text', 'properties': {'text': 'Hello'}},
+            {
+              'type': 'text',
+              'properties': {'text': 'Hello'},
+            },
           ],
           'append': true,
         });
@@ -450,10 +451,7 @@ void main() {
     });
 
     test('ToolConversionException contains tool name', () {
-      const exception = ToolConversionException(
-        'Invalid schema',
-        'my_tool',
-      );
+      const exception = ToolConversionException('Invalid schema', 'my_tool');
       expect(exception.toolName, equals('my_tool'));
       expect(exception.toString(), contains('my_tool'));
     });
@@ -481,28 +479,16 @@ void main() {
     });
 
     test('StreamException tracks retryable status', () {
-      const retryable = StreamException(
-        'Timeout',
-        isRetryable: true,
-      );
-      const nonRetryable = StreamException(
-        'Auth failed',
-      );
+      const retryable = StreamException('Timeout', isRetryable: true);
+      const nonRetryable = StreamException('Auth failed');
       expect(retryable.isRetryable, isTrue);
       expect(nonRetryable.isRetryable, isFalse);
     });
 
     test('ValidationException contains errors', () {
-      const exception = ValidationException(
-        'Validation failed',
-        [
-          ValidationError(
-            field: 'name',
-            message: 'Required',
-            code: 'required',
-          ),
-        ],
-      );
+      const exception = ValidationException('Validation failed', [
+        ValidationError(field: 'name', message: 'Required', code: 'required'),
+      ]);
       expect(exception.errors.length, equals(1));
       expect(exception.errors.first.field, equals('name'));
     });
@@ -529,13 +515,10 @@ void main() {
     });
 
     test('ValidationException toString shows error count', () {
-      const exception = ValidationException(
-        'Multiple errors',
-        [
-          ValidationError(field: 'a', message: 'm1', code: 'c1'),
-          ValidationError(field: 'b', message: 'm2', code: 'c2'),
-        ],
-      );
+      const exception = ValidationException('Multiple errors', [
+        ValidationError(field: 'a', message: 'm1', code: 'c1'),
+        ValidationError(field: 'b', message: 'm2', code: 'c2'),
+      ]);
       expect(exception.toString(), contains('2 errors'));
     });
 
@@ -566,10 +549,7 @@ void main() {
         matchException(const MessageParseException('error')),
         equals('parse'),
       );
-      expect(
-        matchException(const StreamException('error')),
-        equals('stream'),
-      );
+      expect(matchException(const StreamException('error')), equals('stream'));
       expect(
         matchException(const ValidationException('error', [])),
         equals('validation'),
@@ -581,25 +561,13 @@ void main() {
         const ToolConversionException('msg', 'tool'),
         isA<A2uiException>(),
       );
-      expect(
-        const MessageParseException('msg'),
-        isA<A2uiException>(),
-      );
-      expect(
-        const StreamException('msg'),
-        isA<A2uiException>(),
-      );
-      expect(
-        const ValidationException('msg', []),
-        isA<A2uiException>(),
-      );
+      expect(const MessageParseException('msg'), isA<A2uiException>());
+      expect(const StreamException('msg'), isA<A2uiException>());
+      expect(const ValidationException('msg', []), isA<A2uiException>());
     });
 
     test('exceptions implement Exception interface', () {
-      expect(
-        const ToolConversionException('msg', 'tool'),
-        isA<Exception>(),
-      );
+      expect(const ToolConversionException('msg', 'tool'), isA<Exception>());
     });
 
     test('MessageParseException with all parameters', () {
@@ -617,22 +585,15 @@ void main() {
     });
 
     test('MessageParseException toString', () {
-      const exception = MessageParseException(
-        'Parse failed',
-        'bad content',
-      );
+      const exception = MessageParseException('Parse failed', 'bad content');
       expect(exception.toString(), contains('Parse failed'));
     });
 
     test('ValidationException with stack trace', () {
       final stackTrace = StackTrace.current;
-      final exception = ValidationException(
-        'Validation failed',
-        const [
-          ValidationError(field: 'name', message: 'Required', code: 'required'),
-        ],
-        stackTrace,
-      );
+      final exception = ValidationException('Validation failed', const [
+        ValidationError(field: 'name', message: 'Required', code: 'required'),
+      ], stackTrace);
       expect(exception.stackTrace, equals(stackTrace));
       expect(exception.errors.length, equals(1));
     });
@@ -675,11 +636,9 @@ void main() {
         requiredFields: ['name'],
       );
 
-      final result = A2uiToolConverter.validateToolInput(
-        'test_tool',
-        {},
-        [schema],
-      );
+      final result = A2uiToolConverter.validateToolInput('test_tool', {}, [
+        schema,
+      ]);
 
       expect(result.isValid, isFalse);
       expect(result.errors.first.field, equals('name'));
@@ -759,7 +718,10 @@ void main() {
       ]);
 
       expect(tools.length, equals(3));
-      expect(tools.map((t) => t['name']), containsAll(['tool_a', 'tool_b', 'tool_c']));
+      expect(
+        tools.map((t) => t['name']),
+        containsAll(['tool_a', 'tool_b', 'tool_c']),
+      );
     });
 
     test('toClaudeTools with nested object properties', () {
@@ -826,34 +788,30 @@ void main() {
 
   group('ClaudeA2uiParser', () {
     test('parses begin_rendering tool', () {
-      final result = ClaudeA2uiParser.parseToolUse(
-        'begin_rendering',
-        {'surfaceId': 'surface-1'},
-      );
+      final result = ClaudeA2uiParser.parseToolUse('begin_rendering', {
+        'surfaceId': 'surface-1',
+      });
 
       expect(result, isA<BeginRenderingData>());
       expect((result! as BeginRenderingData).surfaceId, equals('surface-1'));
     });
 
     test('parses surface_update tool', () {
-      final result = ClaudeA2uiParser.parseToolUse(
-        'surface_update',
-        {
-          'surfaceId': 'surface-1',
-          'widgets': [
-            {'type': 'text', 'properties': {'text': 'Hello'}},
-          ],
-        },
-      );
+      final result = ClaudeA2uiParser.parseToolUse('surface_update', {
+        'surfaceId': 'surface-1',
+        'widgets': [
+          {
+            'type': 'text',
+            'properties': {'text': 'Hello'},
+          },
+        ],
+      });
 
       expect(result, isA<SurfaceUpdateData>());
     });
 
     test('returns null for unknown tool', () {
-      final result = ClaudeA2uiParser.parseToolUse(
-        'unknown_tool',
-        {},
-      );
+      final result = ClaudeA2uiParser.parseToolUse('unknown_tool', {});
 
       expect(result, isNull);
     });
@@ -866,10 +824,7 @@ void main() {
             'name': 'begin_rendering',
             'input': {'surfaceId': 'surface-1'},
           },
-          {
-            'type': 'text',
-            'text': 'Creating UI...',
-          },
+          {'type': 'text', 'text': 'Creating UI...'},
         ],
       });
 
@@ -879,13 +834,10 @@ void main() {
     });
 
     test('parses data_model_update tool', () {
-      final result = ClaudeA2uiParser.parseToolUse(
-        'data_model_update',
-        {
-          'updates': {'name': 'John', 'age': 30},
-          'scope': 'user',
-        },
-      );
+      final result = ClaudeA2uiParser.parseToolUse('data_model_update', {
+        'updates': {'name': 'John', 'age': 30},
+        'scope': 'user',
+      });
 
       expect(result, isA<DataModelUpdateData>());
       final data = result! as DataModelUpdateData;
@@ -895,13 +847,10 @@ void main() {
     });
 
     test('parses delete_surface tool', () {
-      final result = ClaudeA2uiParser.parseToolUse(
-        'delete_surface',
-        {
-          'surfaceId': 'surface-to-delete',
-          'cascade': false,
-        },
-      );
+      final result = ClaudeA2uiParser.parseToolUse('delete_surface', {
+        'surfaceId': 'surface-to-delete',
+        'cascade': false,
+      });
 
       expect(result, isA<DeleteSurfaceData>());
       final data = result! as DeleteSurfaceData;
@@ -910,10 +859,9 @@ void main() {
     });
 
     test('parses delete_surface with default cascade', () {
-      final result = ClaudeA2uiParser.parseToolUse(
-        'delete_surface',
-        {'surfaceId': 'surface-1'},
-      );
+      final result = ClaudeA2uiParser.parseToolUse('delete_surface', {
+        'surfaceId': 'surface-1',
+      });
 
       expect(result, isA<DeleteSurfaceData>());
       expect((result! as DeleteSurfaceData).cascade, isTrue);
@@ -947,7 +895,10 @@ void main() {
             'input': {
               'surfaceId': 'surface-1',
               'widgets': [
-                {'type': 'text', 'properties': {'text': 'Hello'}},
+                {
+                  'type': 'text',
+                  'properties': {'text': 'Hello'},
+                },
               ],
             },
           },
@@ -959,7 +910,10 @@ void main() {
       expect(result.a2uiMessages.length, equals(2));
       expect(result.a2uiMessages[0], isA<BeginRenderingData>());
       expect(result.a2uiMessages[1], isA<SurfaceUpdateData>());
-      expect(result.textContent, equals('Starting render...\nRender complete.'));
+      expect(
+        result.textContent,
+        equals('Starting render...\nRender complete.'),
+      );
     });
 
     test('parses message with null content returns empty', () {
@@ -1029,11 +983,17 @@ void main() {
     test('shouldRetry respects max attempts', () {
       const policy = RetryPolicy.defaults;
       expect(
-        policy.shouldRetry(const StreamException('error', isRetryable: true), 2),
+        policy.shouldRetry(
+          const StreamException('error', isRetryable: true),
+          2,
+        ),
         isTrue,
       );
       expect(
-        policy.shouldRetry(const StreamException('error', isRetryable: true), 3),
+        policy.shouldRetry(
+          const StreamException('error', isRetryable: true),
+          3,
+        ),
         isFalse,
       );
     });
@@ -1047,13 +1007,7 @@ void main() {
         ),
         isTrue,
       );
-      expect(
-        policy.shouldRetry(
-          const StreamException('error'),
-          1,
-        ),
-        isFalse,
-      );
+      expect(policy.shouldRetry(const StreamException('error'), 1), isFalse);
     });
 
     test('getDelay uses exponential backoff', () {
@@ -1068,20 +1022,14 @@ void main() {
     test('shouldRetry returns true for TimeoutException', () {
       const policy = RetryPolicy.defaults;
       // TimeoutException should be retryable
-      expect(
-        policy.shouldRetry(TimeoutException('timeout'), 1),
-        isTrue,
-      );
+      expect(policy.shouldRetry(TimeoutException('timeout'), 1), isTrue);
     });
 
     test('shouldRetry returns true for SocketException', () {
       const policy = RetryPolicy.defaults;
       // SocketException should be retryable
       expect(
-        policy.shouldRetry(
-          const SocketException('connection failed'),
-          1,
-        ),
+        policy.shouldRetry(const SocketException('connection failed'), 1),
         isTrue,
       );
     });
@@ -1089,10 +1037,7 @@ void main() {
     test('shouldRetry returns false for non-retryable exceptions', () {
       const policy = RetryPolicy.defaults;
       // Generic exceptions should not be retryable
-      expect(
-        policy.shouldRetry(Exception('generic error'), 1),
-        isFalse,
-      );
+      expect(policy.shouldRetry(Exception('generic error'), 1), isFalse);
       expect(
         policy.shouldRetry(const FormatException('parse error'), 1),
         isFalse,
@@ -1122,9 +1067,7 @@ void main() {
     });
 
     test('retryWithBackoff retries on retryable exception', () async {
-      const policy = RetryPolicy(
-        initialDelay: Duration(milliseconds: 10),
-      );
+      const policy = RetryPolicy(initialDelay: Duration(milliseconds: 10));
       var attempts = 0;
 
       final result = await policy.retryWithBackoff(() async {
@@ -1157,20 +1100,23 @@ void main() {
       expect(attempts, equals(2));
     });
 
-    test('retryWithBackoff throws immediately for non-retryable exception', () async {
-      const policy = RetryPolicy.defaults;
-      var attempts = 0;
+    test(
+      'retryWithBackoff throws immediately for non-retryable exception',
+      () async {
+        const policy = RetryPolicy.defaults;
+        var attempts = 0;
 
-      await expectLater(
-        policy.retryWithBackoff(() async {
-          attempts++;
-          throw const FormatException('not retryable');
-        }),
-        throwsA(isA<FormatException>()),
-      );
+        await expectLater(
+          policy.retryWithBackoff(() async {
+            attempts++;
+            throw const FormatException('not retryable');
+          }),
+          throwsA(isA<FormatException>()),
+        );
 
-      expect(attempts, equals(1));
-    });
+        expect(attempts, equals(1));
+      },
+    );
   });
 
   group('SchemaMapper', () {
@@ -1425,8 +1371,9 @@ void main() {
       ];
 
       final events = <A2uiMessageData>[];
-      await for (final event
-          in parser.parseStream(Stream.fromIterable(inputEvents))) {
+      await for (final event in parser.parseStream(
+        Stream.fromIterable(inputEvents),
+      )) {
         events.add(event);
       }
 
@@ -1445,7 +1392,10 @@ void main() {
         {
           'type': 'content_block_delta',
           'index': 0,
-          'delta': {'type': 'input_json_delta', 'partial_json': '{"surfaceId":'},
+          'delta': {
+            'type': 'input_json_delta',
+            'partial_json': '{"surfaceId":',
+          },
         },
         {
           'type': 'content_block_delta',
@@ -1455,8 +1405,9 @@ void main() {
       ];
 
       final events = <A2uiMessageData>[];
-      await for (final event
-          in parser.parseStream(Stream.fromIterable(inputEvents))) {
+      await for (final event in parser.parseStream(
+        Stream.fromIterable(inputEvents),
+      )) {
         events.add(event);
       }
 
@@ -1472,15 +1423,13 @@ void main() {
           'index': 0,
           'content_block': {'type': 'text'},
         },
-        {
-          'type': 'content_block_stop',
-          'index': 0,
-        },
+        {'type': 'content_block_stop', 'index': 0},
       ];
 
       final events = <A2uiMessageData>[];
-      await for (final event
-          in parser.parseStream(Stream.fromIterable(inputEvents))) {
+      await for (final event in parser.parseStream(
+        Stream.fromIterable(inputEvents),
+      )) {
         events.add(event);
       }
 
@@ -1508,18 +1457,16 @@ void main() {
           'index': 0,
           'delta': {'type': 'input_json_delta', 'partial_json': '"bar"}'},
         },
-        {
-          'type': 'content_block_stop',
-          'index': 0,
-        },
+        {'type': 'content_block_stop', 'index': 0},
       ];
 
       final events = <A2uiMessageData>[];
       // Using unknown_tool to avoid TypeError from BeginRenderingData.fromJson
       // since _parseJson stub returns {} and known tools require specific fields.
       // ClaudeA2uiParser.parseToolUse returns null for unknown tools.
-      await for (final event
-          in parser.parseStream(Stream.fromIterable(inputEvents))) {
+      await for (final event in parser.parseStream(
+        Stream.fromIterable(inputEvents),
+      )) {
         events.add(event);
       }
 
@@ -1542,7 +1489,10 @@ void main() {
         yield {
           'type': 'content_block_delta',
           'index': 0,
-          'delta': {'type': 'input_json_delta', 'partial_json': '{"surfaceId":'},
+          'delta': {
+            'type': 'input_json_delta',
+            'partial_json': '{"surfaceId":',
+          },
         };
         throw Exception('Connection lost');
       }
@@ -1574,9 +1524,9 @@ void main() {
 
       // Start listening
       final events = <A2uiMessageData>[];
-      final subscription = parser.parseStream(createInfiniteStream()).listen(
-        events.add,
-      );
+      final subscription = parser
+          .parseStream(createInfiniteStream())
+          .listen(events.add);
 
       // Give it time to process then cancel
       await Future<void>.delayed(const Duration(milliseconds: 10));
@@ -1595,76 +1545,82 @@ void main() {
       expect(parser.reset, returnsNormally);
     });
 
-    test('parseStream yields BeginRenderingData for complete begin_rendering tool', () async {
-      // BUG FIX TEST: This test verifies JSON is properly parsed
-      // Previously _parseJson() returned {} which broke all parsing
-      final parser = StreamParser();
-      final inputEvents = [
-        {
-          'type': 'content_block_start',
-          'index': 0,
-          'content_block': {'type': 'tool_use', 'name': 'begin_rendering'},
-        },
-        {
-          'type': 'content_block_delta',
-          'index': 0,
-          'delta': {'type': 'input_json_delta', 'partial_json': '{"surfaceId":"test-surface-123"}'},
-        },
-        {
-          'type': 'content_block_stop',
-          'index': 0,
-        },
-      ];
-
-      final events = <A2uiMessageData>[];
-      await for (final event
-          in parser.parseStream(Stream.fromIterable(inputEvents))) {
-        events.add(event);
-      }
-
-      // Should yield exactly one BeginRenderingData with correct surfaceId
-      expect(events, hasLength(1));
-      expect(events.first, isA<BeginRenderingData>());
-      final beginData = events.first as BeginRenderingData;
-      expect(beginData.surfaceId, equals('test-surface-123'));
-    });
-
-    test('parseStream yields SurfaceUpdateData for complete surface_update tool', () async {
-      // BUG FIX TEST: Verifies JSON parsing works for surface_update
-      final parser = StreamParser();
-      final inputEvents = [
-        {
-          'type': 'content_block_start',
-          'index': 0,
-          'content_block': {'type': 'tool_use', 'name': 'surface_update'},
-        },
-        {
-          'type': 'content_block_delta',
-          'index': 0,
-          'delta': {
-            'type': 'input_json_delta',
-            'partial_json': '{"surfaceId":"surface-1","widgets":[{"type":"Text","properties":{"text":"Hello"}}]}',
+    test(
+      'parseStream yields BeginRenderingData for complete begin_rendering tool',
+      () async {
+        // BUG FIX TEST: This test verifies JSON is properly parsed
+        // Previously _parseJson() returned {} which broke all parsing
+        final parser = StreamParser();
+        final inputEvents = [
+          {
+            'type': 'content_block_start',
+            'index': 0,
+            'content_block': {'type': 'tool_use', 'name': 'begin_rendering'},
           },
-        },
-        {
-          'type': 'content_block_stop',
-          'index': 0,
-        },
-      ];
+          {
+            'type': 'content_block_delta',
+            'index': 0,
+            'delta': {
+              'type': 'input_json_delta',
+              'partial_json': '{"surfaceId":"test-surface-123"}',
+            },
+          },
+          {'type': 'content_block_stop', 'index': 0},
+        ];
 
-      final events = <A2uiMessageData>[];
-      await for (final event
-          in parser.parseStream(Stream.fromIterable(inputEvents))) {
-        events.add(event);
-      }
+        final events = <A2uiMessageData>[];
+        await for (final event in parser.parseStream(
+          Stream.fromIterable(inputEvents),
+        )) {
+          events.add(event);
+        }
 
-      expect(events, hasLength(1));
-      expect(events.first, isA<SurfaceUpdateData>());
-      final updateData = events.first as SurfaceUpdateData;
-      expect(updateData.surfaceId, equals('surface-1'));
-      expect(updateData.widgets, hasLength(1));
-      expect(updateData.widgets.first.type, equals('Text'));
-    });
+        // Should yield exactly one BeginRenderingData with correct surfaceId
+        expect(events, hasLength(1));
+        expect(events.first, isA<BeginRenderingData>());
+        final beginData = events.first as BeginRenderingData;
+        expect(beginData.surfaceId, equals('test-surface-123'));
+      },
+    );
+
+    test(
+      'parseStream yields SurfaceUpdateData for complete surface_update tool',
+      () async {
+        // BUG FIX TEST: Verifies JSON parsing works for surface_update
+        final parser = StreamParser();
+        final inputEvents = [
+          {
+            'type': 'content_block_start',
+            'index': 0,
+            'content_block': {'type': 'tool_use', 'name': 'surface_update'},
+          },
+          {
+            'type': 'content_block_delta',
+            'index': 0,
+            'delta': {
+              'type': 'input_json_delta',
+              'partial_json':
+                  '{"surfaceId":"surface-1","widgets":[{"type":"Text","properties":{"text":"Hello"}}]}',
+            },
+          },
+          {'type': 'content_block_stop', 'index': 0},
+        ];
+
+        final events = <A2uiMessageData>[];
+        await for (final event in parser.parseStream(
+          Stream.fromIterable(inputEvents),
+        )) {
+          events.add(event);
+        }
+
+        expect(events, hasLength(1));
+        expect(events.first, isA<SurfaceUpdateData>());
+        final updateData = events.first as SurfaceUpdateData;
+        expect(updateData.surfaceId, equals('surface-1'));
+        expect(updateData.widgets, hasLength(1));
+        expect(updateData.widgets.first.type, equals('Text'));
+      },
+    );
   });
 
   group('RateLimiter', () {
@@ -1688,8 +1644,14 @@ void main() {
     });
 
     test('parses Retry-After header as seconds', () {
-      expect(RateLimiter.parseRetryAfter('30'), equals(const Duration(seconds: 30)));
-      expect(RateLimiter.parseRetryAfter('60'), equals(const Duration(seconds: 60)));
+      expect(
+        RateLimiter.parseRetryAfter('30'),
+        equals(const Duration(seconds: 30)),
+      );
+      expect(
+        RateLimiter.parseRetryAfter('60'),
+        equals(const Duration(seconds: 60)),
+      );
       expect(RateLimiter.parseRetryAfter(null), isNull);
     });
 
@@ -1833,10 +1795,7 @@ void main() {
           'index': 0,
           'content_block': {'type': 'tool_use', 'name': 'begin_rendering'},
         },
-        {
-          'type': 'content_block_stop',
-          'index': 0,
-        },
+        {'type': 'content_block_stop', 'index': 0},
       ];
 
       final events = <StreamEvent>[];
@@ -1869,26 +1828,17 @@ void main() {
         };
       }
 
-      expect(
-        matchEvent(const DeltaEvent({})),
-        equals('delta'),
-      );
+      expect(matchEvent(const DeltaEvent({})), equals('delta'));
       expect(
         matchEvent(const A2uiMessageEvent(BeginRenderingData(surfaceId: 's'))),
         equals('a2ui'),
       );
-      expect(
-        matchEvent(const TextDeltaEvent('text')),
-        equals('text'),
-      );
+      expect(matchEvent(const TextDeltaEvent('text')), equals('text'));
       expect(
         matchEvent(const ThinkingEvent('thinking content')),
         equals('thinking'),
       );
-      expect(
-        matchEvent(const CompleteEvent()),
-        equals('complete'),
-      );
+      expect(matchEvent(const CompleteEvent()), equals('complete'));
       expect(
         matchEvent(const ErrorEvent(StreamException('err'))),
         equals('error'),
@@ -1933,38 +1883,41 @@ void main() {
       expect(events.first, isA<CompleteEvent>());
     });
 
-    test('streamRequest handles malformed JSON in tool input gracefully', () async {
-      final handler = ClaudeStreamHandler();
-      final inputEvents = [
-        {
-          'type': 'content_block_start',
-          'index': 0,
-          'content_block': {'type': 'tool_use', 'name': 'begin_rendering'},
-        },
-        {
-          'type': 'content_block_delta',
-          'index': 0,
-          'delta': {'type': 'input_json_delta', 'partial_json': '{invalid json'},
-        },
-        {
-          'type': 'content_block_stop',
-          'index': 0,
-        },
-        {'type': 'message_stop'},
-      ];
+    test(
+      'streamRequest handles malformed JSON in tool input gracefully',
+      () async {
+        final handler = ClaudeStreamHandler();
+        final inputEvents = [
+          {
+            'type': 'content_block_start',
+            'index': 0,
+            'content_block': {'type': 'tool_use', 'name': 'begin_rendering'},
+          },
+          {
+            'type': 'content_block_delta',
+            'index': 0,
+            'delta': {
+              'type': 'input_json_delta',
+              'partial_json': '{invalid json',
+            },
+          },
+          {'type': 'content_block_stop', 'index': 0},
+          {'type': 'message_stop'},
+        ];
 
-      final events = <StreamEvent>[];
-      await for (final event in handler.streamRequest(
-        messageStream: Stream.fromIterable(inputEvents),
-      )) {
-        events.add(event);
-      }
+        final events = <StreamEvent>[];
+        await for (final event in handler.streamRequest(
+          messageStream: Stream.fromIterable(inputEvents),
+        )) {
+          events.add(event);
+        }
 
-      // Should have DeltaEvent and CompleteEvent, but no A2uiMessageEvent
-      // due to malformed JSON (handled gracefully with warning log)
-      expect(events.whereType<A2uiMessageEvent>().length, equals(0));
-      expect(events.whereType<CompleteEvent>().length, equals(1));
-    });
+        // Should have DeltaEvent and CompleteEvent, but no A2uiMessageEvent
+        // due to malformed JSON (handled gracefully with warning log)
+        expect(events.whereType<A2uiMessageEvent>().length, equals(0));
+        expect(events.whereType<CompleteEvent>().length, equals(1));
+      },
+    );
 
     test('streamRequest yields A2uiMessageEvent for valid tool_use', () async {
       final handler = ClaudeStreamHandler();
@@ -1982,10 +1935,7 @@ void main() {
             'partial_json': '{"surfaceId": "surface-1"}',
           },
         },
-        {
-          'type': 'content_block_stop',
-          'index': 0,
-        },
+        {'type': 'content_block_stop', 'index': 0},
       ];
 
       final events = <StreamEvent>[];
@@ -2013,10 +1963,7 @@ void main() {
           'content_block': {'type': 'tool_use', 'name': 'begin_rendering'},
         },
         // No input_json_delta events
-        {
-          'type': 'content_block_stop',
-          'index': 0,
-        },
+        {'type': 'content_block_stop', 'index': 0},
         {'type': 'message_stop'},
       ];
 
@@ -2048,10 +1995,7 @@ void main() {
             'partial_json': '{"foo": "bar"}',
           },
         },
-        {
-          'type': 'content_block_stop',
-          'index': 0,
-        },
+        {'type': 'content_block_stop', 'index': 0},
         {'type': 'message_stop'},
       ];
 
@@ -2079,17 +2023,20 @@ void main() {
           {
             'type': 'content_block_delta',
             'index': 0,
-            'delta': {'type': 'thinking_delta', 'thinking': 'Let me analyze this...'},
+            'delta': {
+              'type': 'thinking_delta',
+              'thinking': 'Let me analyze this...',
+            },
           },
           {
             'type': 'content_block_delta',
             'index': 0,
-            'delta': {'type': 'thinking_delta', 'thinking': ' I should consider...'},
+            'delta': {
+              'type': 'thinking_delta',
+              'thinking': ' I should consider...',
+            },
           },
-          {
-            'type': 'content_block_stop',
-            'index': 0,
-          },
+          {'type': 'content_block_stop', 'index': 0},
           {'type': 'message_stop'},
         ];
 
@@ -2105,46 +2052,50 @@ void main() {
         expect(thinkingEvents.length, equals(3));
 
         // Check partial events
-        final partialEvents = thinkingEvents.where((e) => !e.isComplete).toList();
+        final partialEvents = thinkingEvents
+            .where((e) => !e.isComplete)
+            .toList();
         expect(partialEvents.length, equals(2));
         expect(partialEvents[0].content, equals('Let me analyze this...'));
         expect(partialEvents[1].content, equals(' I should consider...'));
 
         // Check completion event
-        final completeEvents = thinkingEvents.where((e) => e.isComplete).toList();
+        final completeEvents = thinkingEvents
+            .where((e) => e.isComplete)
+            .toList();
         expect(completeEvents.length, equals(1));
       });
 
-      test('streamRequest emits ThinkingEvent with isComplete on block stop', () async {
-        final handler = ClaudeStreamHandler();
-        final inputEvents = [
-          {
-            'type': 'content_block_start',
-            'index': 0,
-            'content_block': {'type': 'thinking'},
-          },
-          {
-            'type': 'content_block_delta',
-            'index': 0,
-            'delta': {'type': 'thinking_delta', 'thinking': 'Thinking...'},
-          },
-          {
-            'type': 'content_block_stop',
-            'index': 0,
-          },
-        ];
+      test(
+        'streamRequest emits ThinkingEvent with isComplete on block stop',
+        () async {
+          final handler = ClaudeStreamHandler();
+          final inputEvents = [
+            {
+              'type': 'content_block_start',
+              'index': 0,
+              'content_block': {'type': 'thinking'},
+            },
+            {
+              'type': 'content_block_delta',
+              'index': 0,
+              'delta': {'type': 'thinking_delta', 'thinking': 'Thinking...'},
+            },
+            {'type': 'content_block_stop', 'index': 0},
+          ];
 
-        final events = <StreamEvent>[];
-        await for (final event in handler.streamRequest(
-          messageStream: Stream.fromIterable(inputEvents),
-        )) {
-          events.add(event);
-        }
+          final events = <StreamEvent>[];
+          await for (final event in handler.streamRequest(
+            messageStream: Stream.fromIterable(inputEvents),
+          )) {
+            events.add(event);
+          }
 
-        final thinkingEvents = events.whereType<ThinkingEvent>().toList();
-        // Should have a final thinking event with isComplete=true
-        expect(thinkingEvents.any((e) => e.isComplete), isTrue);
-      });
+          final thinkingEvents = events.whereType<ThinkingEvent>().toList();
+          // Should have a final thinking event with isComplete=true
+          expect(thinkingEvents.any((e) => e.isComplete), isTrue);
+        },
+      );
 
       test('streamRequest handles interleaved thinking and text', () async {
         final handler = ClaudeStreamHandler();
@@ -2157,12 +2108,12 @@ void main() {
           {
             'type': 'content_block_delta',
             'index': 0,
-            'delta': {'type': 'thinking_delta', 'thinking': 'Thinking first...'},
+            'delta': {
+              'type': 'thinking_delta',
+              'thinking': 'Thinking first...',
+            },
           },
-          {
-            'type': 'content_block_stop',
-            'index': 0,
-          },
+          {'type': 'content_block_stop', 'index': 0},
           {
             'type': 'content_block_start',
             'index': 1,
@@ -2173,10 +2124,7 @@ void main() {
             'index': 1,
             'delta': {'type': 'text_delta', 'text': 'Here is my response.'},
           },
-          {
-            'type': 'content_block_stop',
-            'index': 1,
-          },
+          {'type': 'content_block_stop', 'index': 1},
           {'type': 'message_stop'},
         ];
 

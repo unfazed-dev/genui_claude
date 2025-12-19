@@ -188,8 +188,10 @@ void main() {
 
         // Not processing - button enabled
         find.byIcon(Icons.send);
-        expect(tester.widget<IconButton>(find.byType(IconButton).last).onPressed,
-            isNotNull,);
+        expect(
+          tester.widget<IconButton>(find.byType(IconButton).last).onPressed,
+          isNotNull,
+        );
 
         // Start processing
         mockGenerator.setProcessing(true);
@@ -449,10 +451,13 @@ class _ChatFlowWidgetState extends State<_ChatFlowWidget> {
               ? const Center(child: Text('No messages'))
               : ListView(
                   children: [
-                    ..._messages.map((m) => ListTile(
-                          title: Text(m.text),
-                          leading: Icon(m.isUser ? Icons.person : Icons.smart_toy),
-                        ),),
+                    ..._messages.map(
+                      (m) => ListTile(
+                        title: Text(m.text),
+                        leading:
+                            Icon(m.isUser ? Icons.person : Icons.smart_toy),
+                      ),
+                    ),
                     if (_currentResponse.isNotEmpty)
                       ListTile(
                         title: Text(_currentResponse),

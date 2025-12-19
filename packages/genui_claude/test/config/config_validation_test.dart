@@ -700,7 +700,8 @@ void main() {
         const lenient = CircuitBreakerConfig.lenient;
         const defaults = CircuitBreakerConfig.defaults;
 
-        expect(lenient.failureThreshold, greaterThan(defaults.failureThreshold));
+        expect(
+            lenient.failureThreshold, greaterThan(defaults.failureThreshold),);
         expect(lenient.recoveryTimeout, greaterThan(defaults.recoveryTimeout));
       });
     });
@@ -867,7 +868,8 @@ void main() {
 
       final copy = config.copyWith(timeout: const Duration(seconds: 30));
       expect(copy, isNot(same(config)));
-      expect(config.timeout, equals(const Duration(seconds: 120))); // Original unchanged
+      expect(config.timeout,
+          equals(const Duration(seconds: 120)),); // Original unchanged
     });
 
     test('RetryConfig is immutable', () {

@@ -62,7 +62,9 @@ void main() {
         expect(copy.failureThreshold, equals(10));
         expect(copy.recoveryTimeout, equals(original.recoveryTimeout));
         expect(
-            copy.halfOpenSuccessThreshold, equals(original.halfOpenSuccessThreshold),);
+          copy.halfOpenSuccessThreshold,
+          equals(original.halfOpenSuccessThreshold),
+        );
       });
 
       test('creates copy with updated recovery timeout', () {
@@ -74,7 +76,9 @@ void main() {
         expect(copy.failureThreshold, equals(original.failureThreshold));
         expect(copy.recoveryTimeout, equals(const Duration(seconds: 120)));
         expect(
-            copy.halfOpenSuccessThreshold, equals(original.halfOpenSuccessThreshold),);
+          copy.halfOpenSuccessThreshold,
+          equals(original.halfOpenSuccessThreshold),
+        );
       });
 
       test('creates copy with updated half-open success threshold', () {
@@ -343,11 +347,13 @@ void main() {
 
         expect(breaker.lastFailureTime, isNotNull);
         expect(
-          breaker.lastFailureTime!.isAfter(before.subtract(const Duration(milliseconds: 1))),
+          breaker.lastFailureTime!
+              .isAfter(before.subtract(const Duration(milliseconds: 1))),
           isTrue,
         );
         expect(
-          breaker.lastFailureTime!.isBefore(after.add(const Duration(milliseconds: 1))),
+          breaker.lastFailureTime!
+              .isBefore(after.add(const Duration(milliseconds: 1))),
           isTrue,
         );
       });

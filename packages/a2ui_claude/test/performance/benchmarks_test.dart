@@ -79,13 +79,17 @@ void main() {
         A2uiToolConverter.toClaudeTools(schemas1000);
         stopwatch1000.stop();
 
-        final ratio100 = stopwatch100.elapsedMicroseconds /
+        final ratio100 =
+            stopwatch100.elapsedMicroseconds /
             (stopwatch10.elapsedMicroseconds.clamp(1, double.maxFinite));
-        final ratio1000 = stopwatch1000.elapsedMicroseconds /
+        final ratio1000 =
+            stopwatch1000.elapsedMicroseconds /
             (stopwatch100.elapsedMicroseconds.clamp(1, double.maxFinite));
 
-        print('Scaling: 10→100 ratio: ${ratio100.toStringAsFixed(2)}x, '
-            '100→1000 ratio: ${ratio1000.toStringAsFixed(2)}x');
+        print(
+          'Scaling: 10→100 ratio: ${ratio100.toStringAsFixed(2)}x, '
+          '100→1000 ratio: ${ratio1000.toStringAsFixed(2)}x',
+        );
 
         // Allow for system variance in timing-sensitive benchmarks.
         // Linear scaling (O(n)) would give ratio ~10, quadratic (O(n²)) ~100.
@@ -197,7 +201,11 @@ void main() {
           'surface_update': {
             'surfaceId': 'test-1',
             'widgets': [
-              {'type': 'text', 'id': 't1', 'props': {'content': 'Hello'}},
+              {
+                'type': 'text',
+                'id': 't1',
+                'props': {'content': 'Hello'},
+              },
             ],
           },
           'data_model_update': {
@@ -234,10 +242,7 @@ void main() {
             {
               'type': 'tool_use',
               'name': 'data_model_update',
-              'input': {
-                'surfaceId': 'test-1',
-                'updates': largeUpdates,
-              },
+              'input': {'surfaceId': 'test-1', 'updates': largeUpdates},
             },
           ],
         };
@@ -326,11 +331,7 @@ void main() {
 
         final perReset = stopwatch.elapsedMicroseconds / 10000;
         print('Per-reset: ${perReset.toStringAsFixed(2)}μs');
-        expect(
-          perReset,
-          lessThan(1),
-          reason: 'Parser reset should be < 1μs',
-        );
+        expect(perReset, lessThan(1), reason: 'Parser reset should be < 1μs');
       });
 
       test('handles rapid stream creation/disposal', () async {
@@ -345,12 +346,10 @@ void main() {
         stopwatch.stop();
 
         final perCycle = stopwatch.elapsedMicroseconds / 100;
-        print('Per create/process/dispose cycle: ${perCycle.toStringAsFixed(2)}μs');
-        expect(
-          perCycle,
-          lessThan(1000),
-          reason: 'Full cycle should be < 1ms',
+        print(
+          'Per create/process/dispose cycle: ${perCycle.toStringAsFixed(2)}μs',
         );
+        expect(perCycle, lessThan(1000), reason: 'Full cycle should be < 1ms');
       });
     });
 
@@ -410,7 +409,9 @@ void main() {
         }
 
         final avgTime = times.reduce((a, b) => a + b) / times.length;
-        print('Avg tool conversion (10 tools): ${avgTime.toStringAsFixed(2)}μs');
+        print(
+          'Avg tool conversion (10 tools): ${avgTime.toStringAsFixed(2)}μs',
+        );
 
         expect(
           avgTime,
@@ -457,7 +458,9 @@ void main() {
 
         final avgTotal = times.reduce((a, b) => a + b) / times.length;
         final avgPerEvent = avgTotal / events.length;
-        print('Avg stream processing per event: ${avgPerEvent.toStringAsFixed(2)}μs');
+        print(
+          'Avg stream processing per event: ${avgPerEvent.toStringAsFixed(2)}μs',
+        );
 
         expect(
           avgPerEvent,
@@ -475,7 +478,10 @@ void main() {
 
 const _benchmarkInputSchema = <String, dynamic>{
   'properties': <String, dynamic>{
-    'surfaceId': <String, dynamic>{'type': 'string', 'description': 'Surface ID'},
+    'surfaceId': <String, dynamic>{
+      'type': 'string',
+      'description': 'Surface ID',
+    },
     'title': <String, dynamic>{'type': 'string', 'description': 'Title'},
     'count': <String, dynamic>{'type': 'integer', 'description': 'Count'},
   },
@@ -516,22 +522,29 @@ Map<String, dynamic> _generateMessageWithBlocks(int blockCount) {
         'name': i % 4 == 0
             ? 'begin_rendering'
             : i % 4 == 1
-                ? 'surface_update'
-                : i % 4 == 2
-                    ? 'data_model_update'
-                    : 'delete_surface',
+            ? 'surface_update'
+            : i % 4 == 2
+            ? 'data_model_update'
+            : 'delete_surface',
         'input': i % 4 == 0
             ? {'surfaceId': 'surface-$i'}
             : i % 4 == 1
-                ? {
-                    'surfaceId': 'surface-$i',
-                    'widgets': [
-                      {'type': 'text', 'id': 't$i', 'props': {'content': 'Text $i'}},
-                    ],
-                  }
-                : i % 4 == 2
-                    ? {'surfaceId': 'surface-$i', 'updates': {'field$i': 'value$i'}}
-                    : {'surfaceId': 'surface-$i', 'cascade': true},
+            ? {
+                'surfaceId': 'surface-$i',
+                'widgets': [
+                  {
+                    'type': 'text',
+                    'id': 't$i',
+                    'props': {'content': 'Text $i'},
+                  },
+                ],
+              }
+            : i % 4 == 2
+            ? {
+                'surfaceId': 'surface-$i',
+                'updates': {'field$i': 'value$i'},
+              }
+            : {'surfaceId': 'surface-$i', 'cascade': true},
       },
     ),
   };
@@ -578,17 +591,11 @@ Map<String, dynamic> _generateTypicalMessage() {
   // A typical Claude response with text and a few tool blocks
   return {
     'content': [
-      {
-        'type': 'text',
-        'text': "I'll create a user interface for you.",
-      },
+      {'type': 'text', 'text': "I'll create a user interface for you."},
       {
         'type': 'tool_use',
         'name': 'begin_rendering',
-        'input': {
-          'surfaceId': 'main-ui',
-          'title': 'User Dashboard',
-        },
+        'input': {'surfaceId': 'main-ui', 'title': 'User Dashboard'},
       },
       {
         'type': 'tool_use',
@@ -646,28 +653,20 @@ List<Map<String, dynamic>> _generateStreamEvents(int count) {
         events.add({
           'type': 'content_block_start',
           'index': blockIndex,
-          'content_block': {
-            'type': 'text',
-            'text': '',
-          },
+          'content_block': {'type': 'text', 'text': ''},
         });
       case 1:
       case 2:
         events.add({
           'type': 'content_block_delta',
           'index': blockIndex,
-          'delta': {
-            'type': 'text_delta',
-            'text': 'chunk_$i',
-          },
+          'delta': {'type': 'text_delta', 'text': 'chunk_$i'},
         });
       case 3:
         // Use message_delta instead of content_block_stop to avoid parsing
         events.add({
           'type': 'message_delta',
-          'delta': {
-            'stop_reason': null,
-          },
+          'delta': {'stop_reason': null},
         });
     }
   }

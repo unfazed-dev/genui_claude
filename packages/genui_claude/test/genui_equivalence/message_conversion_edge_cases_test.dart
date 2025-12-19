@@ -477,8 +477,8 @@ void main() {
       });
 
       test('pruneHistory handles empty list', () {
-        final result =
-            MessageConverter.pruneHistory(<Map<String, dynamic>>[], maxMessages: 5);
+        final result = MessageConverter.pruneHistory(<Map<String, dynamic>>[],
+            maxMessages: 5,);
 
         expect(result, isEmpty);
       });
@@ -584,8 +584,10 @@ void main() {
         final result = MessageConverter.toClaudeMessages(messages);
 
         expect(result, hasLength(5));
-        expect(result.map((m) => m['role']).toList(),
-            ['user', 'assistant', 'user', 'assistant', 'user'],);
+        expect(
+          result.map((m) => m['role']).toList(),
+          ['user', 'assistant', 'user', 'assistant', 'user'],
+        );
       });
 
       test('converts conversation with tool interactions', () {

@@ -1,4 +1,3 @@
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:genui_claude/src/metrics/metrics_collector.dart';
 import 'package:genui_claude/src/metrics/metrics_event.dart';
@@ -474,7 +473,8 @@ void main() {
           // Add 10 latencies: 100, 200, 300, ..., 1000
           for (var i = 1; i <= 10; i++) {
             final requestId = 'req-$i';
-            collector.recordRequestStart(requestId: requestId, endpoint: 'test');
+            collector.recordRequestStart(
+                requestId: requestId, endpoint: 'test',);
             collector.recordRequestSuccess(
               requestId: requestId,
               duration: Duration(milliseconds: i * 100),
@@ -931,7 +931,8 @@ void main() {
         expect(map['request_id'], equals('req-123'));
         expect(map['operation'], equals('database_query'));
         expect(map['duration_ms'], equals(50));
-        expect(map['metadata'], equals({'table': 'users', 'query_type': 'select'}));
+        expect(map['metadata'],
+            equals({'table': 'users', 'query_type': 'select'}),);
       });
 
       test('toMap excludes null optional fields', () {

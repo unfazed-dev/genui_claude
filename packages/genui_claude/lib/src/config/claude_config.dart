@@ -210,7 +210,8 @@ class ProxyConfig {
     this.circuitBreakerConfig = CircuitBreakerConfig.defaults,
     this.disableCircuitBreaker = false,
   })  : assert(retryAttempts >= 0, 'retryAttempts cannot be negative'),
-        assert(maxHistoryMessages >= 0, 'maxHistoryMessages cannot be negative');
+        assert(
+            maxHistoryMessages >= 0, 'maxHistoryMessages cannot be negative',);
 
   /// Request timeout duration.
   final Duration timeout;

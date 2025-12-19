@@ -91,11 +91,15 @@ void main() {
         expect(surfaceUpdate.surfaceId, 'main');
         expect(surfaceUpdate.components, hasLength(1));
         // Type is the key in componentProperties, id is a UUID
-        expect(surfaceUpdate.components.first.componentProperties.containsKey('Text'), isTrue);
+        expect(
+            surfaceUpdate.components.first.componentProperties
+                .containsKey('Text'),
+            isTrue,);
         expect(surfaceUpdate.components.first.id, isNotEmpty);
       });
 
-      test('surface_update with multiple widgets preserves all widgets', () async {
+      test('surface_update with multiple widgets preserves all widgets',
+          () async {
         mockHandler.stubEvents(
           MockEventFactory.surfaceUpdateResponse(
             surfaceId: 'multi-widget',
@@ -117,9 +121,17 @@ void main() {
         final surfaceUpdate = messages.first as SurfaceUpdate;
         expect(surfaceUpdate.components, hasLength(3));
         // Type is the key in componentProperties, id is a UUID
-        expect(surfaceUpdate.components[0].componentProperties.containsKey('Text'), isTrue);
-        expect(surfaceUpdate.components[1].componentProperties.containsKey('Button'), isTrue);
-        expect(surfaceUpdate.components[2].componentProperties.containsKey('Container'), isTrue);
+        expect(
+            surfaceUpdate.components[0].componentProperties.containsKey('Text'),
+            isTrue,);
+        expect(
+            surfaceUpdate.components[1].componentProperties
+                .containsKey('Button'),
+            isTrue,);
+        expect(
+            surfaceUpdate.components[2].componentProperties
+                .containsKey('Container'),
+            isTrue,);
       });
 
       test('widget properties are preserved in Component', () async {
@@ -148,7 +160,8 @@ void main() {
         final surfaceUpdate = messages.first as SurfaceUpdate;
         final component = surfaceUpdate.components.first;
         // Type is the key, properties are nested inside
-        final textProps = component.componentProperties['Text']! as Map<String, dynamic>;
+        final textProps =
+            component.componentProperties['Text']! as Map<String, dynamic>;
         expect(textProps['text'], 'Test content');
         expect(textProps['style'], 'bold');
       });
@@ -263,7 +276,10 @@ void main() {
         expect(beginRendering.surfaceId, 'complete-flow');
         expect(surfaceUpdate.surfaceId, 'complete-flow');
         // Type is the key in componentProperties
-        expect(surfaceUpdate.components.first.componentProperties.containsKey('Text'), isTrue);
+        expect(
+            surfaceUpdate.components.first.componentProperties
+                .containsKey('Text'),
+            isTrue,);
       });
 
       test('message order is preserved', () async {
@@ -291,9 +307,12 @@ void main() {
 
         // Widgets in order - type is key, properties are nested
         final surfaceUpdate = messages[1] as SurfaceUpdate;
-        final props0 = surfaceUpdate.components[0].componentProperties['Text']! as Map<String, dynamic>;
-        final props1 = surfaceUpdate.components[1].componentProperties['Text']! as Map<String, dynamic>;
-        final props2 = surfaceUpdate.components[2].componentProperties['Text']! as Map<String, dynamic>;
+        final props0 = surfaceUpdate.components[0].componentProperties['Text']!
+            as Map<String, dynamic>;
+        final props1 = surfaceUpdate.components[1].componentProperties['Text']!
+            as Map<String, dynamic>;
+        final props2 = surfaceUpdate.components[2].componentProperties['Text']!
+            as Map<String, dynamic>;
         expect(props0['text'], 'First');
         expect(props1['text'], 'Second');
         expect(props2['text'], 'Third');
@@ -305,7 +324,8 @@ void main() {
         mockHandler.stubTextResponse('Hello from Claude!');
 
         final textChunks = <String>[];
-        final subscription = generator.textResponseStream.listen(textChunks.add);
+        final subscription =
+            generator.textResponseStream.listen(textChunks.add);
 
         await generator.sendRequest(UserMessage.text('Say hello'));
 
@@ -326,7 +346,8 @@ void main() {
         );
 
         final a2uiMessages = <A2uiMessage>[];
-        final subscription = generator.a2uiMessageStream.listen(a2uiMessages.add);
+        final subscription =
+            generator.a2uiMessageStream.listen(a2uiMessages.add);
 
         await generator.sendRequest(UserMessage.text('Second'));
 

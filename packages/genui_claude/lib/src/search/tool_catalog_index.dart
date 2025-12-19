@@ -94,10 +94,7 @@ class ToolCatalogIndex {
     scoredItems.sort((a, b) => b.score.compareTo(a.score));
 
     // Return top results
-    return scoredItems
-        .take(maxResults)
-        .map((s) => s.item.schema)
-        .toList();
+    return scoredItems.take(maxResults).map((s) => s.item.schema).toList();
   }
 
   /// Gets a schema by exact name.

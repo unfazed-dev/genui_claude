@@ -29,8 +29,7 @@ class A2uiMessageAdapter {
           root: root ?? 'root',
           styles: metadata,
         ),
-      a2ui.SurfaceUpdateData(:final surfaceId, :final widgets) =>
-        SurfaceUpdate(
+      a2ui.SurfaceUpdateData(:final surfaceId, :final widgets) => SurfaceUpdate(
           surfaceId: surfaceId,
           components: widgets.map(_toComponent).toList(),
         ),
@@ -59,7 +58,8 @@ class A2uiMessageAdapter {
   }
 
   /// Converts a list of a2ui_claude messages to GenUI messages.
-  static List<A2uiMessage> toGenUiMessages(List<a2ui.A2uiMessageData> messages) {
+  static List<A2uiMessage> toGenUiMessages(
+      List<a2ui.A2uiMessageData> messages,) {
     return messages.map(toGenUiMessage).toList();
   }
 }

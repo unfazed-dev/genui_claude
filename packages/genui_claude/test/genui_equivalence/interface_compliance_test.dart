@@ -38,7 +38,8 @@ void main() {
         generator.dispose();
       });
 
-      test('ClaudeContentGenerator.withHandler implements ContentGenerator', () {
+      test('ClaudeContentGenerator.withHandler implements ContentGenerator',
+          () {
         final mockHandler = MockApiHandler();
         final generator = ClaudeContentGenerator.withHandler(
           handler: mockHandler,
@@ -79,7 +80,8 @@ void main() {
         expect(generator.isProcessing, isA<ValueListenable<bool>>());
       });
 
-      test('all streams are broadcast streams (support multiple listeners)', () {
+      test('all streams are broadcast streams (support multiple listeners)',
+          () {
         // a2uiMessageStream
         final a2uiSub1 = generator.a2uiMessageStream.listen((_) {});
         final a2uiSub2 = generator.a2uiMessageStream.listen((_) {});

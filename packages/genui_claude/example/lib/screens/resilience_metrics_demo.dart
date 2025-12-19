@@ -71,7 +71,9 @@ class _ResilienceMetricsDemoScreenState
   void _addEvent(String event) {
     setState(() {
       _eventLog.insert(
-          0, '[${DateTime.now().toString().substring(11, 19)}] $event',);
+        0,
+        '[${DateTime.now().toString().substring(11, 19)}] $event',
+      );
       if (_eventLog.length > 30) {
         _eventLog.removeLast();
       }
@@ -113,7 +115,8 @@ class _ResilienceMetricsDemoScreenState
       );
       _metricsCollector.recordRequestSuccess(
         requestId: requestId,
-        duration: Duration(milliseconds: 100 + (DateTime.now().millisecond % 400)),
+        duration:
+            Duration(milliseconds: 100 + (DateTime.now().millisecond % 400)),
       );
     } on CircuitBreakerOpenException catch (e) {
       _addEvent('Blocked: ${e.message}');
@@ -223,7 +226,8 @@ class _ResilienceMetricsDemoScreenState
           children: [
             Row(
               children: [
-                Icon(Icons.shield, color: Theme.of(context).colorScheme.primary),
+                Icon(Icons.shield,
+                    color: Theme.of(context).colorScheme.primary,),
                 const SizedBox(width: 8),
                 Text(
                   'Resilience & Observability',
@@ -257,7 +261,8 @@ class _ResilienceMetricsDemoScreenState
           children: [
             Row(
               children: [
-                Icon(Icons.error_outline, color: Theme.of(context).colorScheme.error),
+                Icon(Icons.error_outline,
+                    color: Theme.of(context).colorScheme.error,),
                 const SizedBox(width: 8),
                 Text(
                   'Exception Hierarchy',
@@ -268,17 +273,23 @@ class _ResilienceMetricsDemoScreenState
             const SizedBox(height: 12),
             const Text(
               'ClaudeException (sealed base class)',
-              style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'monospace'),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, fontFamily: 'monospace',),
             ),
             const SizedBox(height: 8),
-            _buildExceptionRow('NetworkException', 'DNS, connection, socket', true),
-            _buildExceptionRow('TimeoutException', 'Request exceeded timeout', true),
-            _buildExceptionRow('AuthenticationException', '401/403 responses', false),
+            _buildExceptionRow(
+                'NetworkException', 'DNS, connection, socket', true,),
+            _buildExceptionRow(
+                'TimeoutException', 'Request exceeded timeout', true,),
+            _buildExceptionRow(
+                'AuthenticationException', '401/403 responses', false,),
             _buildExceptionRow('RateLimitException', '429 + retryAfter', true),
-            _buildExceptionRow('ValidationException', '400/422 client errors', false),
+            _buildExceptionRow(
+                'ValidationException', '400/422 client errors', false,),
             _buildExceptionRow('ServerException', '5xx server errors', true),
             _buildExceptionRow('StreamException', 'SSE parsing errors', false),
-            _buildExceptionRow('CircuitBreakerOpenException', 'Circuit tripped', true),
+            _buildExceptionRow(
+                'CircuitBreakerOpenException', 'Circuit tripped', true,),
             const SizedBox(height: 12),
             ExpansionTile(
               title: const Text('ExceptionFactory.fromHttpStatus()'),
@@ -445,7 +456,8 @@ class _ResilienceMetricsDemoScreenState
                   items: ['defaults', 'lenient', 'strict'].map((name) {
                     return DropdownMenuItem(value: name, child: Text(name));
                   }).toList(),
-                  onChanged: (v) => _updateCircuitBreakerConfig(v ?? 'defaults'),
+                  onChanged: (v) =>
+                      _updateCircuitBreakerConfig(v ?? 'defaults'),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -527,7 +539,8 @@ class _ResilienceMetricsDemoScreenState
               children: [
                 Row(
                   children: [
-                    Icon(Icons.analytics, color: Theme.of(context).colorScheme.primary),
+                    Icon(Icons.analytics,
+                        color: Theme.of(context).colorScheme.primary,),
                     const SizedBox(width: 8),
                     Text(
                       'MetricsStats (Aggregated)',
@@ -546,14 +559,17 @@ class _ResilienceMetricsDemoScreenState
 
             // Request stats
             _buildStatsRow('totalRequests', stats.totalRequests.toString()),
-            _buildStatsRow('successfulRequests', stats.successfulRequests.toString()),
+            _buildStatsRow(
+                'successfulRequests', stats.successfulRequests.toString(),),
             _buildStatsRow('failedRequests', stats.failedRequests.toString()),
             _buildStatsRow('activeRequests', stats.activeRequests.toString()),
-            _buildStatsRow('successRate', '${stats.successRate.toStringAsFixed(1)}%'),
+            _buildStatsRow(
+                'successRate', '${stats.successRate.toStringAsFixed(1)}%',),
             const Divider(),
 
             // Latency stats
-            _buildStatsRow('averageLatencyMs', '${stats.averageLatencyMs.toStringAsFixed(1)}ms'),
+            _buildStatsRow('averageLatencyMs',
+                '${stats.averageLatencyMs.toStringAsFixed(1)}ms',),
             _buildStatsRow('p50LatencyMs', '${stats.p50LatencyMs}ms'),
             _buildStatsRow('p95LatencyMs', '${stats.p95LatencyMs}ms'),
             _buildStatsRow('p99LatencyMs', '${stats.p99LatencyMs}ms'),
@@ -562,9 +578,12 @@ class _ResilienceMetricsDemoScreenState
             // Event counts
             _buildStatsRow('totalRetries', stats.totalRetries.toString()),
             _buildStatsRow('rateLimitEvents', stats.rateLimitEvents.toString()),
-            _buildStatsRow('circuitBreakerEvents', stats.circuitBreakerEvents.toString()),
-            _buildStatsRow('circuitBreakerOpens', stats.circuitBreakerOpens.toString()),
-            _buildStatsRow('streamInactivityEvents', stats.streamInactivityEvents.toString()),
+            _buildStatsRow(
+                'circuitBreakerEvents', stats.circuitBreakerEvents.toString(),),
+            _buildStatsRow(
+                'circuitBreakerOpens', stats.circuitBreakerOpens.toString(),),
+            _buildStatsRow('streamInactivityEvents',
+                stats.streamInactivityEvents.toString(),),
           ],
         ),
       ),
@@ -577,7 +596,8 @@ class _ResilienceMetricsDemoScreenState
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(name, style: const TextStyle(fontFamily: 'monospace', fontSize: 11)),
+          Text(name,
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 11),),
           Text(
             value,
             style: TextStyle(
@@ -612,17 +632,26 @@ class _ResilienceMetricsDemoScreenState
             const SizedBox(height: 12),
             const Text(
               'MetricsEvent (sealed base class)',
-              style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'monospace'),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, fontFamily: 'monospace',),
             ),
             const SizedBox(height: 8),
-            _buildEventTypeRow('CircuitBreakerStateChangeEvent', 'circuitName, previousState, newState'),
-            _buildEventTypeRow('RetryAttemptEvent', 'attempt, maxAttempts, delayMs, reason'),
-            _buildEventTypeRow('RequestStartEvent', 'requestId, endpoint, model'),
-            _buildEventTypeRow('RequestSuccessEvent', 'durationMs, totalRetries, firstTokenMs'),
-            _buildEventTypeRow('RequestFailureEvent', 'errorType, errorMessage, statusCode'),
-            _buildEventTypeRow('RateLimitEvent', 'retryAfterMs, retryAfterHeader'),
-            _buildEventTypeRow('LatencyEvent', 'operation, durationMs, metadata'),
-            _buildEventTypeRow('StreamInactivityEvent', 'timeoutMs, lastActivityMs'),
+            _buildEventTypeRow('CircuitBreakerStateChangeEvent',
+                'circuitName, previousState, newState',),
+            _buildEventTypeRow(
+                'RetryAttemptEvent', 'attempt, maxAttempts, delayMs, reason',),
+            _buildEventTypeRow(
+                'RequestStartEvent', 'requestId, endpoint, model',),
+            _buildEventTypeRow('RequestSuccessEvent',
+                'durationMs, totalRetries, firstTokenMs',),
+            _buildEventTypeRow(
+                'RequestFailureEvent', 'errorType, errorMessage, statusCode',),
+            _buildEventTypeRow(
+                'RateLimitEvent', 'retryAfterMs, retryAfterHeader',),
+            _buildEventTypeRow(
+                'LatencyEvent', 'operation, durationMs, metadata',),
+            _buildEventTypeRow(
+                'StreamInactivityEvent', 'timeoutMs, lastActivityMs',),
             const SizedBox(height: 16),
 
             // Simulate events
@@ -691,7 +720,8 @@ class _ResilienceMetricsDemoScreenState
               children: [
                 Row(
                   children: [
-                    Icon(Icons.history, color: Theme.of(context).colorScheme.primary),
+                    Icon(Icons.history,
+                        color: Theme.of(context).colorScheme.primary,),
                     const SizedBox(width: 8),
                     Text(
                       'Live Event Log',

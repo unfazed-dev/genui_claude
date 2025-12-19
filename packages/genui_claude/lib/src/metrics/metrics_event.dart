@@ -35,7 +35,10 @@ class CircuitBreakerStateChangeEvent extends MetricsEvent {
   /// Creates a circuit breaker state change event.
   const CircuitBreakerStateChangeEvent({
     required super.timestamp,
-    required this.circuitName, required this.previousState, required this.newState, super.requestId,
+    required this.circuitName,
+    required this.previousState,
+    required this.newState,
+    super.requestId,
     this.failureCount,
   });
 
@@ -76,7 +79,11 @@ class RetryAttemptEvent extends MetricsEvent {
   /// Creates a retry attempt event.
   const RetryAttemptEvent({
     required super.timestamp,
-    required this.attempt, required this.maxAttempts, required this.delayMs, required this.reason, super.requestId,
+    required this.attempt,
+    required this.maxAttempts,
+    required this.delayMs,
+    required this.reason,
+    super.requestId,
     this.statusCode,
   });
 
@@ -279,7 +286,9 @@ class LatencyEvent extends MetricsEvent {
   /// Creates a latency event.
   const LatencyEvent({
     required super.timestamp,
-    required this.operation, required this.durationMs, super.requestId,
+    required this.operation,
+    required this.durationMs,
+    super.requestId,
     this.metadata,
   });
 
@@ -316,7 +325,9 @@ class StreamInactivityEvent extends MetricsEvent {
   /// Creates a stream inactivity event.
   const StreamInactivityEvent({
     required super.timestamp,
-    required this.timeoutMs, required this.lastActivityMs, super.requestId,
+    required this.timeoutMs,
+    required this.lastActivityMs,
+    super.requestId,
   });
 
   /// Configured timeout in milliseconds.

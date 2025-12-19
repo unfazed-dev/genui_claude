@@ -175,7 +175,8 @@ class _ProductionChatScreenState extends State<ProductionChatScreen> {
   Widget _buildProxyInfo(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+      color:
+          Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
       child: Row(
         children: [
           Icon(

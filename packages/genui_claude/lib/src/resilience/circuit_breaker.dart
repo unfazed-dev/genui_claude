@@ -33,7 +33,8 @@ class CircuitBreakerConfig {
     this.recoveryTimeout = const Duration(seconds: 30),
     this.halfOpenSuccessThreshold = 2,
   })  : assert(failureThreshold > 0, 'failureThreshold must be at least 1'),
-        assert(halfOpenSuccessThreshold > 0, 'halfOpenSuccessThreshold must be at least 1');
+        assert(halfOpenSuccessThreshold > 0,
+            'halfOpenSuccessThreshold must be at least 1',);
 
   /// Number of failures before opening the circuit.
   final int failureThreshold;

@@ -42,7 +42,8 @@ class DemoCatalog extends Catalog {
         properties: {
           'title': S.string(description: 'Card title'),
           'content': S.string(description: 'Card body content'),
-          'icon': S.string(description: 'Icon name: info, warning, success, error'),
+          'icon':
+              S.string(description: 'Icon name: info, warning, success, error'),
         },
         required: ['title', 'content'],
       ),
@@ -353,7 +354,8 @@ class _ItemListWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final title = props['title'] as String?;
-    final items = (props['items'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [];
+    final items =
+        (props['items'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [];
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -413,10 +415,7 @@ class _ProgressWidget extends StatelessWidget {
             Text(label),
             const SizedBox(height: 8),
           ],
-          if (type == 'circular')
-            Center(child: indicator)
-          else
-            indicator,
+          if (type == 'circular') Center(child: indicator) else indicator,
         ],
       ),
     );

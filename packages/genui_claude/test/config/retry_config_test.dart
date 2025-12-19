@@ -298,9 +298,12 @@ void main() {
           );
 
           // All attempts should have same delay
-          expect(config.getDelayForAttempt(0), equals(const Duration(seconds: 5)));
-          expect(config.getDelayForAttempt(1), equals(const Duration(seconds: 5)));
-          expect(config.getDelayForAttempt(5), equals(const Duration(seconds: 5)));
+          expect(
+              config.getDelayForAttempt(0), equals(const Duration(seconds: 5)),);
+          expect(
+              config.getDelayForAttempt(1), equals(const Duration(seconds: 5)),);
+          expect(
+              config.getDelayForAttempt(5), equals(const Duration(seconds: 5)),);
         });
       });
     });
@@ -359,7 +362,8 @@ void main() {
         expect(copy.maxDelay, equals(original.maxDelay));
         expect(copy.backoffMultiplier, equals(original.backoffMultiplier));
         expect(copy.jitterFactor, equals(original.jitterFactor));
-        expect(copy.retryableStatusCodes, equals(original.retryableStatusCodes));
+        expect(
+            copy.retryableStatusCodes, equals(original.retryableStatusCodes),);
       });
 
       test('creates copy with updated initialDelay', () {
@@ -424,12 +428,8 @@ void main() {
 
     group('equality', () {
       test('equal configs are equal', () {
-        const config1 = RetryConfig(
-          
-        );
-        const config2 = RetryConfig(
-          
-        );
+        const config1 = RetryConfig();
+        const config2 = RetryConfig();
 
         expect(config1, equals(config2));
         expect(config1.hashCode, equals(config2.hashCode));

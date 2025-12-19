@@ -156,16 +156,14 @@ class KeywordExtractor {
   /// Tokenizes a name into words.
   List<String> _tokenizeName(String name) {
     // First, replace separators with spaces
-    final normalized = name
-        .replaceAll('_', ' ')
-        .replaceAll('-', ' ');
+    final normalized = name.replaceAll('_', ' ').replaceAll('-', ' ');
 
     // Handle camelCase and PascalCase by inserting spaces before capitals
     final buffer = StringBuffer();
     for (var i = 0; i < normalized.length; i++) {
       final char = normalized[i];
-      final isUpperCase = char.toUpperCase() == char &&
-          char.toLowerCase() != char;
+      final isUpperCase =
+          char.toUpperCase() == char && char.toLowerCase() != char;
 
       if (isUpperCase && i > 0) {
         final prevChar = normalized[i - 1];

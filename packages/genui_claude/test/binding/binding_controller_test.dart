@@ -110,7 +110,9 @@ void main() {
     late BindingController controller;
 
     setUp(() {
-      mockDataModel = MockDataModel({'form': {'email': 'test@example.com'}});
+      mockDataModel = MockDataModel({
+        'form': {'email': 'test@example.com'},
+      });
       registry = BindingRegistry();
       controller = BindingController(
         registry: registry,

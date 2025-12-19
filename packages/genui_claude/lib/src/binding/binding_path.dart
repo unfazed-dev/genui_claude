@@ -85,8 +85,7 @@ class BindingPath {
       return BindingPath._(const [], isAbsolute: isAbsolute);
     }
 
-    final segments =
-        pathToSplit.split('/').where((s) => s.isNotEmpty).toList();
+    final segments = pathToSplit.split('/').where((s) => s.isNotEmpty).toList();
 
     return BindingPath._(segments, isAbsolute: isAbsolute);
   }

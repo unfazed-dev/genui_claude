@@ -49,7 +49,8 @@ class TestCatalog extends Catalog {
         description: 'A clickable button widget',
         properties: {
           'label': S.string(description: 'Button label text'),
-          'action': S.string(description: 'Action identifier for click handler'),
+          'action':
+              S.string(description: 'Action identifier for click handler'),
         },
         required: ['label'],
       ),

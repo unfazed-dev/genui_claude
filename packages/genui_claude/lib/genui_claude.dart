@@ -30,7 +30,8 @@
 /// - [A2uiMessageAdapter] - Utility for message type conversion
 library genui_claude;
 
-import 'package:genui_claude/genui_claude.dart' show ClaudeContentGenerator, ClaudeConfig, ProxyConfig, A2uiMessageAdapter;
+import 'package:genui_claude/genui_claude.dart'
+    show ClaudeContentGenerator, ClaudeConfig, ProxyConfig, A2uiMessageAdapter;
 
 export 'src/adapter/a2ui_control_tools.dart';
 export 'src/adapter/catalog_tool_bridge.dart';

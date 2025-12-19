@@ -50,7 +50,8 @@ class MessageConverter {
   }
 
   /// Converts assistant message parts to Claude format.
-  static Map<String, dynamic> _convertAssistantMessage(List<MessagePart> parts) {
+  static Map<String, dynamic> _convertAssistantMessage(
+      List<MessagePart> parts,) {
     // Check if there are tool calls
     final hasToolCalls = parts.any((p) => p is ToolCallPart);
 
@@ -86,7 +87,8 @@ class MessageConverter {
   }
 
   /// Extracts content from message parts.
-  static dynamic _extractContent(List<MessagePart> parts, {required bool isUser}) {
+  static dynamic _extractContent(List<MessagePart> parts,
+      {required bool isUser,}) {
     // For simple text-only messages, return a string
     final hasOnlyText = parts.every((p) => p is TextPart);
     if (hasOnlyText) {
@@ -103,10 +105,7 @@ class MessageConverter {
 
   /// Extracts text content from parts.
   static String _extractTextContent(List<MessagePart> parts) {
-    return parts
-        .whereType<TextPart>()
-        .map((p) => p.text)
-        .join('\n');
+    return parts.whereType<TextPart>().map((p) => p.text).join('\n');
   }
 
   // coverage:ignore-start
@@ -235,10 +234,8 @@ class MessageConverter {
   ///
   /// Returns null if no InternalMessages are present.
   static String? extractSystemContext(List<ChatMessage> messages) {
-    final internalMessages = messages
-        .whereType<InternalMessage>()
-        .map((m) => m.text)
-        .toList();
+    final internalMessages =
+        messages.whereType<InternalMessage>().map((m) => m.text).toList();
 
     if (internalMessages.isEmpty) {
       return null;

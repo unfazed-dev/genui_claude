@@ -80,8 +80,8 @@ class ProxyModeHandler implements ApiHandler {
         _authToken = authToken,
         _config = config,
         // Use explicit retryConfig if provided, otherwise create one from ProxyConfig
-        _retryConfig = retryConfig ??
-            RetryConfig(maxAttempts: config.retryAttempts),
+        _retryConfig =
+            retryConfig ?? RetryConfig(maxAttempts: config.retryAttempts),
         // Use explicit circuitBreaker if provided, otherwise create from config
         // unless disabled
         _circuitBreaker = circuitBreaker ??
@@ -141,7 +141,8 @@ class ProxyModeHandler implements ApiHandler {
 
     while (attempt <= _retryConfig.maxAttempts) {
       try {
-        await for (final event in _executeRequest(request, requestId, attempt)) {
+        await for (final event
+            in _executeRequest(request, requestId, attempt)) {
           yield event;
         }
         _circuitBreaker?.recordSuccess();
@@ -151,9 +152,9 @@ class ProxyModeHandler implements ApiHandler {
           totalRetries: totalRetries,
         );
         return;
-      // coverage:ignore-start
-      // NOTE: RateLimitException handling requires triggering actual 429 responses
-      // from the API, which is not feasible in unit tests without a mock server.
+        // coverage:ignore-start
+        // NOTE: RateLimitException handling requires triggering actual 429 responses
+        // from the API, which is not feasible in unit tests without a mock server.
       } on RateLimitException catch (e) {
         lastException = e;
         _circuitBreaker?.recordFailure();
@@ -201,7 +202,7 @@ class ProxyModeHandler implements ApiHandler {
         await Future<void>.delayed(delay);
         attempt++;
         totalRetries++;
-      // coverage:ignore-end
+        // coverage:ignore-end
       } on ClaudeException catch (e) {
         lastException = e;
         _circuitBreaker?.recordFailure();
@@ -346,18 +347,21 @@ class ProxyModeHandler implements ApiHandler {
     return {
       'messages': request.messages,
       'max_tokens': request.maxTokens,
-      if (request.systemInstruction != null) 'system': request.systemInstruction,
+      if (request.systemInstruction != null)
+        'system': request.systemInstruction,
       if (request.tools != null) 'tools': request.tools,
       if (request.model != null) 'model': request.model,
       if (request.temperature != null) 'temperature': request.temperature,
       if (request.topP != null) 'top_p': request.topP,
       if (request.topK != null) 'top_k': request.topK,
-      if (request.stopSequences != null) 'stop_sequences': request.stopSequences,
-      if (request.enableInterleavedThinking) 'thinking': {
-        'type': 'enabled',
-        if (request.thinkingBudgetTokens != null)
-          'budget_tokens': request.thinkingBudgetTokens,
-      },
+      if (request.stopSequences != null)
+        'stop_sequences': request.stopSequences,
+      if (request.enableInterleavedThinking)
+        'thinking': {
+          'type': 'enabled',
+          if (request.thinkingBudgetTokens != null)
+            'budget_tokens': request.thinkingBudgetTokens,
+        },
       'stream': true,
     };
   }
@@ -367,7 +371,8 @@ class ProxyModeHandler implements ApiHandler {
     http.ByteStream stream,
     String requestId,
   ) async* {
-    final lines = stream.transform(utf8.decoder).transform(const LineSplitter());
+    final lines =
+        stream.transform(utf8.decoder).transform(const LineSplitter());
 
     async.Timer? inactivityTimer;
     final completer = async.Completer<void>();
@@ -389,7 +394,8 @@ class ProxyModeHandler implements ApiHandler {
         );
         completer.completeError(
           TimeoutException(
-            message: 'Stream inactivity timeout after $_streamInactivityTimeout',
+            message:
+                'Stream inactivity timeout after $_streamInactivityTimeout',
             timeout: _streamInactivityTimeout,
             requestId: requestId,
           ),

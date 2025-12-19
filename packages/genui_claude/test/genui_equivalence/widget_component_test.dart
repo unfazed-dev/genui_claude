@@ -32,12 +32,14 @@ void main() {
       });
 
       test('Component.id is a UUID when not provided', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'test',
-          widgets: [
-            {'type': 'CustomWidget', 'properties': <String, dynamic>{}},
-          ],
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'test',
+            widgets: [
+              {'type': 'CustomWidget', 'properties': <String, dynamic>{}},
+            ],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -56,19 +58,21 @@ void main() {
       });
 
       test('componentProperties wraps type with widget properties', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'test',
-          widgets: [
-            {
-              'type': 'Text',
-              'properties': {
-                'content': 'Hello World',
-                'fontSize': 16,
-                'color': '#000000',
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'test',
+            widgets: [
+              {
+                'type': 'Text',
+                'properties': {
+                  'content': 'Hello World',
+                  'fontSize': 16,
+                  'color': '#000000',
+                },
               },
-            },
-          ],
-        ),);
+            ],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -87,25 +91,27 @@ void main() {
       });
 
       test('nested properties preserved', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'test',
-          widgets: [
-            {
-              'type': 'Card',
-              'properties': {
-                'title': 'Card Title',
-                'style': {
-                  'elevation': 4,
-                  'borderRadius': 8,
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'test',
+            widgets: [
+              {
+                'type': 'Card',
+                'properties': {
+                  'title': 'Card Title',
+                  'style': {
+                    'elevation': 4,
+                    'borderRadius': 8,
+                  },
+                  'actions': [
+                    {'label': 'OK', 'type': 'primary'},
+                    {'label': 'Cancel', 'type': 'secondary'},
+                  ],
                 },
-                'actions': [
-                  {'label': 'OK', 'type': 'primary'},
-                  {'label': 'Cancel', 'type': 'secondary'},
-                ],
               },
-            },
-          ],
-        ),);
+            ],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -113,8 +119,8 @@ void main() {
         await generator.sendRequest(UserMessage.text('render'));
 
         final update = messages[0] as SurfaceUpdate;
-        final widgetProps =
-            update.components[0].componentProperties['Card']! as Map<String, dynamic>;
+        final widgetProps = update.components[0].componentProperties['Card']!
+            as Map<String, dynamic>;
 
         expect(widgetProps['title'], 'Card Title');
         final style = widgetProps['style'] as Map<String, dynamic>;
@@ -126,15 +132,29 @@ void main() {
       });
 
       test('multiple components have unique ids and maintain order', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'test',
-          widgets: [
-            {'type': 'A', 'properties': {'order': 1}},
-            {'type': 'B', 'properties': {'order': 2}},
-            {'type': 'C', 'properties': {'order': 3}},
-            {'type': 'D', 'properties': {'order': 4}},
-          ],
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'test',
+            widgets: [
+              {
+                'type': 'A',
+                'properties': {'order': 1},
+              },
+              {
+                'type': 'B',
+                'properties': {'order': 2},
+              },
+              {
+                'type': 'C',
+                'properties': {'order': 3},
+              },
+              {
+                'type': 'D',
+                'properties': {'order': 4},
+              },
+            ],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -150,10 +170,14 @@ void main() {
         expect(ids.length, 4);
 
         // Types are wrapped in componentProperties
-        expect(update.components[0].componentProperties.containsKey('A'), isTrue);
-        expect(update.components[1].componentProperties.containsKey('B'), isTrue);
-        expect(update.components[2].componentProperties.containsKey('C'), isTrue);
-        expect(update.components[3].componentProperties.containsKey('D'), isTrue);
+        expect(
+            update.components[0].componentProperties.containsKey('A'), isTrue,);
+        expect(
+            update.components[1].componentProperties.containsKey('B'), isTrue,);
+        expect(
+            update.components[2].componentProperties.containsKey('C'), isTrue,);
+        expect(
+            update.components[3].componentProperties.containsKey('D'), isTrue,);
 
         // Properties are preserved inside the type wrapper
         expect(
@@ -185,15 +209,17 @@ void main() {
       }
 
       test('string properties preserved', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'test',
-          widgets: [
-            {
-              'type': 'Text',
-              'properties': {'content': 'String value'},
-            },
-          ],
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'test',
+            widgets: [
+              {
+                'type': 'Text',
+                'properties': {'content': 'String value'},
+              },
+            ],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -207,15 +233,17 @@ void main() {
       });
 
       test('integer properties preserved', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'test',
-          widgets: [
-            {
-              'type': 'Slider',
-              'properties': {'min': 0, 'max': 100, 'value': 50},
-            },
-          ],
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'test',
+            widgets: [
+              {
+                'type': 'Slider',
+                'properties': {'min': 0, 'max': 100, 'value': 50},
+              },
+            ],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -232,15 +260,17 @@ void main() {
       });
 
       test('double properties preserved', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'test',
-          widgets: [
-            {
-              'type': 'Box',
-              'properties': {'opacity': 0.5, 'aspectRatio': 1.77},
-            },
-          ],
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'test',
+            widgets: [
+              {
+                'type': 'Box',
+                'properties': {'opacity': 0.5, 'aspectRatio': 1.77},
+              },
+            ],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -255,15 +285,17 @@ void main() {
       });
 
       test('boolean properties preserved', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'test',
-          widgets: [
-            {
-              'type': 'Switch',
-              'properties': {'enabled': true, 'checked': false},
-            },
-          ],
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'test',
+            widgets: [
+              {
+                'type': 'Switch',
+                'properties': {'enabled': true, 'checked': false},
+              },
+            ],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -279,15 +311,17 @@ void main() {
       });
 
       test('null properties preserved', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'test',
-          widgets: [
-            {
-              'type': 'Optional',
-              'properties': {'value': null, 'fallback': 'default'},
-            },
-          ],
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'test',
+            widgets: [
+              {
+                'type': 'Optional',
+                'properties': {'value': null, 'fallback': 'default'},
+              },
+            ],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -302,18 +336,20 @@ void main() {
       });
 
       test('array properties preserved', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'test',
-          widgets: [
-            {
-              'type': 'List',
-              'properties': {
-                'items': ['a', 'b', 'c'],
-                'numbers': [1, 2, 3],
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'test',
+            widgets: [
+              {
+                'type': 'List',
+                'properties': {
+                  'items': ['a', 'b', 'c'],
+                  'numbers': [1, 2, 3],
+                },
               },
-            },
-          ],
-        ),);
+            ],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -328,19 +364,21 @@ void main() {
       });
 
       test('object properties preserved', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'test',
-          widgets: [
-            {
-              'type': 'Custom',
-              'properties': {
-                'config': {
-                  'nested': {'deep': 'value'},
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'test',
+            widgets: [
+              {
+                'type': 'Custom',
+                'properties': {
+                  'config': {
+                    'nested': {'deep': 'value'},
+                  },
                 },
               },
-            },
-          ],
-        ),);
+            ],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -370,12 +408,14 @@ void main() {
       });
 
       test('widget with empty properties', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'test',
-          widgets: [
-            {'type': 'Spacer', 'properties': <String, dynamic>{}},
-          ],
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'test',
+            widgets: [
+              {'type': 'Spacer', 'properties': <String, dynamic>{}},
+            ],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -390,10 +430,12 @@ void main() {
       });
 
       test('empty widgets list produces empty components', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'test',
-          widgets: [],
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'test',
+            widgets: [],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -405,17 +447,19 @@ void main() {
       });
 
       test('widget with extra unknown properties does not crash', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'test',
-          widgets: [
-            {
-              'type': 'Button',
-              'properties': {'label': 'Click'},
-              'unknownField': 'ignored',
-              'anotherUnknown': 123,
-            },
-          ],
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'test',
+            widgets: [
+              {
+                'type': 'Button',
+                'properties': {'label': 'Click'},
+                'unknownField': 'ignored',
+                'anotherUnknown': 123,
+              },
+            ],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -448,12 +492,14 @@ void main() {
       });
 
       test('surfaceId is preserved', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'unique-surface-123',
-          widgets: [
-            {'type': 'Text', 'properties': <String, dynamic>{}},
-          ],
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'unique-surface-123',
+            widgets: [
+              {'type': 'Text', 'properties': <String, dynamic>{}},
+            ],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -465,10 +511,12 @@ void main() {
       });
 
       test('components list is not null', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'test',
-          widgets: [],
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'test',
+            widgets: [],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -495,9 +543,11 @@ void main() {
       });
 
       test('surfaceId is preserved', () async {
-        mockHandler.stubEvents(MockEventFactory.beginRenderingResponse(
-          surfaceId: 'begin-surface-456',
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.beginRenderingResponse(
+            surfaceId: 'begin-surface-456',
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -509,9 +559,11 @@ void main() {
       });
 
       test('root defaults to "root" when not provided', () async {
-        mockHandler.stubEvents(MockEventFactory.beginRenderingResponse(
-          surfaceId: 'test',
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.beginRenderingResponse(
+            surfaceId: 'test',
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -523,10 +575,12 @@ void main() {
       });
 
       test('styles from metadata', () async {
-        mockHandler.stubEvents(MockEventFactory.beginRenderingResponse(
-          surfaceId: 'styled',
-          metadata: {'background': '#FFFFFF', 'padding': 16},
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.beginRenderingResponse(
+            surfaceId: 'styled',
+            metadata: {'background': '#FFFFFF', 'padding': 16},
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -538,9 +592,11 @@ void main() {
       });
 
       test('styles is null when no metadata', () async {
-        mockHandler.stubEvents(MockEventFactory.beginRenderingResponse(
-          surfaceId: 'no-style',
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.beginRenderingResponse(
+            surfaceId: 'no-style',
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -566,10 +622,12 @@ void main() {
       });
 
       test('surfaceId from scope', () async {
-        mockHandler.stubEvents(MockEventFactory.dataModelUpdateResponse(
-          updates: {'key': 'value'},
-          scope: 'my-scope',
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.dataModelUpdateResponse(
+            updates: {'key': 'value'},
+            scope: 'my-scope',
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -581,9 +639,11 @@ void main() {
       });
 
       test('surfaceId uses globalSurfaceId when no scope', () async {
-        mockHandler.stubEvents(MockEventFactory.dataModelUpdateResponse(
-          updates: {'key': 'value'},
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.dataModelUpdateResponse(
+            updates: {'key': 'value'},
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -595,9 +655,11 @@ void main() {
       });
 
       test('contents contains update data', () async {
-        mockHandler.stubEvents(MockEventFactory.dataModelUpdateResponse(
-          updates: {'name': 'John', 'age': 30, 'active': true},
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.dataModelUpdateResponse(
+            updates: {'name': 'John', 'age': 30, 'active': true},
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -627,9 +689,11 @@ void main() {
       });
 
       test('surfaceId is preserved', () async {
-        mockHandler.stubEvents(MockEventFactory.deleteSurfaceResponse(
-          surfaceId: 'delete-me',
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.deleteSurfaceResponse(
+            surfaceId: 'delete-me',
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);

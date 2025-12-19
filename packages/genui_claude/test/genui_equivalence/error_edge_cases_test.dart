@@ -153,10 +153,12 @@ void main() {
       });
 
       test('unknown tool name does not crash', () async {
-        mockHandler.stubEvents(MockEventFactory.unknownToolResponse(
-          toolName: 'completely_unknown_tool',
-          input: {'random': 'data'},
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.unknownToolResponse(
+            toolName: 'completely_unknown_tool',
+            input: {'random': 'data'},
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);

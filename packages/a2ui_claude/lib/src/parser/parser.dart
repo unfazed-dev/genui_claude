@@ -7,7 +7,8 @@
 library;
 
 import 'package:a2ui_claude/a2ui_claude.dart' show ClaudeA2uiParser;
-import 'package:a2ui_claude/src/parser/message_parser.dart' show ClaudeA2uiParser;
+import 'package:a2ui_claude/src/parser/message_parser.dart'
+    show ClaudeA2uiParser;
 import 'package:a2ui_claude/src/parser/parser.dart' show ClaudeA2uiParser;
 
 export 'block_handlers.dart';

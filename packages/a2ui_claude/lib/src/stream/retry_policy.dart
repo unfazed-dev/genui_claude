@@ -5,7 +5,6 @@ import 'package:a2ui_claude/src/exceptions/exceptions.dart';
 
 /// Configures retry behavior for failed requests.
 class RetryPolicy {
-
   /// Creates a retry policy.
   const RetryPolicy({
     this.maxAttempts = 3,
@@ -13,6 +12,7 @@ class RetryPolicy {
     this.maxDelay = const Duration(seconds: 30),
     this.backoffMultiplier = 2.0,
   });
+
   /// Maximum number of retry attempts.
   final int maxAttempts;
 

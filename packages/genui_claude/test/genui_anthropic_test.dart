@@ -26,7 +26,8 @@ void main() {
           config: const ClaudeConfig(maxTokens: 8192),
         );
 
-        expect(generator.systemInstruction, equals('You are a helpful assistant.'));
+        expect(generator.systemInstruction,
+            equals('You are a helpful assistant.'),);
         expect(generator.isDirectMode, isTrue);
 
         generator.dispose();

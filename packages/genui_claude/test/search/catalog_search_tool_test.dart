@@ -5,7 +5,8 @@ void main() {
   group('CatalogSearchTool', () {
     group('searchCatalogTool', () {
       test('has correct name', () {
-        expect(CatalogSearchTool.searchCatalogTool.name, equals('search_catalog'));
+        expect(
+            CatalogSearchTool.searchCatalogTool.name, equals('search_catalog'),);
       });
 
       test('has description', () {
@@ -40,7 +41,8 @@ void main() {
         final schema = CatalogSearchTool.searchCatalogTool.inputSchema;
         final properties = schema['properties'] as Map<String, dynamic>;
         expect(properties.containsKey('max_results'), isTrue);
-        final maxResultsProp = properties['max_results'] as Map<String, dynamic>;
+        final maxResultsProp =
+            properties['max_results'] as Map<String, dynamic>;
         expect(maxResultsProp['type'], equals('integer'));
       });
     });

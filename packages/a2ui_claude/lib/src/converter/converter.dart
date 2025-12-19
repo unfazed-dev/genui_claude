@@ -6,8 +6,10 @@
 library;
 
 import 'package:a2ui_claude/a2ui_claude.dart' show A2uiToolConverter;
-import 'package:a2ui_claude/src/converter/converter.dart' show A2uiToolConverter;
-import 'package:a2ui_claude/src/converter/tool_converter.dart' show A2uiToolConverter;
+import 'package:a2ui_claude/src/converter/converter.dart'
+    show A2uiToolConverter;
+import 'package:a2ui_claude/src/converter/tool_converter.dart'
+    show A2uiToolConverter;
 
 export 'schema_mapper.dart';
 export 'tool_converter.dart';

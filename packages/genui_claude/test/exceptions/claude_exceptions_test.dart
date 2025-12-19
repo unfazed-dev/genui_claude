@@ -348,7 +348,8 @@ void main() {
 
         expect(exception, isA<RateLimitException>());
         final rateLimitException = exception as RateLimitException;
-        expect(rateLimitException.retryAfter, equals(const Duration(seconds: 60)));
+        expect(
+            rateLimitException.retryAfter, equals(const Duration(seconds: 60)),);
       });
 
       test('returns ValidationException for 400', () {
@@ -458,7 +459,8 @@ void main() {
 
       test('parses ISO 8601 date format', () {
         final futureDate = DateTime.now().add(const Duration(minutes: 5));
-        final result = ExceptionFactory.parseRetryAfter(futureDate.toIso8601String());
+        final result =
+            ExceptionFactory.parseRetryAfter(futureDate.toIso8601String());
 
         expect(result, isNotNull);
         // Should be approximately 5 minutes (allow some tolerance)
@@ -467,7 +469,8 @@ void main() {
 
       test('returns zero duration for past date', () {
         final pastDate = DateTime.now().subtract(const Duration(hours: 1));
-        final result = ExceptionFactory.parseRetryAfter(pastDate.toIso8601String());
+        final result =
+            ExceptionFactory.parseRetryAfter(pastDate.toIso8601String());
 
         expect(result, equals(Duration.zero));
       });

@@ -10,7 +10,6 @@ part 'parse_result.freezed.dart';
 /// A2UI messages were found.
 @freezed
 abstract class ParseResult with _$ParseResult {
-
   /// Creates a parse result.
   const factory ParseResult({
     /// Parsed A2UI messages from tool_use blocks.
@@ -25,18 +24,12 @@ abstract class ParseResult with _$ParseResult {
   const ParseResult._();
 
   /// Creates an empty parse result.
-  factory ParseResult.empty() => const ParseResult(
-        a2uiMessages: [],
-        textContent: '',
-        hasToolUse: false,
-      );
+  factory ParseResult.empty() =>
+      const ParseResult(a2uiMessages: [], textContent: '', hasToolUse: false);
 
   /// Creates a parse result with only text content.
-  factory ParseResult.textOnly(String text) => ParseResult(
-        a2uiMessages: const [],
-        textContent: text,
-        hasToolUse: false,
-      );
+  factory ParseResult.textOnly(String text) =>
+      ParseResult(a2uiMessages: const [], textContent: text, hasToolUse: false);
 
   /// Creates a parse result with only A2UI messages.
   factory ParseResult.messagesOnly(List<A2uiMessageData> messages) =>

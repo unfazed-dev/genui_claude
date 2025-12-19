@@ -502,8 +502,7 @@ class _RetryWidgetState extends State<_RetryWidget> {
     if (_error == null) return const SizedBox();
 
     final exception = _error!.error;
-    final isRetryable =
-        exception is ClaudeException && exception.isRetryable;
+    final isRetryable = exception is ClaudeException && exception.isRetryable;
 
     return Column(
       mainAxisSize: MainAxisSize.min,

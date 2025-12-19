@@ -59,15 +59,16 @@ class HomePage extends StatelessWidget {
             icon: Icons.security,
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute<void>(builder: (_) => const ProductionChatScreen()),
+              MaterialPageRoute<void>(
+                  builder: (_) => const ProductionChatScreen(),),
             ),
           ),
           const SizedBox(height: 24),
           Text(
             'Advanced Features',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 12),
           _ExampleTile(
@@ -147,8 +148,8 @@ class _HeaderCard extends StatelessWidget {
                 Text(
                   'genui_claude',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ],
             ),
@@ -226,8 +227,8 @@ class _InfoSection extends StatelessWidget {
                 Text(
                   'Setup Required',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ],
             ),

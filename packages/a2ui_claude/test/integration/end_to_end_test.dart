@@ -58,7 +58,9 @@ void main() {
           ),
         ];
 
-        final instructions = A2uiToolConverter.generateToolInstructions(schemas);
+        final instructions = A2uiToolConverter.generateToolInstructions(
+          schemas,
+        );
 
         expect(instructions, contains('begin_rendering'));
         expect(instructions, contains('surface_update'));
@@ -78,10 +80,7 @@ void main() {
 
         expect(result, isNotNull);
         expect(result, isA<BeginRenderingData>());
-        expect(
-          result,
-          isBeginRenderingData(surfaceId: 'test-surface-123'),
-        );
+        expect(result, isBeginRenderingData(surfaceId: 'test-surface-123'));
       });
 
       test('parses surface_update tool from message content', () {
@@ -139,10 +138,9 @@ void main() {
       });
 
       test('returns null for unknown tool names', () {
-        final result = ClaudeA2uiParser.parseToolUse(
-          'unknown_tool',
-          {'foo': 'bar'},
-        );
+        final result = ClaudeA2uiParser.parseToolUse('unknown_tool', {
+          'foo': 'bar',
+        });
 
         expect(result, isNull);
       });
@@ -187,9 +185,7 @@ void main() {
 
       test('yields ErrorEvent on error', () async {
         final handler = ClaudeStreamHandler();
-        final inputEvents = [
-          MockStreamEvents.error(message: 'API Error'),
-        ];
+        final inputEvents = [MockStreamEvents.error(message: 'API Error')];
 
         final events = await collectStream(
           handler.streamRequest(
@@ -288,11 +284,9 @@ void main() {
           ),
         ];
 
-        final result = A2uiToolConverter.validateToolInput(
-          'begin_rendering',
-          {'surfaceId': 'test-123'},
-          schemas,
-        );
+        final result = A2uiToolConverter.validateToolInput('begin_rendering', {
+          'surfaceId': 'test-123',
+        }, schemas);
 
         expect(result.isValid, isTrue);
         expect(result.errors, isEmpty);
@@ -404,13 +398,7 @@ void main() {
         );
 
         // Non-retryable errors should not retry
-        expect(
-          policy.shouldRetry(
-            const StreamException('error'),
-            1,
-          ),
-          isFalse,
-        );
+        expect(policy.shouldRetry(const StreamException('error'), 1), isFalse);
       });
     });
 
@@ -502,9 +490,7 @@ void main() {
       test('widget node copyWith preserves unchanged values', () {
         final original = textWidget(content: 'Original');
 
-        final modified = original.copyWith(
-          type: 'modified_text',
-        );
+        final modified = original.copyWith(type: 'modified_text');
 
         expect(modified.type, equals('modified_text'));
         expect(modified.properties, equals(original.properties));

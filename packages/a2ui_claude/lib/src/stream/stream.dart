@@ -8,7 +8,8 @@ library;
 
 import 'package:a2ui_claude/a2ui_claude.dart' show ClaudeStreamHandler;
 import 'package:a2ui_claude/src/stream/stream.dart' show ClaudeStreamHandler;
-import 'package:a2ui_claude/src/stream/stream_handler.dart' show ClaudeStreamHandler;
+import 'package:a2ui_claude/src/stream/stream_handler.dart'
+    show ClaudeStreamHandler;
 
 export 'rate_limiter.dart';
 export 'retry_policy.dart';

@@ -47,7 +47,8 @@ void main() {
       expect(request.temperature, 0.7);
     });
 
-    test('creates with advanced model parameters (topP, topK, stopSequences)', () {
+    test('creates with advanced model parameters (topP, topK, stopSequences)',
+        () {
       const request = ApiRequest(
         messages: [
           {'role': 'user', 'content': 'Hello'},

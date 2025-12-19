@@ -184,7 +184,8 @@ void main() {
         const expected = {
           'type': 'content_block_start',
           'index': 0,
-          'content_block': <String, dynamic>{}, // Contains contentBlock.toJson()
+          'content_block':
+              <String, dynamic>{}, // Contains contentBlock.toJson()
         };
 
         expect(expected['type'], equals('content_block_start'));

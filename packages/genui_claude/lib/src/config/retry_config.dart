@@ -32,7 +32,8 @@ class RetryConfig {
     this.jitterFactor = 0.1,
     this.retryableStatusCodes = defaultRetryableStatusCodes,
   })  : assert(maxAttempts >= 0, 'maxAttempts cannot be negative'),
-        assert(backoffMultiplier >= 1.0, 'backoffMultiplier must be at least 1.0'),
+        assert(
+            backoffMultiplier >= 1.0, 'backoffMultiplier must be at least 1.0',),
         assert(jitterFactor >= 0.0, 'jitterFactor cannot be negative'),
         assert(jitterFactor <= 1.0, 'jitterFactor cannot be greater than 1.0');
 

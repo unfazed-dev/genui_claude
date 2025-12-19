@@ -17,9 +17,11 @@ class RateLimiter {
   Future<T> execute<T>(Future<T> Function() request) async {
     if (_isRateLimited) {
       final completer = Completer<T>();
-      _queue.add(_QueuedRequest(
-        execute: () async => completer.complete(await request()),
-      ),);
+      _queue.add(
+        _QueuedRequest(
+          execute: () async => completer.complete(await request()),
+        ),
+      );
       return completer.future;
     }
 
@@ -30,10 +32,7 @@ class RateLimiter {
   ///
   /// [statusCode] should be 429 for rate limiting.
   /// [retryAfter] is parsed from the Retry-After header.
-  void recordRateLimit({
-    required int statusCode,
-    Duration? retryAfter,
-  }) {
+  void recordRateLimit({required int statusCode, Duration? retryAfter}) {
     if (statusCode == 429) {
       _isRateLimited = true;
       _retryAfter = retryAfter ?? const Duration(seconds: 60);
@@ -53,7 +52,8 @@ class RateLimiter {
       final request = _queue.removeAt(0);
       try {
         await request.execute();
-      } on Exception { // coverage:ignore-line
+      } on Exception {
+        // coverage:ignore-line
         // Errors are handled by the original caller
       }
     }
@@ -81,7 +81,6 @@ class RateLimiter {
 }
 
 class _QueuedRequest {
-
   _QueuedRequest({required this.execute});
   final Future<void> Function() execute;
 }

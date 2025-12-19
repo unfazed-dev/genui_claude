@@ -26,8 +26,7 @@ class ApiKeyConfig {
   static bool get shouldSkip => apiKey == null || apiKey!.isEmpty;
 
   /// Skip message for when API key is not available.
-  static const skipMessage =
-      'Integration tests require TEST_CLAUDE_API_KEY. '
+  static const skipMessage = 'Integration tests require TEST_CLAUDE_API_KEY. '
       'Run with: flutter test integration_test/ '
       '--dart-define=TEST_CLAUDE_API_KEY=your-key';
 }

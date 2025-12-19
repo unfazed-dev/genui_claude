@@ -5,7 +5,6 @@
 @TestOn('vm')
 library;
 
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:genui/genui.dart';

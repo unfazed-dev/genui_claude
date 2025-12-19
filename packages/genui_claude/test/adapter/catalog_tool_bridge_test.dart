@@ -59,7 +59,8 @@ void main() {
           isTrue,
         );
         expect(
-          (schema['properties'] as Map<String, dynamic>).containsKey('subtitle'),
+          (schema['properties'] as Map<String, dynamic>)
+              .containsKey('subtitle'),
           isTrue,
         );
       });
@@ -323,7 +324,6 @@ void main() {
         // Empty required list should not be included in schema
         expect(schema.containsKey('required'), isFalse);
       });
-
     });
 
     group('fromCatalog', () {
@@ -378,11 +378,9 @@ void main() {
       });
 
       test('includes all A2UI control tools', () {
-        final allTools =
-            CatalogToolBridge.withA2uiTools(<A2uiToolSchema>[]);
+        final allTools = CatalogToolBridge.withA2uiTools(<A2uiToolSchema>[]);
 
-        final toolNames =
-            allTools.map((A2uiToolSchema t) => t.name).toList();
+        final toolNames = allTools.map((A2uiToolSchema t) => t.name).toList();
         expect(toolNames, contains('begin_rendering'));
         expect(toolNames, contains('surface_update'));
         expect(toolNames, contains('data_model_update'));

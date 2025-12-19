@@ -198,13 +198,14 @@ class _DataBindingDemoScreenState extends State<DataBindingDemoScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.sync_alt, color: Theme.of(context).colorScheme.primary),
+                Icon(Icons.sync_alt,
+                    color: Theme.of(context).colorScheme.primary,),
                 const SizedBox(width: 8),
                 Text(
                   'Data Binding Engine',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ],
             ),
@@ -248,7 +249,8 @@ class _DataBindingDemoScreenState extends State<DataBindingDemoScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.swap_horiz, color: Theme.of(context).colorScheme.primary),
+                Icon(Icons.swap_horiz,
+                    color: Theme.of(context).colorScheme.primary,),
                 const SizedBox(width: 8),
                 Text(
                   'Binding Modes',
@@ -292,7 +294,8 @@ class _DataBindingDemoScreenState extends State<DataBindingDemoScreen> {
             const SizedBox(height: 16),
 
             // ONE-WAY-TO-SOURCE: Label input
-            _buildModeLabel('ONE-WAY-TO-SOURCE', 'widget → model', Colors.orange),
+            _buildModeLabel(
+                'ONE-WAY-TO-SOURCE', 'widget → model', Colors.orange,),
             const SizedBox(height: 8),
             _OneWayToSourceField(
               widgetId: 'label-source',
@@ -387,9 +390,11 @@ class _DataBindingDemoScreenState extends State<DataBindingDemoScreen> {
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
-            _buildOperationResult('parent', dotPath.parent?.toDotNotation() ?? 'null'),
+            _buildOperationResult(
+                'parent', dotPath.parent?.toDotNotation() ?? 'null',),
             _buildOperationResult('leaf', dotPath.leaf),
-            _buildOperationResult('isAbsolute', slashPath.isAbsolute.toString()),
+            _buildOperationResult(
+                'isAbsolute', slashPath.isAbsolute.toString(),),
             _buildOperationResult(
               'join(other)',
               BindingPath.fromDotNotation('form')
@@ -398,7 +403,9 @@ class _DataBindingDemoScreenState extends State<DataBindingDemoScreen> {
             ),
             _buildOperationResult(
               'startsWith(form)',
-              dotPath.startsWith(BindingPath.fromDotNotation('form')).toString(),
+              dotPath
+                  .startsWith(BindingPath.fromDotNotation('form'))
+                  .toString(),
             ),
             const SizedBox(height: 12),
 
@@ -427,10 +434,14 @@ class _DataBindingDemoScreenState extends State<DataBindingDemoScreen> {
         children: [
           Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
-          Text('Input: "$input"', style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
-          Text('Segments: ${path.segments}', style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
-          Text('→ Dot: ${path.toDotNotation()}', style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
-          Text('→ Slash: ${path.toSlashNotation()}', style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
+          Text('Input: "$input"',
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 12),),
+          Text('Segments: ${path.segments}',
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 12),),
+          Text('→ Dot: ${path.toDotNotation()}',
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 12),),
+          Text('→ Slash: ${path.toSlashNotation()}',
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 12),),
         ],
       ),
     );
@@ -471,7 +482,8 @@ class _DataBindingDemoScreenState extends State<DataBindingDemoScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.transform, color: Theme.of(context).colorScheme.primary),
+                Icon(Icons.transform,
+                    color: Theme.of(context).colorScheme.primary,),
                 const SizedBox(width: 8),
                 Text(
                   'Value Transformers',
@@ -522,7 +534,8 @@ class _DataBindingDemoScreenState extends State<DataBindingDemoScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.storage, color: Theme.of(context).colorScheme.primary),
+                Icon(Icons.storage,
+                    color: Theme.of(context).colorScheme.primary,),
                 const SizedBox(width: 8),
                 Text(
                   'Registry Lookups',
@@ -531,7 +544,6 @@ class _DataBindingDemoScreenState extends State<DataBindingDemoScreen> {
               ],
             ),
             const SizedBox(height: 16),
-
             _buildLookupResult(
               'getBindingsForWidget("email-input")',
               '${widgetBindings.length} binding(s)',
@@ -548,24 +560,27 @@ class _DataBindingDemoScreenState extends State<DataBindingDemoScreen> {
               'hasBindings',
               _registry.hasBindings.toString(),
             ),
-
             const SizedBox(height: 12),
             const Text(
               'Surface Bindings:',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            ...surfaceBindings.take(5).map((b) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text(
-                '• ${b.widgetId}.${b.property} → ${b.path.toDotNotation()} (${b.mode.name})',
-                style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
-              ),
-            ),),
+            ...surfaceBindings.take(5).map(
+                  (b) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(
+                      '• ${b.widgetId}.${b.property} → ${b.path.toDotNotation()} (${b.mode.name})',
+                      style: const TextStyle(
+                          fontFamily: 'monospace', fontSize: 11,),
+                    ),
+                  ),
+                ),
             if (surfaceBindings.length > 5)
               Text(
                 '  ... and ${surfaceBindings.length - 5} more',
-                style: const TextStyle(fontStyle: FontStyle.italic, fontSize: 11),
+                style:
+                    const TextStyle(fontStyle: FontStyle.italic, fontSize: 11),
               ),
           ],
         ),
@@ -587,7 +602,8 @@ class _DataBindingDemoScreenState extends State<DataBindingDemoScreen> {
                 children: [
                   TextSpan(
                     text: method,
-                    style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
+                    style:
+                        const TextStyle(fontFamily: 'monospace', fontSize: 11),
                   ),
                   const TextSpan(text: ' → '),
                   TextSpan(
@@ -607,10 +623,12 @@ class _DataBindingDemoScreenState extends State<DataBindingDemoScreen> {
   }
 
   Widget _buildLifecycleSection() {
-    final secondaryBindings = _registry.getBindingsForSurface('secondary-surface');
+    final secondaryBindings =
+        _registry.getBindingsForSurface('secondary-surface');
 
     return Card(
-      color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.3),
+      color:
+          Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.3),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -618,7 +636,8 @@ class _DataBindingDemoScreenState extends State<DataBindingDemoScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.delete_sweep, color: Theme.of(context).colorScheme.error),
+                Icon(Icons.delete_sweep,
+                    color: Theme.of(context).colorScheme.error,),
                 const SizedBox(width: 8),
                 Text(
                   'Lifecycle Management',
@@ -634,20 +653,20 @@ class _DataBindingDemoScreenState extends State<DataBindingDemoScreen> {
               '• dispose() - clears all bindings',
             ),
             const SizedBox(height: 16),
-
             Text(
               'Secondary Surface Bindings: ${secondaryBindings.length}',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            ...secondaryBindings.map((b) => Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                '• ${b.widgetId} → ${b.path.toDotNotation()}',
-                style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
+            ...secondaryBindings.map(
+              (b) => Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  '• ${b.widgetId} → ${b.path.toDotNotation()}',
+                  style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
+                ),
               ),
-            ),),
+            ),
             const SizedBox(height: 12),
-
             Row(
               children: [
                 FilledButton.tonalIcon(
@@ -700,7 +719,8 @@ class _DataBindingDemoScreenState extends State<DataBindingDemoScreen> {
     _dataModel[_nestedPath]?.value = 'light';
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Data model updated! Watch widgets refresh.')),
+      const SnackBar(
+          content: Text('Data model updated! Watch widgets refresh.'),),
     );
   }
 
@@ -1146,8 +1166,10 @@ class _TransformerDemoState extends State<_TransformerDemo> {
       subscribe: (path) {
         final key = path.toDotNotation();
         // Use a dedicated path for transformer demo
-        widget.dataModel['transformer.percentage'] ??= ValueNotifier<dynamic>(0.75);
-        return widget.dataModel[key] ?? widget.dataModel['transformer.percentage']!;
+        widget.dataModel['transformer.percentage'] ??=
+            ValueNotifier<dynamic>(0.75);
+        return widget.dataModel[key] ??
+            widget.dataModel['transformer.percentage']!;
       },
       update: (path, value) {
         final key = path.toDotNotation();
@@ -1165,7 +1187,8 @@ class _TransformerDemoState extends State<_TransformerDemo> {
     );
 
     // Register with transformers
-    final subscription = widget.dataModel['transformer.percentage'] ??= ValueNotifier<dynamic>(0.75);
+    final subscription = widget.dataModel['transformer.percentage'] ??=
+        ValueNotifier<dynamic>(0.75);
     final binding = WidgetBinding(
       widgetId: 'transformer-input',
       surfaceId: 'transformer-surface',

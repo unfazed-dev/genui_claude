@@ -12,9 +12,9 @@ library;
 ///
 /// This is a sealed class enabling exhaustive pattern matching.
 sealed class A2uiException implements Exception {
-
   /// Creates an A2UI exception.
   const A2uiException(this.message, [this.stackTrace]);
+
   /// Human-readable error message.
   final String message;
 
@@ -31,7 +31,6 @@ sealed class A2uiException implements Exception {
 ///
 /// Contains details about which tool failed and optionally the invalid schema.
 class ToolConversionException extends A2uiException {
-
   /// Creates a tool conversion exception.
   const ToolConversionException(
     super.message,
@@ -39,6 +38,7 @@ class ToolConversionException extends A2uiException {
     this.invalidSchema,
     super.stackTrace,
   ]);
+
   /// Name of the tool that failed conversion.
   final String toolName;
 
@@ -53,7 +53,6 @@ class ToolConversionException extends A2uiException {
 ///
 /// Contains the raw content that failed to parse and expected format.
 class MessageParseException extends A2uiException {
-
   /// Creates a message parse exception.
   const MessageParseException(
     super.message, [
@@ -61,6 +60,7 @@ class MessageParseException extends A2uiException {
     this.expectedFormat,
     super.stackTrace,
   ]);
+
   /// The raw content that failed to parse.
   final String? rawContent;
 
@@ -75,7 +75,6 @@ class MessageParseException extends A2uiException {
 ///
 /// Indicates whether the error is retryable and includes HTTP status if available.
 class StreamException extends A2uiException {
-
   /// Creates a stream exception.
   const StreamException(
     String message, {
@@ -83,6 +82,7 @@ class StreamException extends A2uiException {
     this.isRetryable = false,
     StackTrace? stackTrace,
   }) : super(message, stackTrace);
+
   /// HTTP status code if this was an HTTP error.
   final int? httpStatusCode;
 
@@ -98,10 +98,13 @@ class StreamException extends A2uiException {
 ///
 /// Contains a list of validation errors with field-level details.
 class ValidationException extends A2uiException {
-
   /// Creates a validation exception.
-  const ValidationException(String message, this.errors, [StackTrace? stackTrace])
-      : super(message, stackTrace);
+  const ValidationException(
+    String message,
+    this.errors, [
+    StackTrace? stackTrace,
+  ]) : super(message, stackTrace);
+
   /// List of specific validation errors.
   final List<ValidationError> errors;
 
@@ -112,13 +115,13 @@ class ValidationException extends A2uiException {
 
 /// Represents a single validation error.
 class ValidationError {
-
   /// Creates a validation error.
   const ValidationError({
     required this.field,
     required this.message,
     required this.code,
   });
+
   /// The field path that failed validation.
   final String field;
 

@@ -8,7 +8,6 @@ part 'validation_result.freezed.dart';
 /// Contains validation status and any errors found.
 @freezed
 abstract class ValidationResult with _$ValidationResult {
-
   /// Creates a validation result.
   const factory ValidationResult({
     /// Whether the input is valid.
@@ -20,26 +19,20 @@ abstract class ValidationResult with _$ValidationResult {
   const ValidationResult._();
 
   /// Creates a successful validation result.
-  factory ValidationResult.valid() => const ValidationResult(
-        isValid: true,
-        errors: [],
-      );
+  factory ValidationResult.valid() =>
+      const ValidationResult(isValid: true, errors: []);
 
   /// Creates a failed validation result with errors.
   factory ValidationResult.invalid(List<ValidationError> errors) =>
-      ValidationResult(
-        isValid: false,
-        errors: errors,
-      );
+      ValidationResult(isValid: false, errors: errors);
 
   /// Creates a failed validation result with a single error.
   factory ValidationResult.error({
     required String field,
     required String message,
     required String code,
-  }) =>
-      ValidationResult(
-        isValid: false,
-        errors: [ValidationError(field: field, message: message, code: code)],
-      );
+  }) => ValidationResult(
+    isValid: false,
+    errors: [ValidationError(field: field, message: message, code: code)],
+  );
 }

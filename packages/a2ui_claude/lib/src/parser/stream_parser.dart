@@ -54,9 +54,11 @@ class StreamParser {
                   yield message;
                 }
               }
-            } on FormatException { // coverage:ignore-line
+            } on FormatException {
+              // coverage:ignore-line
               // Skip malformed blocks
-            } on Exception { // coverage:ignore-line
+            } on Exception {
+              // coverage:ignore-line
               // Skip other malformed blocks
             }
           }

@@ -27,9 +27,11 @@ void main() {
       });
 
       test('basic surface creation emits BeginRendering', () async {
-        mockHandler.stubEvents(MockEventFactory.beginRenderingResponse(
-          surfaceId: 'main-surface',
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.beginRenderingResponse(
+            surfaceId: 'main-surface',
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -47,10 +49,12 @@ void main() {
       });
 
       test('with parentSurfaceId creates nested surface', () async {
-        mockHandler.stubEvents(MockEventFactory.beginRenderingResponse(
-          surfaceId: 'child-surface',
-          parentSurfaceId: 'parent-surface',
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.beginRenderingResponse(
+            surfaceId: 'child-surface',
+            parentSurfaceId: 'parent-surface',
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -66,10 +70,12 @@ void main() {
       });
 
       test('with metadata includes styles', () async {
-        mockHandler.stubEvents(MockEventFactory.beginRenderingResponse(
-          surfaceId: 'styled-surface',
-          metadata: {'theme': 'dark', 'fontSize': 14},
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.beginRenderingResponse(
+            surfaceId: 'styled-surface',
+            metadata: {'theme': 'dark', 'fontSize': 14},
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -85,9 +91,11 @@ void main() {
       });
 
       test('with empty metadata has null styles', () async {
-        mockHandler.stubEvents(MockEventFactory.beginRenderingResponse(
-          surfaceId: 'no-style-surface',
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.beginRenderingResponse(
+            surfaceId: 'no-style-surface',
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -115,15 +123,17 @@ void main() {
       });
 
       test('emits SurfaceUpdate with components', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'main',
-          widgets: [
-            {
-              'type': 'Text',
-              'properties': {'text': 'Hello World'},
-            },
-          ],
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'main',
+            widgets: [
+              {
+                'type': 'Text',
+                'properties': {'text': 'Hello World'},
+              },
+            ],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -146,19 +156,31 @@ void main() {
 
         // Type is wrapped as key in componentProperties
         expect(component.componentProperties.containsKey('Text'), isTrue);
-        final props = component.componentProperties['Text']! as Map<String, dynamic>;
+        final props =
+            component.componentProperties['Text']! as Map<String, dynamic>;
         expect(props['text'], 'Hello World');
       });
 
       test('handles multiple widgets', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'multi-widget',
-          widgets: [
-            {'type': 'Text', 'properties': {'text': 'First'}},
-            {'type': 'Button', 'properties': {'label': 'Click'}},
-            {'type': 'Image', 'properties': {'url': 'image.png'}},
-          ],
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'multi-widget',
+            widgets: [
+              {
+                'type': 'Text',
+                'properties': {'text': 'First'},
+              },
+              {
+                'type': 'Button',
+                'properties': {'label': 'Click'},
+              },
+              {
+                'type': 'Image',
+                'properties': {'url': 'image.png'},
+              },
+            ],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -171,9 +193,12 @@ void main() {
         expect(update.components, hasLength(3));
 
         // Each component has unique UUID id, type is in componentProperties key
-        expect(update.components[0].componentProperties.containsKey('Text'), isTrue);
-        expect(update.components[1].componentProperties.containsKey('Button'), isTrue);
-        expect(update.components[2].componentProperties.containsKey('Image'), isTrue);
+        expect(update.components[0].componentProperties.containsKey('Text'),
+            isTrue,);
+        expect(update.components[1].componentProperties.containsKey('Button'),
+            isTrue,);
+        expect(update.components[2].componentProperties.containsKey('Image'),
+            isTrue,);
 
         // All IDs are unique UUIDs
         final ids = update.components.map((c) => c.id).toSet();
@@ -181,21 +206,23 @@ void main() {
       });
 
       test('preserves complex widget properties', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'complex',
-          widgets: [
-            {
-              'type': 'Card',
-              'properties': {
-                'title': 'Card Title',
-                'elevation': 4,
-                'padding': {'top': 8, 'bottom': 8, 'left': 16, 'right': 16},
-                'colors': ['#FF0000', '#00FF00', '#0000FF'],
-                'enabled': true,
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'complex',
+            widgets: [
+              {
+                'type': 'Card',
+                'properties': {
+                  'title': 'Card Title',
+                  'elevation': 4,
+                  'padding': {'top': 8, 'bottom': 8, 'left': 16, 'right': 16},
+                  'colors': ['#FF0000', '#00FF00', '#0000FF'],
+                  'enabled': true,
+                },
               },
-            },
-          ],
-        ),);
+            ],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -206,21 +233,24 @@ void main() {
 
         final update = messages[0] as SurfaceUpdate;
         // Type is the key, properties are nested inside
-        final cardProps =
-            update.components[0].componentProperties['Card']! as Map<String, dynamic>;
+        final cardProps = update.components[0].componentProperties['Card']!
+            as Map<String, dynamic>;
 
         expect(cardProps['title'], 'Card Title');
         expect(cardProps['elevation'], 4);
-        expect(cardProps['padding'], {'top': 8, 'bottom': 8, 'left': 16, 'right': 16});
+        expect(cardProps['padding'],
+            {'top': 8, 'bottom': 8, 'left': 16, 'right': 16},);
         expect(cardProps['colors'], ['#FF0000', '#00FF00', '#0000FF']);
         expect(cardProps['enabled'], true);
       });
 
       test('handles empty widgets array', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'empty',
-          widgets: [],
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'empty',
+            widgets: [],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -234,10 +264,12 @@ void main() {
       });
 
       test('handles large widget array', () async {
-        mockHandler.stubEvents(MockEventFactory.largeWidgetResponse(
-          surfaceId: 'large',
-          widgetCount: 100,
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.largeWidgetResponse(
+            surfaceId: 'large',
+            widgetCount: 100,
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -253,13 +285,18 @@ void main() {
       });
 
       test('append mode is passed through', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'append-test',
-          widgets: [
-            {'type': 'Text', 'properties': {'text': 'Appended'}},
-          ],
-          append: true,
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'append-test',
+            widgets: [
+              {
+                'type': 'Text',
+                'properties': {'text': 'Appended'},
+              },
+            ],
+            append: true,
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -288,9 +325,11 @@ void main() {
       });
 
       test('emits DataModelUpdate with contents', () async {
-        mockHandler.stubEvents(MockEventFactory.dataModelUpdateResponse(
-          updates: {'count': 42, 'name': 'Test'},
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.dataModelUpdateResponse(
+            updates: {'count': 42, 'name': 'Test'},
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -307,10 +346,12 @@ void main() {
       });
 
       test('with scope uses scope as surfaceId', () async {
-        mockHandler.stubEvents(MockEventFactory.dataModelUpdateResponse(
-          updates: {'value': 'scoped'},
-          scope: 'widget-scope',
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.dataModelUpdateResponse(
+            updates: {'value': 'scoped'},
+            scope: 'widget-scope',
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -324,9 +365,11 @@ void main() {
       });
 
       test('without scope uses default surfaceId', () async {
-        mockHandler.stubEvents(MockEventFactory.dataModelUpdateResponse(
-          updates: {'value': 'unscoped'},
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.dataModelUpdateResponse(
+            updates: {'value': 'unscoped'},
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -340,16 +383,18 @@ void main() {
       });
 
       test('handles nested object updates', () async {
-        mockHandler.stubEvents(MockEventFactory.dataModelUpdateResponse(
-          updates: {
-            'user': {
-              'profile': {
-                'name': 'John',
-                'settings': {'theme': 'dark'},
+        mockHandler.stubEvents(
+          MockEventFactory.dataModelUpdateResponse(
+            updates: {
+              'user': {
+                'profile': {
+                  'name': 'John',
+                  'settings': {'theme': 'dark'},
+                },
               },
             },
-          },
-        ),);
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -368,12 +413,14 @@ void main() {
       });
 
       test('handles array values in updates', () async {
-        mockHandler.stubEvents(MockEventFactory.dataModelUpdateResponse(
-          updates: {
-            'items': [1, 2, 3, 4, 5],
-            'tags': ['flutter', 'dart', 'genui'],
-          },
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.dataModelUpdateResponse(
+            updates: {
+              'items': [1, 2, 3, 4, 5],
+              'tags': ['flutter', 'dart', 'genui'],
+            },
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -389,12 +436,14 @@ void main() {
       });
 
       test('handles null values in updates', () async {
-        mockHandler.stubEvents(MockEventFactory.dataModelUpdateResponse(
-          updates: {
-            'value': null,
-            'other': 'not null',
-          },
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.dataModelUpdateResponse(
+            updates: {
+              'value': null,
+              'other': 'not null',
+            },
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -424,9 +473,11 @@ void main() {
       });
 
       test('emits SurfaceDeletion', () async {
-        mockHandler.stubEvents(MockEventFactory.deleteSurfaceResponse(
-          surfaceId: 'to-delete',
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.deleteSurfaceResponse(
+            surfaceId: 'to-delete',
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -443,9 +494,11 @@ void main() {
       });
 
       test('with cascade true', () async {
-        mockHandler.stubEvents(MockEventFactory.deleteSurfaceResponse(
-          surfaceId: 'cascade-delete',
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.deleteSurfaceResponse(
+            surfaceId: 'cascade-delete',
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -460,10 +513,12 @@ void main() {
       });
 
       test('with cascade false', () async {
-        mockHandler.stubEvents(MockEventFactory.deleteSurfaceResponse(
-          surfaceId: 'no-cascade',
-          cascade: false,
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.deleteSurfaceResponse(
+            surfaceId: 'no-cascade',
+            cascade: false,
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -492,12 +547,17 @@ void main() {
 
       test('begin_rendering followed by surface_update (typical flow)',
           () async {
-        mockHandler.stubEvents(MockEventFactory.widgetRenderingResponse(
-          surfaceId: 'typical',
-          widgets: [
-            {'type': 'Text', 'properties': {'text': 'Rendered'}},
-          ],
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.widgetRenderingResponse(
+            surfaceId: 'typical',
+            widgets: [
+              {
+                'type': 'Text',
+                'properties': {'text': 'Rendered'},
+              },
+            ],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -518,9 +578,11 @@ void main() {
       });
 
       test('complete surface lifecycle: create, update, delete', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceLifecycleResponse(
-          surfaceId: 'lifecycle',
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceLifecycleResponse(
+            surfaceId: 'lifecycle',
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -537,9 +599,9 @@ void main() {
       });
 
       test('nested surfaces creation', () async {
-        mockHandler.stubEvents(MockEventFactory.nestedSurfaceResponse(
-          
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.nestedSurfaceResponse(),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -565,13 +627,19 @@ void main() {
           ...MockEventFactory.surfaceUpdateResponse(
             surfaceId: 'multi-update',
             widgets: [
-              {'type': 'Text', 'properties': {'text': 'First'}},
+              {
+                'type': 'Text',
+                'properties': {'text': 'First'},
+              },
             ],
           ),
           ...MockEventFactory.surfaceUpdateResponse(
             surfaceId: 'multi-update',
             widgets: [
-              {'type': 'Text', 'properties': {'text': 'Second'}},
+              {
+                'type': 'Text',
+                'properties': {'text': 'Second'},
+              },
             ],
           ),
         ]);
@@ -608,10 +676,12 @@ void main() {
       });
 
       test('unknown tool name does not emit A2uiMessage', () async {
-        mockHandler.stubEvents(MockEventFactory.unknownToolResponse(
-          toolName: 'some_unknown_tool',
-          input: {'foo': 'bar'},
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.unknownToolResponse(
+            toolName: 'some_unknown_tool',
+            input: {'foo': 'bar'},
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final errors = <ContentGeneratorError>[];
@@ -644,19 +714,36 @@ void main() {
 
       test('handles common GenUI widget types', () async {
         final widgetTypes = [
-          {'type': 'text', 'properties': {'content': 'Text widget'}},
-          {'type': 'button', 'properties': {'label': 'Click me'}},
+          {
+            'type': 'text',
+            'properties': {'content': 'Text widget'},
+          },
+          {
+            'type': 'button',
+            'properties': {'label': 'Click me'},
+          },
           {'type': 'column', 'properties': <String, dynamic>{}},
           {'type': 'row', 'properties': <String, dynamic>{}},
-          {'type': 'card', 'properties': {'elevation': 2}},
-          {'type': 'image', 'properties': {'url': 'http://example.com/img.png'}},
-          {'type': 'textField', 'properties': {'placeholder': 'Enter text'}},
+          {
+            'type': 'card',
+            'properties': {'elevation': 2},
+          },
+          {
+            'type': 'image',
+            'properties': {'url': 'http://example.com/img.png'},
+          },
+          {
+            'type': 'textField',
+            'properties': {'placeholder': 'Enter text'},
+          },
         ];
 
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'widget-types',
-          widgets: widgetTypes,
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'widget-types',
+            widgets: widgetTypes,
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -669,13 +756,21 @@ void main() {
         expect(update.components, hasLength(7));
 
         // Verify each widget type is preserved (type is key in componentProperties)
-        expect(update.components[0].componentProperties.containsKey('text'), isTrue);
-        expect(update.components[1].componentProperties.containsKey('button'), isTrue);
-        expect(update.components[2].componentProperties.containsKey('column'), isTrue);
-        expect(update.components[3].componentProperties.containsKey('row'), isTrue);
-        expect(update.components[4].componentProperties.containsKey('card'), isTrue);
-        expect(update.components[5].componentProperties.containsKey('image'), isTrue);
-        expect(update.components[6].componentProperties.containsKey('textField'), isTrue);
+        expect(update.components[0].componentProperties.containsKey('text'),
+            isTrue,);
+        expect(update.components[1].componentProperties.containsKey('button'),
+            isTrue,);
+        expect(update.components[2].componentProperties.containsKey('column'),
+            isTrue,);
+        expect(update.components[3].componentProperties.containsKey('row'),
+            isTrue,);
+        expect(update.components[4].componentProperties.containsKey('card'),
+            isTrue,);
+        expect(update.components[5].componentProperties.containsKey('image'),
+            isTrue,);
+        expect(
+            update.components[6].componentProperties.containsKey('textField'),
+            isTrue,);
 
         // All IDs are unique UUIDs
         final ids = update.components.map((c) => c.id).toSet();
@@ -683,12 +778,14 @@ void main() {
       });
 
       test('handles widget with empty properties', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'empty-props',
-          widgets: [
-            {'type': 'Container', 'properties': <String, dynamic>{}},
-          ],
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'empty-props',
+            widgets: [
+              {'type': 'Container', 'properties': <String, dynamic>{}},
+            ],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -699,7 +796,9 @@ void main() {
 
         final update = messages[0] as SurfaceUpdate;
         // Type is the key, empty properties are nested inside
-        expect(update.components[0].componentProperties.containsKey('Container'), isTrue);
+        expect(
+            update.components[0].componentProperties.containsKey('Container'),
+            isTrue,);
         expect(update.components[0].componentProperties['Container'], isEmpty);
       });
     });

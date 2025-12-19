@@ -43,7 +43,9 @@ data: {"type": "message_stop"}
         when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -81,7 +83,9 @@ data: {"type": "message_stop"}
         when(mockClient.send(any)).thenAnswer((_) async => response);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -94,7 +98,8 @@ data: {"type": "message_stop"}
 
         // Pause
         subscription.pause();
-        controller.add(utf8.encode('data: {"type": "content_block_start"}\n\n'));
+        controller
+            .add(utf8.encode('data: {"type": "content_block_start"}\n\n'));
         await Future<void>.delayed(const Duration(milliseconds: 10));
 
         // Resume
@@ -125,7 +130,9 @@ data: {"type": "message_stop"}
         when(mockClient.send(any)).thenAnswer((_) async => response);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -175,7 +182,9 @@ data: {"type": "message_stop"}
         when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -201,7 +210,9 @@ data: {"type": "message_stop"}
         when(mockClient.send(any)).thenAnswer((_) async => response);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -209,7 +220,8 @@ data: {"type": "message_stop"}
         final subscription = handler.createStream(request).listen(events.add);
 
         // First chunk ends mid-line
-        controller.add(utf8.encode('data: {"type": "message_start"}\n\ndata: {"type":'));
+        controller.add(
+            utf8.encode('data: {"type": "message_start"}\n\ndata: {"type":'),);
         await Future<void>.delayed(const Duration(milliseconds: 10));
 
         // Second chunk completes the line
@@ -249,7 +261,9 @@ data: {"type": "message_stop"}
         when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -272,7 +286,8 @@ data: {"type": "message_stop"}
         final buffer = StringBuffer();
         buffer.write('data: {"type": "message_start"}\n\n');
         for (var i = 0; i < 100; i++) {
-          buffer.write('data: {"type": "content_block_delta", "index": $i}\n\n');
+          buffer
+              .write('data: {"type": "content_block_delta", "index": $i}\n\n');
         }
         buffer.write('data: {"type": "message_stop"}\n\n');
 
@@ -283,7 +298,9 @@ data: {"type": "message_stop"}
         when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -309,7 +326,9 @@ data: {"type": "message_stop"}
         when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -333,7 +352,9 @@ data: {"type": "message_stop"}
         when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -363,7 +384,9 @@ data: {"type": "message_stop"}
         when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -388,7 +411,9 @@ data: {"type": "message_stop"}
         when(mockClient.send(any)).thenAnswer((_) async => response);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -396,10 +421,10 @@ data: {"type": "message_stop"}
         final completer = Completer<void>();
 
         handler.createStream(request).listen(
-          events.add,
-          onDone: completer.complete,
-          onError: completer.completeError,
-        );
+              events.add,
+              onDone: completer.complete,
+              onError: completer.completeError,
+            );
 
         // Emit partial data then close abruptly
         controller.add(utf8.encode('data: {"type": "message_start"}\n\n'));
@@ -425,7 +450,9 @@ data: {"type": "message_stop"}
         when(mockClient.send(any)).thenAnswer((_) async => response);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -475,7 +502,9 @@ data: {"type": "message_stop"}
         when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -507,7 +536,9 @@ data: {"type": "message_stop"}
         when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -540,7 +571,9 @@ data: {"type": "message_stop"}
         when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -563,7 +596,8 @@ data: {"type": "message_stop"}
           client: mockClient,
         );
 
-        const sseBody = 'data: {"type": "message_start"}\r\n\r\ndata: {"type": "message_stop"}\r\n\r\n';
+        const sseBody =
+            'data: {"type": "message_start"}\r\n\r\ndata: {"type": "message_stop"}\r\n\r\n';
         final mockResponse = http.StreamedResponse(
           Stream.value(utf8.encode(sseBody)),
           200,
@@ -571,7 +605,9 @@ data: {"type": "message_stop"}
         when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -588,7 +624,8 @@ data: {"type": "message_stop"}
           client: mockClient,
         );
 
-        const sseBody = 'data: {"type": "message_start"}\n\ndata: {"type": "content"}\r\n\r\ndata: {"type": "message_stop"}\n\n';
+        const sseBody =
+            'data: {"type": "message_start"}\n\ndata: {"type": "content"}\r\n\r\ndata: {"type": "message_stop"}\n\n';
         final mockResponse = http.StreamedResponse(
           Stream.value(utf8.encode(sseBody)),
           200,
@@ -596,7 +633,9 @@ data: {"type": "message_stop"}
         when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -613,7 +652,8 @@ data: {"type": "message_stop"}
           client: mockClient,
         );
 
-        const sseBody = 'data:{"type": "message_start"}\n\ndata:  {"type": "message_stop"}\n\n';
+        const sseBody =
+            'data:{"type": "message_start"}\n\ndata:  {"type": "message_stop"}\n\n';
         final mockResponse = http.StreamedResponse(
           Stream.value(utf8.encode(sseBody)),
           200,
@@ -621,7 +661,9 @@ data: {"type": "message_stop"}
         when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 

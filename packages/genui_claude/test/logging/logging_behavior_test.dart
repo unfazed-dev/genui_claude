@@ -56,7 +56,9 @@ data: {"type": "message_stop"}
           when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
           const request = ApiRequest(
-            messages: [{'role': 'user', 'content': 'Hello'}],
+            messages: [
+              {'role': 'user', 'content': 'Hello'},
+            ],
             maxTokens: 1024,
           );
 
@@ -69,7 +71,8 @@ data: {"type": "message_stop"}
           expect(
             proxyLogs.any(
               (r) =>
-                  r.level == Level.FINE && r.message.contains('Starting proxy request'),
+                  r.level == Level.FINE &&
+                  r.message.contains('Starting proxy request'),
             ),
             isTrue,
             reason: 'Should log request start at FINE level',
@@ -122,7 +125,9 @@ data: {"type": "message_stop"}
           when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
           const request = ApiRequest(
-            messages: [{'role': 'user', 'content': 'Hello'}],
+            messages: [
+              {'role': 'user', 'content': 'Hello'},
+            ],
             maxTokens: 1024,
           );
 
@@ -165,7 +170,9 @@ data: {"type": "message_stop"}
           when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
           const request = ApiRequest(
-            messages: [{'role': 'user', 'content': 'Hello'}],
+            messages: [
+              {'role': 'user', 'content': 'Hello'},
+            ],
             maxTokens: 1024,
           );
 
@@ -211,7 +218,9 @@ data: {"type": "message_stop"}
           );
 
           const request = ApiRequest(
-            messages: [{'role': 'user', 'content': 'Hello'}],
+            messages: [
+              {'role': 'user', 'content': 'Hello'},
+            ],
             maxTokens: 1024,
           );
 
@@ -224,7 +233,8 @@ data: {"type": "message_stop"}
 
           expect(
             warningLogs.any(
-              (r) => r.message.contains('HTTP error') || r.message.contains('500'),
+              (r) =>
+                  r.message.contains('HTTP error') || r.message.contains('500'),
             ),
             isTrue,
             reason: 'Should log HTTP errors at WARNING level',
@@ -248,7 +258,9 @@ data: {"type": "message_stop"}
           });
 
           const request = ApiRequest(
-            messages: [{'role': 'user', 'content': 'Hello'}],
+            messages: [
+              {'role': 'user', 'content': 'Hello'},
+            ],
             maxTokens: 1024,
           );
 
@@ -283,7 +295,9 @@ data: {"type": "message_stop"}
           );
 
           const request = ApiRequest(
-            messages: [{'role': 'user', 'content': 'Hello'}],
+            messages: [
+              {'role': 'user', 'content': 'Hello'},
+            ],
             maxTokens: 1024,
           );
 
@@ -329,18 +343,22 @@ data: {"type": "message_stop"}
               );
             }
             return http.StreamedResponse(
-              Stream.value(utf8.encode('''
+              Stream.value(
+                utf8.encode('''
 data: {"type": "message_start"}
 
 data: {"type": "message_stop"}
 
-'''),),
+'''),
+              ),
               200,
             );
           });
 
           const request = ApiRequest(
-            messages: [{'role': 'user', 'content': 'Hello'}],
+            messages: [
+              {'role': 'user', 'content': 'Hello'},
+            ],
             maxTokens: 1024,
           );
 
@@ -385,18 +403,22 @@ data: {"type": "message_stop"}
               return response;
             }
             return http.StreamedResponse(
-              Stream.value(utf8.encode('''
+              Stream.value(
+                utf8.encode('''
 data: {"type": "message_start"}
 
 data: {"type": "message_stop"}
 
-'''),),
+'''),
+              ),
               200,
             );
           });
 
           const request = ApiRequest(
-            messages: [{'role': 'user', 'content': 'Hello'}],
+            messages: [
+              {'role': 'user', 'content': 'Hello'},
+            ],
             maxTokens: 1024,
           );
 
@@ -437,7 +459,9 @@ data: {"type": "message_stop"}
           );
 
           const request = ApiRequest(
-            messages: [{'role': 'user', 'content': 'Hello'}],
+            messages: [
+              {'role': 'user', 'content': 'Hello'},
+            ],
             maxTokens: 1024,
           );
 
@@ -483,7 +507,9 @@ data: {"type": "message_stop"}
           when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
           const request = ApiRequest(
-            messages: [{'role': 'user', 'content': 'Hello'}],
+            messages: [
+              {'role': 'user', 'content': 'Hello'},
+            ],
             maxTokens: 1024,
           );
 
@@ -530,7 +556,9 @@ data: {"type": "message_stop"}
             when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
             const request = ApiRequest(
-              messages: [{'role': 'user', 'content': 'Hello'}],
+              messages: [
+                {'role': 'user', 'content': 'Hello'},
+              ],
               maxTokens: 1024,
             );
 
@@ -615,18 +643,22 @@ data: {"type": "message_stop"}
               );
             }
             return http.StreamedResponse(
-              Stream.value(utf8.encode('''
+              Stream.value(
+                utf8.encode('''
 data: {"type": "message_start"}
 
 data: {"type": "message_stop"}
 
-'''),),
+'''),
+              ),
               200,
             );
           });
 
           const request = ApiRequest(
-            messages: [{'role': 'user', 'content': 'Hello'}],
+            messages: [
+              {'role': 'user', 'content': 'Hello'},
+            ],
             maxTokens: 1024,
           );
 
@@ -703,7 +735,9 @@ data: {"type": "message_stop"}
         when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -715,17 +749,16 @@ data: {"type": "message_stop"}
             .toList();
 
         // Filter to INFO and above
-        final infoAndAbove = logRecords
-            .where((r) => r.level.value >= Level.INFO.value)
-            .toList();
+        final infoAndAbove =
+            logRecords.where((r) => r.level.value >= Level.INFO.value).toList();
 
         // Filter to FINE and above (all logs)
-        final fineAndAbove = logRecords
-            .where((r) => r.level.value >= Level.FINE.value)
-            .toList();
+        final fineAndAbove =
+            logRecords.where((r) => r.level.value >= Level.FINE.value).toList();
 
         // Each broader filter should include at least as many logs
-        expect(infoAndAbove.length, greaterThanOrEqualTo(warningAndAbove.length));
+        expect(
+            infoAndAbove.length, greaterThanOrEqualTo(warningAndAbove.length),);
         expect(fineAndAbove.length, greaterThanOrEqualTo(infoAndAbove.length));
 
         handler.dispose();
@@ -762,7 +795,9 @@ data: {"type": "message_stop"}
         when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -804,7 +839,9 @@ data: {"type": "message_stop"}
         when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -839,15 +876,16 @@ data: {"type": "message_stop"}
         when(mockClient.send(any)).thenThrow(Exception('Test error'));
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
         await handler.createStream(request).toList();
 
         final warningLogs = logRecords.where(
-          (r) =>
-              r.loggerName == 'ProxyModeHandler' && r.level == Level.WARNING,
+          (r) => r.loggerName == 'ProxyModeHandler' && r.level == Level.WARNING,
         );
 
         // Some warning logs may include error details

@@ -21,8 +21,7 @@ class A2uiToolConverter {
         'input_schema': {
           'type': 'object',
           'properties': _convertProperties(schema.inputSchema),
-          if (schema.requiredFields != null)
-            'required': schema.requiredFields,
+          if (schema.requiredFields != null) 'required': schema.requiredFields,
         },
       };
     }).toList();
@@ -61,11 +60,13 @@ class A2uiToolConverter {
     // Check required fields
     for (final field in schema.requiredFields ?? <String>[]) {
       if (!input.containsKey(field)) {
-        errors.add(ValidationError(
-          field: field,
-          message: 'Required field missing: $field',
-          code: 'required_field_missing',
-        ),);
+        errors.add(
+          ValidationError(
+            field: field,
+            message: 'Required field missing: $field',
+            code: 'required_field_missing',
+          ),
+        );
       }
     }
 

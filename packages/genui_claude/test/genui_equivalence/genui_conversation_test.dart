@@ -34,7 +34,8 @@ void main() {
         conversation.dispose();
       });
 
-      test('GenUiConversation with callbacks accepts ClaudeContentGenerator', () {
+      test('GenUiConversation with callbacks accepts ClaudeContentGenerator',
+          () {
         final mockHandler = MockApiHandler();
         final generator = ClaudeContentGenerator.withHandler(
           handler: mockHandler,
@@ -95,7 +96,8 @@ void main() {
         await conversation.sendRequest(UserMessage.text('Test input'));
 
         expect(mockHandler.lastRequest?.messages.first['role'], 'user');
-        expect(mockHandler.lastRequest?.messages.first['content'], 'Test input');
+        expect(
+            mockHandler.lastRequest?.messages.first['content'], 'Test input',);
 
         // GenUiConversation.dispose() internally disposes the contentGenerator
         conversation.dispose();

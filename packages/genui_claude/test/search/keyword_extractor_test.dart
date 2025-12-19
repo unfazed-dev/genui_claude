@@ -68,7 +68,8 @@ void main() {
           'A calendar widget for selecting dates',
         );
 
-        expect(keywords, containsAll(['calendar', 'widget', 'selecting', 'dates']));
+        expect(keywords,
+            containsAll(['calendar', 'widget', 'selecting', 'dates']),);
       });
 
       test('filters out common stop words', () {
@@ -265,22 +266,67 @@ void main() {
 
     group('stop words', () {
       test('has common English stop words', () {
-        expect(KeywordExtractor.stopWords, containsAll([
-          'a', 'an', 'the', 'is', 'are', 'was', 'were',
-          'be', 'been', 'being', 'have', 'has', 'had',
-          'do', 'does', 'did', 'will', 'would', 'could',
-          'should', 'may', 'might', 'must', 'shall',
-          'for', 'and', 'nor', 'but', 'or', 'yet', 'so',
-          'in', 'on', 'at', 'to', 'by', 'of', 'with',
-          'this', 'that', 'these', 'those',
-          'it', 'its',
-        ]),);
+        expect(
+          KeywordExtractor.stopWords,
+          containsAll([
+            'a',
+            'an',
+            'the',
+            'is',
+            'are',
+            'was',
+            'were',
+            'be',
+            'been',
+            'being',
+            'have',
+            'has',
+            'had',
+            'do',
+            'does',
+            'did',
+            'will',
+            'would',
+            'could',
+            'should',
+            'may',
+            'might',
+            'must',
+            'shall',
+            'for',
+            'and',
+            'nor',
+            'but',
+            'or',
+            'yet',
+            'so',
+            'in',
+            'on',
+            'at',
+            'to',
+            'by',
+            'of',
+            'with',
+            'this',
+            'that',
+            'these',
+            'those',
+            'it',
+            'its',
+          ]),
+        );
       });
 
       test('has UI-specific words to filter', () {
-        expect(KeywordExtractor.stopWords, containsAll([
-          'optional', 'required', 'default', 'value',
-        ]),);
+        expect(
+          KeywordExtractor.stopWords,
+          containsAll([
+            'optional',
+            'required',
+            'default',
+            'value',
+          ]),
+        );
       });
     });
 

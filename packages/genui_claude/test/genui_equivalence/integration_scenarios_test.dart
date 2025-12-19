@@ -52,12 +52,16 @@ void main() {
         final gen1 = ClaudeContentGenerator.withHandler(handler: handler1);
         final gen2 = ClaudeContentGenerator.withHandler(handler: handler2);
 
-        handler1.stubEvents(MockEventFactory.widgetRenderingResponse(
-          surfaceId: 'surface-gen1',
-        ),);
-        handler2.stubEvents(MockEventFactory.widgetRenderingResponse(
-          surfaceId: 'surface-gen2',
-        ),);
+        handler1.stubEvents(
+          MockEventFactory.widgetRenderingResponse(
+            surfaceId: 'surface-gen1',
+          ),
+        );
+        handler2.stubEvents(
+          MockEventFactory.widgetRenderingResponse(
+            surfaceId: 'surface-gen2',
+          ),
+        );
 
         final messages1 = <A2uiMessage>[];
         final messages2 = <A2uiMessage>[];
@@ -173,10 +177,12 @@ void main() {
       });
 
       test('handles large widget response', () async {
-        mockHandler.stubEvents(MockEventFactory.largeWidgetResponse(
-          surfaceId: 'large',
-          widgetCount: 100,
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.largeWidgetResponse(
+            surfaceId: 'large',
+            widgetCount: 100,
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -196,9 +202,11 @@ void main() {
           largeData['key$i'] = 'value$i';
         }
 
-        mockHandler.stubEvents(MockEventFactory.dataModelUpdateResponse(
-          updates: largeData,
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.dataModelUpdateResponse(
+            updates: largeData,
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -239,12 +247,17 @@ void main() {
         expect(textResponses, ['Hello! How can I help?']);
 
         // Second exchange: UI response
-        mockHandler.stubEvents(MockEventFactory.widgetRenderingResponse(
-          surfaceId: 'form',
-          widgets: [
-            {'type': 'textField', 'properties': {'label': 'Name'}},
-          ],
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.widgetRenderingResponse(
+            surfaceId: 'form',
+            widgets: [
+              {
+                'type': 'textField',
+                'properties': {'label': 'Name'},
+              },
+            ],
+          ),
+        );
 
         await generator.sendRequest(
           UserMessage.text('Show me a form'),
@@ -260,16 +273,33 @@ void main() {
       });
 
       test('form generation flow', () async {
-        mockHandler.stubEvents(MockEventFactory.widgetRenderingResponse(
-          surfaceId: 'contact-form',
-          widgets: [
-            {'type': 'text', 'properties': {'content': 'Contact Form'}},
-            {'type': 'textField', 'properties': {'label': 'Name', 'required': true}},
-            {'type': 'textField', 'properties': {'label': 'Email', 'required': true}},
-            {'type': 'textField', 'properties': {'label': 'Message', 'multiline': true}},
-            {'type': 'button', 'properties': {'label': 'Submit'}},
-          ],
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.widgetRenderingResponse(
+            surfaceId: 'contact-form',
+            widgets: [
+              {
+                'type': 'text',
+                'properties': {'content': 'Contact Form'},
+              },
+              {
+                'type': 'textField',
+                'properties': {'label': 'Name', 'required': true},
+              },
+              {
+                'type': 'textField',
+                'properties': {'label': 'Email', 'required': true},
+              },
+              {
+                'type': 'textField',
+                'properties': {'label': 'Message', 'multiline': true},
+              },
+              {
+                'type': 'button',
+                'properties': {'label': 'Submit'},
+              },
+            ],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -281,8 +311,10 @@ void main() {
         final update = messages[1] as SurfaceUpdate;
         expect(update.components, hasLength(5));
         // Type is the key in componentProperties, id is a UUID
-        expect(update.components[0].componentProperties.containsKey('text'), isTrue);
-        expect(update.components[4].componentProperties.containsKey('button'), isTrue);
+        expect(update.components[0].componentProperties.containsKey('text'),
+            isTrue,);
+        expect(update.components[4].componentProperties.containsKey('button'),
+            isTrue,);
       });
 
       test('recovery after failed request', () async {
@@ -321,23 +353,25 @@ void main() {
 
       test('widgets from catalog are rendered correctly', () async {
         // Use test catalog widgets
-        mockHandler.stubEvents(MockEventFactory.surfaceUpdateResponse(
-          surfaceId: 'catalog-test',
-          widgets: [
-            {
-              'type': 'Text',
-              'properties': {'text': 'Hello', 'style': 'normal'},
-            },
-            {
-              'type': 'Button',
-              'properties': {'label': 'Click', 'action': 'submit'},
-            },
-            {
-              'type': 'Container',
-              'properties': {'color': '#FF0000', 'padding': 8},
-            },
-          ],
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceUpdateResponse(
+            surfaceId: 'catalog-test',
+            widgets: [
+              {
+                'type': 'Text',
+                'properties': {'text': 'Hello', 'style': 'normal'},
+              },
+              {
+                'type': 'Button',
+                'properties': {'label': 'Click', 'action': 'submit'},
+              },
+              {
+                'type': 'Container',
+                'properties': {'color': '#FF0000', 'padding': 8},
+              },
+            ],
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         generator.a2uiMessageStream.listen(messages.add);
@@ -348,9 +382,13 @@ void main() {
         expect(update.components, hasLength(3));
 
         // Type is the key in componentProperties, id is a UUID
-        expect(update.components[0].componentProperties.containsKey('Text'), isTrue);
-        expect(update.components[1].componentProperties.containsKey('Button'), isTrue);
-        expect(update.components[2].componentProperties.containsKey('Container'), isTrue);
+        expect(update.components[0].componentProperties.containsKey('Text'),
+            isTrue,);
+        expect(update.components[1].componentProperties.containsKey('Button'),
+            isTrue,);
+        expect(
+            update.components[2].componentProperties.containsKey('Container'),
+            isTrue,);
 
         // All IDs are unique UUIDs
         final ids = update.components.map((c) => c.id).toSet();
@@ -372,13 +410,18 @@ void main() {
       });
 
       test('text and UI in same response go to correct streams', () async {
-        mockHandler.stubEvents(MockEventFactory.mixedTextAndWidgetResponse(
-          text: 'Here is your widget:',
-          surfaceId: 'mixed',
-          widgets: [
-            {'type': 'Card', 'properties': {'title': 'Result'}},
-          ],
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.mixedTextAndWidgetResponse(
+            text: 'Here is your widget:',
+            surfaceId: 'mixed',
+            widgets: [
+              {
+                'type': 'Card',
+                'properties': {'title': 'Result'},
+              },
+            ],
+          ),
+        );
 
         final texts = <String>[];
         final messages = <A2uiMessage>[];

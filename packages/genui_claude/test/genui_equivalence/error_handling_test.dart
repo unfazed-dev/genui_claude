@@ -205,7 +205,8 @@ void main() {
         mockHandler.stubTextResponse('Success');
 
         final textChunks = <String>[];
-        final subscription = generator.textResponseStream.listen(textChunks.add);
+        final subscription =
+            generator.textResponseStream.listen(textChunks.add);
 
         await generator.sendRequest(UserMessage.text('second'));
 
@@ -217,7 +218,8 @@ void main() {
     });
 
     group('Stream Error Events', () {
-      test('error events from stream are converted to ContentGeneratorError', () async {
+      test('error events from stream are converted to ContentGeneratorError',
+          () async {
         mockHandler.stubEvents(MockEventFactory.errorResponse('Stream error'));
 
         final errors = <ContentGeneratorError>[];

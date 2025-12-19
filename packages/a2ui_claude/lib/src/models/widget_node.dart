@@ -13,7 +13,9 @@ abstract class WidgetNode with _$WidgetNode {
   /// Creates a widget node.
   const factory WidgetNode({
     /// The widget type identifier (e.g., 'text', 'button', 'container').
-    required String type, /// Optional unique instance identifier for this widget.
+    required String type,
+
+    /// Optional unique instance identifier for this widget.
     ///
     /// When provided, this ID uniquely identifies this widget instance
     /// within a surface. If not provided, a UUID will be generated

@@ -133,7 +133,8 @@ class DirectModeHandler implements ApiHandler {
       );
 
       // Stream SDK events and convert to Map format
-      await for (final event in _client.createMessageStream(request: sdkRequest)) {
+      await for (final event
+          in _client.createMessageStream(request: sdkRequest)) {
         final eventMap = _convertEventToMap(event);
         eventMap['_requestId'] = requestId;
         yield eventMap;
@@ -146,7 +147,8 @@ class DirectModeHandler implements ApiHandler {
         duration: DateTime.now().difference(startTime),
       );
     } on Exception catch (e, stackTrace) {
-      _log.warning('[Request $requestId] Claude API request failed', e, stackTrace);
+      _log.warning(
+          '[Request $requestId] Claude API request failed', e, stackTrace,);
       _circuitBreaker?.recordFailure();
 
       // Map exception to our exception types based on message content
@@ -190,7 +192,8 @@ class DirectModeHandler implements ApiHandler {
     final message = e.toString();
 
     // Try to extract status code from message if available
-    final statusMatch = RegExp(r'status(?:Code)?[:\s]+(\d{3})').firstMatch(message);
+    final statusMatch =
+        RegExp(r'status(?:Code)?[:\s]+(\d{3})').firstMatch(message);
     if (statusMatch != null) {
       final statusCode = int.tryParse(statusMatch.group(1) ?? '');
       if (statusCode != null) {

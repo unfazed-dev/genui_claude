@@ -45,7 +45,8 @@ Keep responses concise for testing purposes.
       skip: ApiKeyConfig.shouldSkip ? ApiKeyConfig.skipMessage : null,
       () async {
         // ARRANGE
-        final message = UserMessage.text('Say "Hello World" in exactly 2 words');
+        final message =
+            UserMessage.text('Say "Hello World" in exactly 2 words');
 
         // ACT
         final result = await waitForResponse(generator, message);
@@ -126,7 +127,8 @@ Keep responses concise for testing purposes.
         expect(
           receivedChunks.length,
           greaterThan(1),
-          reason: 'Should receive multiple streaming chunks (got ${receivedChunks.length})',
+          reason:
+              'Should receive multiple streaming chunks (got ${receivedChunks.length})',
         );
 
         final fullText = receivedChunks.join();

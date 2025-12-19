@@ -32,7 +32,8 @@ void main() {
           () async {
         mockHandler.stubDelayedEvents(
           MockEventFactory.streamingTextResponse(
-              ['Hello', ' ', 'World', '!'],),
+            ['Hello', ' ', 'World', '!'],
+          ),
           delay: const Duration(milliseconds: 5),
         );
 
@@ -60,10 +61,12 @@ void main() {
 
       test('cancelling a2uiMessageStream does not affect textResponseStream',
           () async {
-        mockHandler.stubEvents(MockEventFactory.mixedTextAndWidgetResponse(
-          text: 'Hello World',
-          surfaceId: 'main',
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.mixedTextAndWidgetResponse(
+            text: 'Hello World',
+            surfaceId: 'main',
+          ),
+        );
 
         final a2uiMessages = <A2uiMessage>[];
         final textChunks = <String>[];
@@ -148,7 +151,8 @@ void main() {
         mockHandler.stubTextResponse('First');
 
         final textChunks = <String>[];
-        final subscription = generator.textResponseStream.listen(textChunks.add);
+        final subscription =
+            generator.textResponseStream.listen(textChunks.add);
 
         await generator.sendRequest(UserMessage.text('test'));
         expect(textChunks, ['First']);
@@ -182,7 +186,8 @@ void main() {
 
       test('multiple sendRequest calls reuse same streams', () async {
         final textChunks = <String>[];
-        final subscription = generator.textResponseStream.listen(textChunks.add);
+        final subscription =
+            generator.textResponseStream.listen(textChunks.add);
 
         mockHandler.stubTextResponse('One');
         await generator.sendRequest(UserMessage.text('1'));
@@ -248,9 +253,11 @@ void main() {
 
       test('BeginRendering always precedes SurfaceUpdate for same surface',
           () async {
-        mockHandler.stubEvents(MockEventFactory.widgetRenderingResponse(
-          surfaceId: 'test-surface',
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.widgetRenderingResponse(
+            surfaceId: 'test-surface',
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -271,13 +278,15 @@ void main() {
       });
 
       test('text chunks arrive in order', () async {
-        mockHandler.stubEvents(MockEventFactory.streamingTextResponse([
-          'The ',
-          'quick ',
-          'brown ',
-          'fox ',
-          'jumps.',
-        ]),);
+        mockHandler.stubEvents(
+          MockEventFactory.streamingTextResponse([
+            'The ',
+            'quick ',
+            'brown ',
+            'fox ',
+            'jumps.',
+          ]),
+        );
 
         final chunks = <String>[];
         final subscription = generator.textResponseStream.listen(chunks.add);
@@ -290,9 +299,11 @@ void main() {
       });
 
       test('A2UI messages maintain sequence from API', () async {
-        mockHandler.stubEvents(MockEventFactory.surfaceLifecycleResponse(
-          surfaceId: 'lifecycle',
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.surfaceLifecycleResponse(
+            surfaceId: 'lifecycle',
+          ),
+        );
 
         final messages = <A2uiMessage>[];
         final subscription = generator.a2uiMessageStream.listen(messages.add);
@@ -310,10 +321,12 @@ void main() {
 
       test('interleaved text and A2UI events emit to correct streams',
           () async {
-        mockHandler.stubEvents(MockEventFactory.mixedTextAndWidgetResponse(
-          text: 'Here is a widget:',
-          surfaceId: 'widget-surface',
-        ),);
+        mockHandler.stubEvents(
+          MockEventFactory.mixedTextAndWidgetResponse(
+            text: 'Here is a widget:',
+            surfaceId: 'widget-surface',
+          ),
+        );
 
         final textChunks = <String>[];
         final a2uiMessages = <A2uiMessage>[];
@@ -493,7 +506,8 @@ void main() {
       test('pause and resume on textResponseStream works', () async {
         mockHandler.stubDelayedEvents(
           MockEventFactory.streamingTextResponse(
-              ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],),
+            ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+          ),
           delay: const Duration(milliseconds: 5),
         );
 
@@ -524,7 +538,8 @@ void main() {
       test('multiple pauses do not lose events', () async {
         mockHandler.stubDelayedEvents(
           MockEventFactory.streamingTextResponse(
-              List.generate(20, (i) => 'chunk$i'),),
+            List.generate(20, (i) => 'chunk$i'),
+          ),
           delay: const Duration(milliseconds: 2),
         );
 

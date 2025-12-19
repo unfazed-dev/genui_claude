@@ -482,7 +482,10 @@ class MockEventFactory {
         {
           'surfaceId': childSurfaceId,
           'widgets': [
-            {'type': 'Text', 'properties': {'text': 'Child content'}},
+            {
+              'type': 'Text',
+              'properties': {'text': 'Child content'},
+            },
           ],
           'append': false,
         },
@@ -539,7 +542,10 @@ class MockEventFactory {
         {
           'surfaceId': surfaceId,
           'widgets': [
-            {'type': 'Text', 'properties': {'text': 'Initial'}},
+            {
+              'type': 'Text',
+              'properties': {'text': 'Initial'},
+            },
           ],
           'append': false,
         },
@@ -551,7 +557,10 @@ class MockEventFactory {
         {
           'surfaceId': surfaceId,
           'widgets': [
-            {'type': 'Text', 'properties': {'text': 'Updated'}},
+            {
+              'type': 'Text',
+              'properties': {'text': 'Updated'},
+            },
           ],
           'append': false,
         },

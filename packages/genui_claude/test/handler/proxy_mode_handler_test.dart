@@ -575,7 +575,8 @@ void main() {
           handler.dispose();
         });
 
-        test('includes thinking config when interleaved thinking enabled', () async {
+        test('includes thinking config when interleaved thinking enabled',
+            () async {
           final handler = ProxyModeHandler(
             endpoint: testEndpoint,
             client: mockClient,
@@ -610,7 +611,9 @@ void main() {
           handler.dispose();
         });
 
-        test('includes thinking without budget when thinkingBudgetTokens is null', () async {
+        test(
+            'includes thinking without budget when thinkingBudgetTokens is null',
+            () async {
           final handler = ProxyModeHandler(
             endpoint: testEndpoint,
             client: mockClient,

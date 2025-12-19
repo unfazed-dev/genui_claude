@@ -158,7 +158,8 @@ void main() {
         mockHandler.stubTextResponse('Hello');
 
         final textChunks = <String>[];
-        final subscription = generator.textResponseStream.listen(textChunks.add);
+        final subscription =
+            generator.textResponseStream.listen(textChunks.add);
 
         await generator.sendRequest(UserMessage.text('test'));
 

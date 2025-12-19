@@ -151,7 +151,8 @@ data: {"type": "message_stop", "stream": $idx}
           }
           return _createMockStreamedResponse(
             statusCode: 200,
-            body: 'data: {"type": "message_stop", "request": $requestCount}\n\n',
+            body:
+                'data: {"type": "message_stop", "request": $requestCount}\n\n',
           );
         });
 
@@ -333,10 +334,8 @@ data: {"type": "message_stop", "stream": $idx}
         await Future<void>.delayed(const Duration(milliseconds: 50));
 
         // Should have start and success events for each request
-        final startEvents =
-            events.whereType<RequestStartEvent>().toList();
-        final successEvents =
-            events.whereType<RequestSuccessEvent>().toList();
+        final startEvents = events.whereType<RequestStartEvent>().toList();
+        final successEvents = events.whereType<RequestSuccessEvent>().toList();
 
         expect(startEvents, hasLength(3));
         expect(successEvents, hasLength(3));

@@ -50,7 +50,8 @@ class _ToolSearchDemoScreenState extends State<ToolSearchDemoScreen> {
     _interceptor = ToolUseInterceptor(
       handler: _handler,
       onToolsLoaded: (schemas) {
-        _addEvent('Tools loaded via interceptor: ${schemas.map((s) => s.name).join(", ")}');
+        _addEvent(
+            'Tools loaded via interceptor: ${schemas.map((s) => s.name).join(", ")}',);
       },
     );
   }
@@ -156,7 +157,8 @@ class _ToolSearchDemoScreenState extends State<ToolSearchDemoScreen> {
 
   void _addEvent(String event) {
     setState(() {
-      _eventLog.insert(0, '[${DateTime.now().toString().substring(11, 19)}] $event');
+      _eventLog.insert(
+          0, '[${DateTime.now().toString().substring(11, 19)}] $event',);
       if (_eventLog.length > 20) {
         _eventLog.removeLast();
       }
@@ -199,7 +201,8 @@ class _ToolSearchDemoScreenState extends State<ToolSearchDemoScreen> {
     final result = _handler.handleLoadTools(LoadToolsInput(toolNames: names));
     setState(() {});
 
-    _addEvent('Batch load: ${result.output.loaded.length} loaded, ${result.output.notFound.length} not found');
+    _addEvent(
+        'Batch load: ${result.output.loaded.length} loaded, ${result.output.notFound.length} not found',);
   }
 
   void _clearLoadedTools() {
@@ -271,13 +274,14 @@ class _ToolSearchDemoScreenState extends State<ToolSearchDemoScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.search, color: Theme.of(context).colorScheme.primary),
+                Icon(Icons.search,
+                    color: Theme.of(context).colorScheme.primary,),
                 const SizedBox(width: 8),
                 Text(
                   'Dynamic Tool Discovery',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ],
             ),
@@ -305,7 +309,8 @@ class _ToolSearchDemoScreenState extends State<ToolSearchDemoScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.inventory_2, color: Theme.of(context).colorScheme.primary),
+                Icon(Icons.inventory_2,
+                    color: Theme.of(context).colorScheme.primary,),
                 const SizedBox(width: 8),
                 Text(
                   'ToolCatalogIndex Stats',
@@ -347,7 +352,8 @@ class _ToolSearchDemoScreenState extends State<ToolSearchDemoScreen> {
                 FilledButton.tonalIcon(
                   onPressed: () {
                     // Demonstrate batch lookup
-                    final schemas = _index.getSchemasByNames(['button', 'slider', 'chart_bar']);
+                    final schemas = _index
+                        .getSchemasByNames(['button', 'slider', 'chart_bar']);
                     _addEvent('Batch lookup: found ${schemas.length} schemas');
                   },
                   icon: const Icon(Icons.batch_prediction),
@@ -358,7 +364,8 @@ class _ToolSearchDemoScreenState extends State<ToolSearchDemoScreen> {
                   onPressed: () {
                     // Demonstrate single lookup
                     final schema = _index.getSchemaByName('date_picker');
-                    _addEvent('Single lookup: ${schema != null ? "found" : "not found"}');
+                    _addEvent(
+                        'Single lookup: ${schema != null ? "found" : "not found"}',);
                   },
                   child: const Text('Single Lookup'),
                 ),
@@ -384,7 +391,8 @@ class _ToolSearchDemoScreenState extends State<ToolSearchDemoScreen> {
           ),
           Text(
             '→ $description',
-            style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.outline),
+            style: TextStyle(
+                fontSize: 11, color: Theme.of(context).colorScheme.outline,),
           ),
         ],
       ),
@@ -464,7 +472,8 @@ class _ToolSearchDemoScreenState extends State<ToolSearchDemoScreen> {
                   ),
                   FilledButton.tonalIcon(
                     onPressed: () {
-                      _loadMultipleTools(_searchResults.map((s) => s.name).toList());
+                      _loadMultipleTools(
+                          _searchResults.map((s) => s.name).toList(),);
                     },
                     icon: const Icon(Icons.download),
                     label: const Text('Load All'),
@@ -511,7 +520,8 @@ class _ToolSearchDemoScreenState extends State<ToolSearchDemoScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.text_fields, color: Theme.of(context).colorScheme.primary),
+                Icon(Icons.text_fields,
+                    color: Theme.of(context).colorScheme.primary,),
                 const SizedBox(width: 8),
                 Text(
                   'KeywordExtractor',
@@ -521,7 +531,8 @@ class _ToolSearchDemoScreenState extends State<ToolSearchDemoScreen> {
             ),
             const SizedBox(height: 16),
 
-            _buildExtractionDemo('extractFromName("$exampleName")', nameKeywords),
+            _buildExtractionDemo(
+                'extractFromName("$exampleName")', nameKeywords,),
             const SizedBox(height: 12),
             _buildExtractionDemo('extractFromDescription("...")', descKeywords),
             const SizedBox(height: 16),
@@ -602,7 +613,10 @@ class _ToolSearchDemoScreenState extends State<ToolSearchDemoScreen> {
 
   Widget _buildInterceptorSection() {
     return Card(
-      color: Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.3),
+      color: Theme.of(context)
+          .colorScheme
+          .secondaryContainer
+          .withValues(alpha: 0.3),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -610,7 +624,8 @@ class _ToolSearchDemoScreenState extends State<ToolSearchDemoScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.route, color: Theme.of(context).colorScheme.secondary),
+                Icon(Icons.route,
+                    color: Theme.of(context).colorScheme.secondary,),
                 const SizedBox(width: 8),
                 Text(
                   'ToolUseInterceptor',
@@ -626,9 +641,12 @@ class _ToolSearchDemoScreenState extends State<ToolSearchDemoScreen> {
             const SizedBox(height: 16),
 
             // Show which tools are interceptable
-            _buildInterceptRow('search_catalog', CatalogSearchTool.isSearchTool('search_catalog')),
-            _buildInterceptRow('load_tools', CatalogSearchTool.isSearchTool('load_tools')),
-            _buildInterceptRow('custom_widget', CatalogSearchTool.isSearchTool('custom_widget')),
+            _buildInterceptRow('search_catalog',
+                CatalogSearchTool.isSearchTool('search_catalog'),),
+            _buildInterceptRow(
+                'load_tools', CatalogSearchTool.isSearchTool('load_tools'),),
+            _buildInterceptRow('custom_widget',
+                CatalogSearchTool.isSearchTool('custom_widget'),),
 
             const SizedBox(height: 12),
             FilledButton.tonalIcon(
@@ -686,7 +704,8 @@ class _ToolSearchDemoScreenState extends State<ToolSearchDemoScreen> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.download_done, color: Theme.of(context).colorScheme.primary),
+                    Icon(Icons.download_done,
+                        color: Theme.of(context).colorScheme.primary,),
                     const SizedBox(width: 8),
                     Text(
                       'ToolSearchHandler Session',
@@ -754,7 +773,8 @@ class _ToolSearchDemoScreenState extends State<ToolSearchDemoScreen> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.history, color: Theme.of(context).colorScheme.primary),
+                    Icon(Icons.history,
+                        color: Theme.of(context).colorScheme.primary,),
                     const SizedBox(width: 8),
                     Text(
                       'Event Log',
@@ -954,9 +974,8 @@ class _SearchResultTile extends StatelessWidget {
         ),
         leading: Icon(
           isLoaded ? Icons.check_circle : Icons.extension,
-          color: isLoaded
-              ? Colors.green
-              : Theme.of(context).colorScheme.primary,
+          color:
+              isLoaded ? Colors.green : Theme.of(context).colorScheme.primary,
         ),
         title: Text(
           tool.name,

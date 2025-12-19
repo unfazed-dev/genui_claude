@@ -334,7 +334,9 @@ class MockStreamEventFactory {
 
   /// Creates a content_block_start event for tool_use.
   static Map<String, dynamic> toolUseStart({
-    required String id, required String name, int index = 0,
+    required String id,
+    required String name,
+    int index = 0,
   }) {
     return {
       'type': 'content_block_start',

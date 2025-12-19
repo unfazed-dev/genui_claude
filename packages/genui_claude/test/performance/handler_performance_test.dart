@@ -99,7 +99,9 @@ void main() {
         when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -140,7 +142,9 @@ void main() {
         when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -181,7 +185,9 @@ void main() {
         when(mockClient.send(any)).thenAnswer((_) async => mockResponse);
 
         const request = ApiRequest(
-          messages: [{'role': 'user', 'content': 'Hello'}],
+          messages: [
+            {'role': 'user', 'content': 'Hello'},
+          ],
           maxTokens: 1024,
         );
 
@@ -380,7 +386,9 @@ data: {"type": "message_stop"}
       );
 
       const request = ApiRequest(
-        messages: [{'role': 'user', 'content': 'Hello'}],
+        messages: [
+          {'role': 'user', 'content': 'Hello'},
+        ],
         maxTokens: 1024,
       );
 

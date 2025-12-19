@@ -113,11 +113,9 @@ List<A2uiToolSchema> _defineToolSchemas() {
 /// Demonstrate input validation.
 void _demonstrateValidation(List<A2uiToolSchema> schemas) {
   // Valid input
-  final validResult = A2uiToolConverter.validateToolInput(
-    'begin_rendering',
-    {'surfaceId': 'main-ui'},
-    schemas,
-  );
+  final validResult = A2uiToolConverter.validateToolInput('begin_rendering', {
+    'surfaceId': 'main-ui',
+  }, schemas);
   print('   Valid input result: ${validResult.isValid}');
 
   // Invalid input (missing required field)
@@ -134,11 +132,9 @@ void _demonstrateValidation(List<A2uiToolSchema> schemas) {
   }
 
   // Unknown tool
-  final unknownResult = A2uiToolConverter.validateToolInput(
-    'unknown_tool',
-    {'foo': 'bar'},
-    schemas,
-  );
+  final unknownResult = A2uiToolConverter.validateToolInput('unknown_tool', {
+    'foo': 'bar',
+  }, schemas);
   print('   Unknown tool result: ${unknownResult.isValid}');
   if (!unknownResult.isValid) {
     for (final error in unknownResult.errors) {
@@ -156,10 +152,7 @@ void _demonstrateParsing() {
     'type': 'message',
     'role': 'assistant',
     'content': [
-      {
-        'type': 'text',
-        'text': "I'll create a greeting UI for you.",
-      },
+      {'type': 'text', 'text': "I'll create a greeting UI for you."},
       {
         'type': 'tool_use',
         'id': 'toolu_001',
@@ -212,7 +205,9 @@ void _demonstrateParsing() {
         print('   -> SurfaceUpdate: $surfaceId with ${widgets.length} widgets');
         _printWidgetTree(widgets, indent: 6);
       case DataModelUpdateData(:final updates, :final scope):
-        print('   -> DataModelUpdate: ${updates.keys.toList()} (scope: $scope)');
+        print(
+          '   -> DataModelUpdate: ${updates.keys.toList()} (scope: $scope)',
+        );
       case DeleteSurfaceData(:final surfaceId, :final cascade):
         print('   -> DeleteSurface: $surfaceId (cascade: $cascade)');
     }

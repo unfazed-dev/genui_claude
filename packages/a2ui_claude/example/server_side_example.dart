@@ -122,10 +122,7 @@ When asked to create UI, use the provided tools.
 
 $instructions''',
     'messages': [
-      {
-        'role': 'user',
-        'content': 'Create a simple login form',
-      },
+      {'role': 'user', 'content': 'Create a simple login form'},
     ],
     'tools': claudeTools,
   };
@@ -142,9 +139,7 @@ Map<String, dynamic> _simulateClaudeResponse() {
         'type': 'tool_use',
         'id': 'toolu_001',
         'name': 'begin_rendering',
-        'input': {
-          'surfaceId': 'login-form',
-        },
+        'input': {'surfaceId': 'login-form'},
       },
       {
         'type': 'tool_use',
@@ -259,10 +254,7 @@ Future<void> _demonstrateRateLimiting() async {
 
   // Simulate rate limit response (429 with 2 second retry)
   final retryAfter = RateLimiter.parseRetryAfter('2');
-  rateLimiter.recordRateLimit(
-    statusCode: 429,
-    retryAfter: retryAfter,
-  );
+  rateLimiter.recordRateLimit(statusCode: 429, retryAfter: retryAfter);
 
   // Check if rate limited
   print('   Is rate limited: ${rateLimiter.isRateLimited}');

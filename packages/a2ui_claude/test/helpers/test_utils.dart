@@ -14,17 +14,13 @@ import 'package:test/test.dart';
 Matcher isBeginRenderingData({
   required String surfaceId,
   String? parentSurfaceId,
-}) =>
-    _BeginRenderingDataMatcher(
-      surfaceId: surfaceId,
-      parentSurfaceId: parentSurfaceId,
-    );
+}) => _BeginRenderingDataMatcher(
+  surfaceId: surfaceId,
+  parentSurfaceId: parentSurfaceId,
+);
 
 class _BeginRenderingDataMatcher extends Matcher {
-  _BeginRenderingDataMatcher({
-    required this.surfaceId,
-    this.parentSurfaceId,
-  });
+  _BeginRenderingDataMatcher({required this.surfaceId, this.parentSurfaceId});
 
   final String surfaceId;
   final String? parentSurfaceId;
@@ -59,8 +55,9 @@ class _BeginRenderingDataMatcher extends Matcher {
       return mismatchDescription.add('is not a BeginRenderingData');
     }
     if (item.surfaceId != surfaceId) {
-      return mismatchDescription
-          .add('has surfaceId "${item.surfaceId}" instead of "$surfaceId"');
+      return mismatchDescription.add(
+        'has surfaceId "${item.surfaceId}" instead of "$surfaceId"',
+      );
     }
     if (parentSurfaceId != null && item.parentSurfaceId != parentSurfaceId) {
       return mismatchDescription.add(
@@ -73,10 +70,7 @@ class _BeginRenderingDataMatcher extends Matcher {
 }
 
 /// Matches a [SurfaceUpdateData] with the expected [surfaceId] and widget count.
-Matcher isSurfaceUpdateData({
-  required String surfaceId,
-  int? widgetCount,
-}) =>
+Matcher isSurfaceUpdateData({required String surfaceId, int? widgetCount}) =>
     _SurfaceUpdateDataMatcher(surfaceId: surfaceId, widgetCount: widgetCount);
 
 class _SurfaceUpdateDataMatcher extends Matcher {
@@ -111,8 +105,9 @@ class _SurfaceUpdateDataMatcher extends Matcher {
       return mismatchDescription.add('is not a SurfaceUpdateData');
     }
     if (item.surfaceId != surfaceId) {
-      return mismatchDescription
-          .add('has surfaceId "${item.surfaceId}" instead of "$surfaceId"');
+      return mismatchDescription.add(
+        'has surfaceId "${item.surfaceId}" instead of "$surfaceId"',
+      );
     }
     if (widgetCount != null && item.widgets.length != widgetCount) {
       return mismatchDescription.add(
@@ -157,18 +152,16 @@ class _DataModelUpdateDataMatcher extends Matcher {
       return mismatchDescription.add('is not a DataModelUpdateData');
     }
     if (scope != null && item.scope != scope) {
-      return mismatchDescription
-          .add('has scope "${item.scope}" instead of "$scope"');
+      return mismatchDescription.add(
+        'has scope "${item.scope}" instead of "$scope"',
+      );
     }
     return mismatchDescription;
   }
 }
 
 /// Matches a [DeleteSurfaceData] with the expected [surfaceId].
-Matcher isDeleteSurfaceData({
-  required String surfaceId,
-  bool? cascade,
-}) =>
+Matcher isDeleteSurfaceData({required String surfaceId, bool? cascade}) =>
     _DeleteSurfaceDataMatcher(surfaceId: surfaceId, cascade: cascade);
 
 class _DeleteSurfaceDataMatcher extends Matcher {
@@ -203,12 +196,14 @@ class _DeleteSurfaceDataMatcher extends Matcher {
       return mismatchDescription.add('is not a DeleteSurfaceData');
     }
     if (item.surfaceId != surfaceId) {
-      return mismatchDescription
-          .add('has surfaceId "${item.surfaceId}" instead of "$surfaceId"');
+      return mismatchDescription.add(
+        'has surfaceId "${item.surfaceId}" instead of "$surfaceId"',
+      );
     }
     if (cascade != null && item.cascade != cascade) {
-      return mismatchDescription
-          .add('has cascade "${item.cascade}" instead of "$cascade"');
+      return mismatchDescription.add(
+        'has cascade "${item.cascade}" instead of "$cascade"',
+      );
     }
     return mismatchDescription;
   }
@@ -251,8 +246,9 @@ class _TextDeltaEventMatcher extends Matcher {
       return mismatchDescription.add('is not a TextDeltaEvent');
     }
     if (expectedText != null && item.text != expectedText) {
-      return mismatchDescription
-          .add('has text "${item.text}" instead of "$expectedText"');
+      return mismatchDescription.add(
+        'has text "${item.text}" instead of "$expectedText"',
+      );
     }
     return mismatchDescription;
   }
@@ -332,8 +328,9 @@ class _A2uiMessageEventMatcher<T extends A2uiMessageData> extends Matcher {
     if (item is! A2uiMessageEvent) {
       return mismatchDescription.add('is not an A2uiMessageEvent');
     }
-    return mismatchDescription
-        .add('contains ${item.message.runtimeType} instead of $T');
+    return mismatchDescription.add(
+      'contains ${item.message.runtimeType} instead of $T',
+    );
   }
 }
 
@@ -483,10 +480,7 @@ Stream<T> streamWithError<T>(
 // ============================================================================
 
 /// Creates a simple text widget node.
-WidgetNode textWidget({
-  required String content,
-  String? dataBinding,
-}) =>
+WidgetNode textWidget({required String content, String? dataBinding}) =>
     WidgetNode(
       type: 'text',
       properties: {'content': content},
@@ -498,15 +492,11 @@ WidgetNode buttonWidget({
   required String label,
   String? action,
   String? dataBinding,
-}) =>
-    WidgetNode(
-      type: 'button',
-      properties: {
-        'label': label,
-        if (action != null) 'action': action,
-      },
-      dataBinding: dataBinding,
-    );
+}) => WidgetNode(
+  type: 'button',
+  properties: {'label': label, if (action != null) 'action': action},
+  dataBinding: dataBinding,
+);
 
 /// Creates a container widget node with children.
 WidgetNode containerWidget({
@@ -514,10 +504,9 @@ WidgetNode containerWidget({
   List<WidgetNode> children = const [],
   Map<String, dynamic> properties = const {},
   String? dataBinding,
-}) =>
-    WidgetNode(
-      type: type,
-      properties: properties,
-      children: children,
-      dataBinding: dataBinding,
-    );
+}) => WidgetNode(
+  type: type,
+  properties: properties,
+  children: children,
+  dataBinding: dataBinding,
+);

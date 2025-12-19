@@ -56,7 +56,8 @@ Stream<Map<String, dynamic>> stubStreamResponse(
 ///
 /// Useful for testing error handling during streaming.
 Stream<Map<String, dynamic>> stubErrorStream({
-  required Exception error, List<Map<String, dynamic>> eventsBeforeError = const [],
+  required Exception error,
+  List<Map<String, dynamic>> eventsBeforeError = const [],
 }) async* {
   for (final event in eventsBeforeError) {
     yield event;
@@ -114,7 +115,8 @@ MockStreamedResponse stubServerErrorResponse() {
 /// Factory for common mock stream event sequences.
 abstract final class MockEventSequences {
   /// Creates a basic tool_use stream sequence.
-  static List<Map<String, dynamic>> beginRenderingSequence(String surfaceId) => [
+  static List<Map<String, dynamic>> beginRenderingSequence(String surfaceId) =>
+      [
         {
           'type': 'content_block_start',
           'index': 0,
@@ -133,38 +135,31 @@ abstract final class MockEventSequences {
             'partial_json': '{"surfaceId":"$surfaceId"}',
           },
         },
-        {
-          'type': 'content_block_stop',
-          'index': 0,
-        },
+        {'type': 'content_block_stop', 'index': 0},
         {'type': 'message_stop'},
       ];
 
   /// Creates a text response stream sequence.
   static List<Map<String, dynamic>> textSequence(String text) => [
-        {
-          'type': 'content_block_start',
-          'index': 0,
-          'content_block': {'type': 'text', 'text': ''},
-        },
-        {
-          'type': 'content_block_delta',
-          'index': 0,
-          'delta': {'type': 'text_delta', 'text': text},
-        },
-        {'type': 'content_block_stop', 'index': 0},
-        {'type': 'message_stop'},
-      ];
+    {
+      'type': 'content_block_start',
+      'index': 0,
+      'content_block': {'type': 'text', 'text': ''},
+    },
+    {
+      'type': 'content_block_delta',
+      'index': 0,
+      'delta': {'type': 'text_delta', 'text': text},
+    },
+    {'type': 'content_block_stop', 'index': 0},
+    {'type': 'message_stop'},
+  ];
 
   /// Creates a mixed content stream sequence with text and tool_use.
   static List<Map<String, dynamic>> mixedSequence({
     required String text,
     required String surfaceId,
-  }) =>
-      [
-        ...textSequence(text).take(3),
-        ...beginRenderingSequence(surfaceId),
-      ];
+  }) => [...textSequence(text).take(3), ...beginRenderingSequence(surfaceId)];
 }
 
 /// Register all fake values needed for mocktail.
