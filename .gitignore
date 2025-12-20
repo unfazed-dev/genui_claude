@@ -47,7 +47,7 @@ coverage/
 
 # Generated files
 *.g.dart
-*.freezed.dart
+# *.freezed.dart
 *.mocks.dart
 
 # Melos
