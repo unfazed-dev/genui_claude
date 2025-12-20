@@ -46,7 +46,7 @@ app.*.map.json
 coverage/
 
 # Generated files
-*.g.dart
+# *.g.dart
 # *.freezed.dart
 *.mocks.dart
 
