@@ -851,6 +851,73 @@ void main() {
 
         testController.dispose();
       });
+
+      test('eviction removes listeners from source notifiers', () {
+        final testRegistry = BindingRegistry();
+        final testController = BindingController(
+          registry: testRegistry,
+          subscribe: mockDataModel.subscribe,
+          update: mockDataModel.update,
+          maxCacheSize: 2,
+        );
+
+        // Track listener calls on source
+        var listenerCallCount = 0;
+        final path = BindingPath.fromDotNotation('field0');
+        mockDataModel.update(path, 'initial');
+        final source = mockDataModel.subscribe(path);
+        source.addListener(() => listenerCallCount++);
+
+        // Create binding with transformer
+        final definition = BindingDefinition(
+          property: 'value',
+          path: path,
+          toWidget: (value) => 'transformed:$value',
+        );
+        final binding = WidgetBinding(
+          widgetId: 'widget0',
+          surfaceId: 'surface',
+          definition: definition,
+          subscription: source,
+        );
+        testRegistry.register(binding);
+        testController.getValueNotifier(widgetId: 'widget0', property: 'value');
+
+        // Fill cache to evict widget0's transform
+        for (var i = 1; i <= 2; i++) {
+          final p = BindingPath.fromDotNotation('field$i');
+          mockDataModel.update(p, 'value$i');
+          final def = BindingDefinition(
+            property: 'value',
+            path: p,
+            toWidget: (value) => 'transformed:$value',
+          );
+          final sub = mockDataModel.subscribe(p);
+          final b = WidgetBinding(
+            widgetId: 'widget$i',
+            surfaceId: 'surface',
+            definition: def,
+            subscription: sub,
+          );
+          testRegistry.register(b);
+          testController.getValueNotifier(
+            widgetId: 'widget$i',
+            property: 'value',
+          );
+        }
+
+        // Reset counter after eviction
+        listenerCallCount = 0;
+
+        // Update source - should NOT trigger the evicted transform's listener
+        source.value = 'updated';
+
+        // Only the external listener we added should fire (1 call)
+        // If leak exists, evicted transform's listener would also fire (2 calls)
+        expect(listenerCallCount, equals(1));
+
+        testController.dispose();
+      });
     });
   });
 }

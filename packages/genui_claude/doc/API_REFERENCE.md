@@ -19,6 +19,14 @@ Complete API documentation for the `genui_claude` package.
   - [MetricsStats](#metricsstats)
   - [MetricsEvent](#metricsevent)
   - [globalMetricsCollector](#globalmetricscollector)
+- [Observability Classes](#observability-classes)
+  - [ObservabilityAdapter](#observabilityadapter)
+  - [CustomObservabilityAdapter](#customobservabilityadapter)
+  - [DataDogAdapter](#datadogadapter)
+  - [FirebaseAnalyticsAdapter](#firebaseanalyticsadapter)
+  - [SupabaseAdapter](#supabaseadapter)
+  - [ConsoleObservabilityAdapter](#consoleobservabilityadapter)
+  - [BatchingObservabilityAdapter](#batchingobservabilityadapter)
 - [Exception Classes](#exception-classes)
   - [ClaudeException](#claudeexception)
   - [Exception Types](#exception-types)
@@ -497,6 +505,36 @@ const CircuitBreakerConfig({
 | `defaults` | 5 | 30s | 2 | Balanced |
 | `lenient` | 10 | 60s | 3 | High tolerance |
 | `strict` | 3 | 15s | 1 | Fast failure detection |
+| `sla999` | 3 | 15s | 1 | 99.9% SLA (3 nines) |
+| `sla9999` | 2 | 10s | 2 | 99.99% SLA (4 nines) |
+| `highAvailability` | 1 | 5s | 3 | Mission-critical systems |
+
+#### SLA-Based Presets
+
+Choose circuit breaker presets based on your SLA requirements:
+
+```dart
+// 99.9% SLA - 8.76 hours/year downtime tolerance
+final breaker = CircuitBreaker(
+  config: CircuitBreakerConfig.sla999,
+);
+
+// 99.99% SLA - 52.6 minutes/year downtime tolerance
+final breaker = CircuitBreaker(
+  config: CircuitBreakerConfig.sla9999,
+);
+
+// Maximum resilience for mission-critical systems
+final breaker = CircuitBreaker(
+  config: CircuitBreakerConfig.highAvailability,
+);
+```
+
+| SLA Level | Allowed Downtime/Year | Recommended Preset |
+|-----------|----------------------|-------------------|
+| 99.9% (3 nines) | 8.76 hours | `sla999` |
+| 99.99% (4 nines) | 52.6 minutes | `sla9999` |
+| 99.999% (5 nines) | 5.26 minutes | `highAvailability` |
 
 #### Methods
 
@@ -678,6 +716,340 @@ globalMetricsCollector.eventStream.listen((event) {
 
 // Access stats
 print('Success rate: ${globalMetricsCollector.stats.successRate}%');
+```
+
+---
+
+## Observability Classes
+
+### ObservabilityAdapter
+
+Abstract base class for observability platform integrations. Connect to a `MetricsCollector` to receive and forward events.
+
+```dart
+abstract class ObservabilityAdapter {
+  void connect(MetricsCollector collector);
+  void disconnect();
+  void dispose();
+  bool get isConnected;
+  Future<void> sendEvent(MetricsEvent event);
+  Map<String, dynamic> formatEvent(MetricsEvent event);
+}
+```
+
+#### Methods
+
+| Method | Description |
+|--------|-------------|
+| `connect(collector)` | Start receiving events from a collector |
+| `disconnect()` | Stop receiving events |
+| `dispose()` | Release all resources |
+| `sendEvent(event)` | Send a single event (override in subclasses) |
+| `formatEvent(event)` | Format event for the platform (override in subclasses) |
+
+---
+
+### CustomObservabilityAdapter
+
+Callback-based adapter for custom integrations.
+
+```dart
+CustomObservabilityAdapter({
+  required Future<void> Function(Map<String, dynamic>) onEvent,
+  String serviceName = 'genui_claude',
+  String? environment,
+  Map<String, String> additionalTags = const {},
+  Map<String, dynamic> Function(MetricsEvent)? formatter,
+  void Function(Object, StackTrace)? onErrorCallback,
+})
+```
+
+#### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `onEvent` | `Future<void> Function(Map<String, dynamic>)` | Yes | - | Callback for each event |
+| `serviceName` | `String` | No | `'genui_claude'` | Service name in events |
+| `environment` | `String?` | No | `null` | Environment tag |
+| `additionalTags` | `Map<String, String>` | No | `{}` | Extra tags added to events |
+| `formatter` | `Function?` | No | `null` | Custom event formatter |
+| `onErrorCallback` | `Function?` | No | `null` | Error handler |
+
+#### Example
+
+```dart
+final adapter = CustomObservabilityAdapter(
+  onEvent: (event) async {
+    await myAnalytics.track(event['event_type'], event);
+  },
+  serviceName: 'my-app',
+  environment: 'production',
+  additionalTags: {'version': '1.0.0'},
+);
+
+adapter.connect(globalMetricsCollector);
+```
+
+---
+
+### DataDogAdapter
+
+DataDog-specific event formatting and delivery.
+
+```dart
+DataDogAdapter({
+  required String apiKey,
+  String serviceName = 'genui_claude',
+  String? environment,
+  String? host,
+  Map<String, String> additionalTags = const {},
+})
+```
+
+#### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `apiKey` | `String` | Yes | - | DataDog API key |
+| `serviceName` | `String` | No | `'genui_claude'` | Service name |
+| `environment` | `String?` | No | `null` | Environment (staging, production) |
+| `host` | `String?` | No | `null` | Host identifier |
+| `additionalTags` | `Map<String, String>` | No | `{}` | Additional tags |
+
+#### Event Format
+
+Events are formatted with DataDog-specific fields:
+
+```json
+{
+  "ddsource": "genui_claude",
+  "service": "my-app",
+  "env": "production",
+  "ddtags": "event_type:request_success,service:my-app,env:production",
+  "message": "Request completed successfully",
+  "status": "info",
+  "timestamp": "2024-01-15T10:30:00Z",
+  ...event_data
+}
+```
+
+#### Status Mapping
+
+| Event Type | Status |
+|------------|--------|
+| `RequestFailureEvent` | `error` |
+| `CircuitBreakerStateChangeEvent` (to open) | `warning` |
+| `RateLimitEvent` | `warning` |
+| Other events | `info` |
+
+---
+
+### FirebaseAnalyticsAdapter
+
+Firebase Analytics integration with parameter name sanitization.
+
+```dart
+FirebaseAnalyticsAdapter({
+  String serviceName = 'genui_claude',
+  String? environment,
+  Map<String, String> additionalTags = const {},
+})
+```
+
+#### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `serviceName` | `String` | No | `'genui_claude'` | Service name |
+| `environment` | `String?` | No | `null` | Environment tag |
+| `additionalTags` | `Map<String, String>` | No | `{}` | Additional tags |
+
+#### Features
+
+- Automatically sanitizes parameter names (replaces dashes with underscores)
+- Firebase-compatible event structure
+- All keys use snake_case format
+
+---
+
+### SupabaseAdapter
+
+Supabase table insertion and Edge Function support.
+
+#### Table Mode Constructor
+
+```dart
+SupabaseAdapter({
+  required String supabaseUrl,
+  required String supabaseKey,
+  String tableName = 'metrics_events',
+  String serviceName = 'genui_claude',
+  String? environment,
+  Map<String, String> additionalTags = const {},
+})
+```
+
+#### Edge Function Mode Constructor
+
+```dart
+SupabaseAdapter.edgeFunction({
+  required String supabaseUrl,
+  required String supabaseKey,
+  required String functionName,
+  String serviceName = 'genui_claude',
+  String? environment,
+  Map<String, String> additionalTags = const {},
+})
+```
+
+#### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `supabaseUrl` | `String` | Yes | - | Supabase project URL |
+| `supabaseKey` | `String` | Yes | - | Supabase anon/service key |
+| `tableName` | `String` | No | `'metrics_events'` | Target table name |
+| `functionName` | `String` | Yes (edge) | - | Edge Function name |
+| `serviceName` | `String` | No | `'genui_claude'` | Service name |
+| `environment` | `String?` | No | `null` | Environment tag |
+
+#### Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `tableName` | `String` | Target table (empty for edge function mode) |
+
+#### Supabase Table Schema
+
+```sql
+CREATE TABLE metrics_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_type TEXT NOT NULL,
+  timestamp TIMESTAMPTZ NOT NULL,
+  request_id TEXT,
+  service_name TEXT,
+  environment TEXT,
+  duration_ms INTEGER,
+  error_type TEXT,
+  error_message TEXT,
+  metadata JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_metrics_events_timestamp ON metrics_events(timestamp);
+CREATE INDEX idx_metrics_events_type ON metrics_events(event_type);
+CREATE INDEX idx_metrics_events_request_id ON metrics_events(request_id);
+```
+
+#### Example
+
+```dart
+// Table mode
+final adapter = SupabaseAdapter(
+  supabaseUrl: 'https://your-project.supabase.co',
+  supabaseKey: 'your-anon-key',
+  tableName: 'metrics_events',
+  environment: 'production',
+);
+
+// Edge Function mode
+final adapter = SupabaseAdapter.edgeFunction(
+  supabaseUrl: 'https://your-project.supabase.co',
+  supabaseKey: 'your-anon-key',
+  functionName: 'process-metrics',
+);
+
+adapter.connect(globalMetricsCollector);
+```
+
+---
+
+### ConsoleObservabilityAdapter
+
+Console logging adapter for development and debugging.
+
+```dart
+ConsoleObservabilityAdapter({
+  bool prettyPrint = false,
+  bool Function(MetricsEvent)? filter,
+})
+```
+
+#### Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `prettyPrint` | `bool` | `false` | Pretty-print JSON output |
+| `filter` | `Function?` | `null` | Filter function for events |
+
+#### Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `prettyPrint` | `bool` | Whether to pretty-print output |
+| `filter` | `Function?` | Current filter function |
+
+#### Example
+
+```dart
+// Log only failure events
+final adapter = ConsoleObservabilityAdapter(
+  prettyPrint: true,
+  filter: (event) => event is RequestFailureEvent,
+);
+
+adapter.connect(globalMetricsCollector);
+```
+
+---
+
+### BatchingObservabilityAdapter
+
+Batches events before sending to reduce API calls.
+
+```dart
+BatchingObservabilityAdapter({
+  required ObservabilityAdapter delegate,
+  int batchSize = 10,
+  Duration flushInterval = const Duration(seconds: 30),
+})
+```
+
+#### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `delegate` | `ObservabilityAdapter` | Yes | - | Underlying adapter |
+| `batchSize` | `int` | No | `10` | Events before auto-flush |
+| `flushInterval` | `Duration` | No | `30 seconds` | Max time before flush |
+
+#### Methods
+
+| Method | Description |
+|--------|-------------|
+| `flush()` | Manually flush all buffered events |
+
+#### Behavior
+
+- Buffers events until `batchSize` is reached
+- Auto-flushes after `flushInterval`
+- Flushes remaining events on `disconnect()` or `dispose()`
+
+#### Example
+
+```dart
+final innerAdapter = DataDogAdapter(apiKey: 'your-key');
+
+final adapter = BatchingObservabilityAdapter(
+  delegate: innerAdapter,
+  batchSize: 20,
+  flushInterval: const Duration(minutes: 1),
+);
+
+adapter.connect(globalMetricsCollector);
+
+// Force flush when needed
+await adapter.flush();
 ```
 
 ---

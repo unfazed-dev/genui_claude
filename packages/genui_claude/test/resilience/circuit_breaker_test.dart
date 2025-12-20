@@ -52,6 +52,54 @@ void main() {
         expect(config.recoveryTimeout, equals(const Duration(seconds: 15)));
         expect(config.halfOpenSuccessThreshold, equals(1));
       });
+
+      test('sla999 preset is optimized for 99.9% availability', () {
+        const config = CircuitBreakerConfig.sla999;
+
+        expect(config.failureThreshold, equals(3));
+        expect(config.recoveryTimeout, equals(const Duration(seconds: 15)));
+        expect(config.halfOpenSuccessThreshold, equals(1));
+      });
+
+      test('sla9999 preset is optimized for 99.99% availability', () {
+        const config = CircuitBreakerConfig.sla9999;
+
+        expect(config.failureThreshold, equals(2));
+        expect(config.recoveryTimeout, equals(const Duration(seconds: 10)));
+        expect(config.halfOpenSuccessThreshold, equals(2));
+      });
+
+      test('highAvailability preset has strictest thresholds', () {
+        const config = CircuitBreakerConfig.highAvailability;
+
+        expect(config.failureThreshold, equals(1));
+        expect(config.recoveryTimeout, equals(const Duration(seconds: 5)));
+        expect(config.halfOpenSuccessThreshold, equals(3));
+      });
+
+      test('SLA presets are progressively stricter', () {
+        const sla999 = CircuitBreakerConfig.sla999;
+        const sla9999 = CircuitBreakerConfig.sla9999;
+        const ha = CircuitBreakerConfig.highAvailability;
+
+        // Failure threshold decreases with stricter SLA
+        expect(sla9999.failureThreshold, lessThan(sla999.failureThreshold));
+        expect(ha.failureThreshold, lessThan(sla9999.failureThreshold));
+
+        // Recovery timeout decreases with stricter SLA
+        expect(sla9999.recoveryTimeout, lessThan(sla999.recoveryTimeout));
+        expect(ha.recoveryTimeout, lessThan(sla9999.recoveryTimeout));
+
+        // Success threshold increases with stricter SLA (more validation)
+        expect(
+          sla9999.halfOpenSuccessThreshold,
+          greaterThanOrEqualTo(sla999.halfOpenSuccessThreshold),
+        );
+        expect(
+          ha.halfOpenSuccessThreshold,
+          greaterThan(sla9999.halfOpenSuccessThreshold),
+        );
+      });
     });
 
     group('copyWith', () {

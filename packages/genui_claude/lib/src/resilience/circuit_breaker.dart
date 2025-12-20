@@ -62,6 +62,38 @@ class CircuitBreakerConfig {
     halfOpenSuccessThreshold: 1,
   );
 
+  /// Configuration optimized for 99.9% SLA (3 nines).
+  ///
+  /// Allows up to 8.76 hours of downtime per year.
+  /// More lenient than strict, faster recovery than defaults.
+  /// Suitable for most production workloads.
+  static const CircuitBreakerConfig sla999 = CircuitBreakerConfig(
+    failureThreshold: 3,
+    recoveryTimeout: Duration(seconds: 15),
+    halfOpenSuccessThreshold: 1,
+  );
+
+  /// Configuration optimized for 99.99% SLA (4 nines).
+  ///
+  /// Allows up to 52.6 minutes of downtime per year.
+  /// Stricter failure detection with fast recovery attempts.
+  /// Suitable for high-reliability production systems.
+  static const CircuitBreakerConfig sla9999 = CircuitBreakerConfig(
+    failureThreshold: 2,
+    recoveryTimeout: Duration(seconds: 10),
+  );
+
+  /// Maximum resilience configuration for high availability.
+  ///
+  /// Opens circuit after first failure, attempts recovery quickly,
+  /// but requires multiple successes before fully closing.
+  /// Suitable for mission-critical systems requiring 99.999%+ availability.
+  static const CircuitBreakerConfig highAvailability = CircuitBreakerConfig(
+    failureThreshold: 1,
+    recoveryTimeout: Duration(seconds: 5),
+    halfOpenSuccessThreshold: 3,
+  );
+
   /// Creates a copy with the given fields replaced.
   CircuitBreakerConfig copyWith({
     int? failureThreshold,

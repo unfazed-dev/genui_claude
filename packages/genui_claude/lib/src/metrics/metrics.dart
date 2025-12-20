@@ -44,3 +44,4 @@ library;
 
 export 'metrics_collector.dart';
 export 'metrics_event.dart';
+export 'observability.dart';

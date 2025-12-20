@@ -5,14 +5,16 @@ This guide explains how to integrate the `genui_claude` package with monitoring 
 ## Table of Contents
 
 1. [MetricsCollector Overview](#metricscollector-overview)
-2. [Built-in Metrics](#built-in-metrics)
-3. [DataDog Integration](#datadog-integration)
-4. [Firebase Analytics Integration](#firebase-analytics-integration)
-5. [Prometheus Integration](#prometheus-integration)
-6. [Custom Logging Backend](#custom-logging-backend)
-7. [Dashboard Templates](#dashboard-templates)
-8. [Alerting Recommendations](#alerting-recommendations)
-9. [Request Tracing](#request-tracing)
+2. [Built-in Observability Adapters](#built-in-observability-adapters)
+3. [Built-in Metrics](#built-in-metrics)
+4. [DataDog Integration](#datadog-integration)
+5. [Firebase Analytics Integration](#firebase-analytics-integration)
+6. [Supabase Integration](#supabase-integration)
+7. [Prometheus Integration](#prometheus-integration)
+8. [Custom Logging Backend](#custom-logging-backend)
+9. [Dashboard Templates](#dashboard-templates)
+10. [Alerting Recommendations](#alerting-recommendations)
+11. [Request Tracing](#request-tracing)
 
 ---
 
@@ -60,6 +62,93 @@ metricsCollector.eventStream.listen((event) {
 
 ---
 
+## Built-in Observability Adapters
+
+The package includes built-in adapters for popular monitoring platforms. These adapters handle event formatting and delivery automatically.
+
+### Quick Start
+
+```dart
+import 'package:genui_claude/genui_claude.dart';
+
+// DataDog - built-in adapter
+final dataDogAdapter = DataDogAdapter(
+  apiKey: 'your-datadog-api-key',
+  serviceName: 'my-app',
+  environment: 'production',
+);
+dataDogAdapter.connect(globalMetricsCollector);
+
+// Firebase Analytics - built-in adapter
+final firebaseAdapter = FirebaseAnalyticsAdapter(
+  serviceName: 'my-app',
+  environment: 'production',
+);
+firebaseAdapter.connect(globalMetricsCollector);
+
+// Supabase - built-in adapter (table mode)
+final supabaseAdapter = SupabaseAdapter(
+  supabaseUrl: 'https://your-project.supabase.co',
+  supabaseKey: 'your-anon-key',
+  tableName: 'metrics_events',
+);
+supabaseAdapter.connect(globalMetricsCollector);
+
+// Custom adapter - for any platform
+final customAdapter = CustomObservabilityAdapter(
+  onEvent: (event) async {
+    await yourPlatform.sendEvent(event);
+  },
+  serviceName: 'my-app',
+);
+customAdapter.connect(globalMetricsCollector);
+```
+
+### Available Adapters
+
+| Adapter | Use Case | Platform-Specific Features |
+|---------|----------|---------------------------|
+| `DataDogAdapter` | DataDog APM | ddtags, status levels, ddsource |
+| `FirebaseAnalyticsAdapter` | Firebase Analytics | Parameter sanitization, snake_case keys |
+| `SupabaseAdapter` | Supabase Database | Table mode, Edge Function mode |
+| `ConsoleObservabilityAdapter` | Development/Debug | Pretty print, event filtering |
+| `CustomObservabilityAdapter` | Any platform | Callback-based, custom formatting |
+| `BatchingObservabilityAdapter` | Reduce API calls | Wraps any adapter with batching |
+
+### Batching for High-Volume Apps
+
+For high-traffic applications, wrap any adapter with `BatchingObservabilityAdapter`:
+
+```dart
+final innerAdapter = DataDogAdapter(apiKey: 'your-key');
+
+final adapter = BatchingObservabilityAdapter(
+  delegate: innerAdapter,
+  batchSize: 20,          // Flush every 20 events
+  flushInterval: const Duration(minutes: 1),  // Or every minute
+);
+
+adapter.connect(globalMetricsCollector);
+```
+
+### Development vs Production
+
+```dart
+// Development: Console logging
+final adapter = ConsoleObservabilityAdapter(
+  prettyPrint: true,
+  filter: (event) => event is RequestFailureEvent, // Only failures
+);
+
+// Production: Real platform integration
+final adapter = DataDogAdapter(
+  apiKey: 'your-key',
+  environment: kDebugMode ? 'development' : 'production',
+);
+```
+
+---
+
 ## Built-in Metrics
 
 ### MetricsStats Properties
@@ -90,7 +179,33 @@ metricsCollector.eventStream.listen((event) {
 
 ## DataDog Integration
 
-### Setup
+### Using Built-in Adapter (Recommended)
+
+```dart
+import 'package:genui_claude/genui_claude.dart';
+
+// Simple setup with built-in adapter
+final adapter = DataDogAdapter(
+  apiKey: 'your-datadog-api-key',
+  serviceName: 'my-app',
+  environment: 'production',
+  additionalTags: {'version': '1.0.0'},
+);
+
+adapter.connect(globalMetricsCollector);
+
+// Don't forget to dispose when done
+adapter.dispose();
+```
+
+The built-in `DataDogAdapter` automatically:
+- Formats events with DataDog-specific fields (ddsource, ddtags, env)
+- Sets appropriate status levels (info, warning, error)
+- Includes all event metadata
+
+### Custom DataDog Integration
+
+For advanced use cases requiring DataDog Flutter plugin integration:
 
 ```dart
 import 'package:datadog_flutter_plugin/datadog_flutter_plugin.dart';
@@ -204,7 +319,32 @@ class DataDogMetricsReporter {
 
 ## Firebase Analytics Integration
 
-### Setup
+### Using Built-in Adapter (Recommended)
+
+```dart
+import 'package:genui_claude/genui_claude.dart';
+
+// Simple setup with built-in adapter
+final adapter = FirebaseAnalyticsAdapter(
+  serviceName: 'my-app',
+  environment: 'production',
+  additionalTags: {'version': '1.0.0'},
+);
+
+adapter.connect(globalMetricsCollector);
+
+// Don't forget to dispose when done
+adapter.dispose();
+```
+
+The built-in `FirebaseAnalyticsAdapter` automatically:
+- Sanitizes parameter names (replaces dashes with underscores)
+- Formats events with Firebase-compatible structure
+- Uses snake_case keys for all parameters
+
+### Custom Firebase Integration
+
+For advanced use cases requiring custom Firebase Analytics events:
 
 ```dart
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -313,6 +453,103 @@ class FirebasePerformanceReporter {
     }
   }
 }
+```
+
+---
+
+## Supabase Integration
+
+The built-in `SupabaseAdapter` supports two modes: direct table insertion and Edge Function forwarding.
+
+### Table Mode (Recommended for Simple Setups)
+
+```dart
+import 'package:genui_claude/genui_claude.dart';
+
+final adapter = SupabaseAdapter(
+  supabaseUrl: 'https://your-project.supabase.co',
+  supabaseKey: 'your-anon-key',
+  tableName: 'metrics_events',
+  serviceName: 'my-app',
+  environment: 'production',
+);
+
+adapter.connect(globalMetricsCollector);
+```
+
+### Edge Function Mode (For Custom Processing)
+
+```dart
+final adapter = SupabaseAdapter.edgeFunction(
+  supabaseUrl: 'https://your-project.supabase.co',
+  supabaseKey: 'your-anon-key',
+  functionName: 'process-metrics',
+  serviceName: 'my-app',
+);
+
+adapter.connect(globalMetricsCollector);
+```
+
+### Required Supabase Table Schema
+
+```sql
+CREATE TABLE metrics_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_type TEXT NOT NULL,
+  timestamp TIMESTAMPTZ NOT NULL,
+  request_id TEXT,
+  service_name TEXT,
+  environment TEXT,
+  duration_ms INTEGER,
+  error_type TEXT,
+  error_message TEXT,
+  metadata JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Indexes for efficient querying
+CREATE INDEX idx_metrics_events_timestamp ON metrics_events(timestamp);
+CREATE INDEX idx_metrics_events_type ON metrics_events(event_type);
+CREATE INDEX idx_metrics_events_request_id ON metrics_events(request_id);
+```
+
+### Sample Edge Function
+
+```typescript
+// supabase/functions/process-metrics/index.ts
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+serve(async (req) => {
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  )
+
+  const event = await req.json()
+
+  // Custom processing logic
+  const enrichedEvent = {
+    ...event,
+    processed_at: new Date().toISOString(),
+    region: Deno.env.get('DENO_REGION'),
+  }
+
+  const { error } = await supabase
+    .from('metrics_events')
+    .insert(enrichedEvent)
+
+  if (error) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
+  return new Response(JSON.stringify({ success: true }), {
+    headers: { 'Content-Type': 'application/json' },
+  })
+})
 ```
 
 ---
@@ -441,7 +678,53 @@ scrape_configs:
 
 ## Custom Logging Backend
 
-### Structured Logger
+### Using Built-in CustomObservabilityAdapter (Recommended)
+
+For most custom logging needs, use the built-in `CustomObservabilityAdapter`:
+
+```dart
+import 'package:genui_claude/genui_claude.dart';
+import 'dart:convert';
+
+final adapter = CustomObservabilityAdapter(
+  onEvent: (event) async {
+    // Send to any backend
+    final json = jsonEncode(event);
+    print(json); // Or send to your logging service
+  },
+  serviceName: 'my-app',
+  environment: 'production',
+  additionalTags: {'version': '1.0.0'},
+  onErrorCallback: (error, stack) {
+    // Handle send failures
+    print('Failed to send metrics: $error');
+  },
+);
+
+adapter.connect(globalMetricsCollector);
+```
+
+### Custom Formatter
+
+You can provide a custom formatter to transform events:
+
+```dart
+final adapter = CustomObservabilityAdapter(
+  onEvent: (event) async {
+    await myLoggingService.send(event);
+  },
+  formatter: (event) => {
+    'custom_format': true,
+    'type': event.eventType,
+    'data': event.toMap(),
+    'app_version': '1.0.0',
+  },
+);
+```
+
+### Advanced: Custom Structured Logger
+
+For more control, implement your own logger:
 
 ```dart
 import 'dart:convert';

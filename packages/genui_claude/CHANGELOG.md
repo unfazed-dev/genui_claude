@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **SLA-based Circuit Breaker Presets**: Pre-configured circuit breaker settings for different availability requirements
+  - `CircuitBreakerConfig.sla999`: For 99.9% SLA (3 nines) - 8.76 hours/year downtime tolerance
+  - `CircuitBreakerConfig.sla9999`: For 99.99% SLA (4 nines) - 52.6 minutes/year downtime tolerance
+  - `CircuitBreakerConfig.highAvailability`: Maximum resilience for mission-critical systems
+
+- **Observability Adapters**: Built-in adapters for popular monitoring platforms
+  - `ObservabilityAdapter`: Abstract base class for custom integrations
+  - `CustomObservabilityAdapter`: Callback-based adapter for any platform
+  - `DataDogAdapter`: DataDog-specific event formatting and delivery
+  - `FirebaseAnalyticsAdapter`: Firebase Analytics integration
+  - `SupabaseAdapter`: Supabase table insertion and Edge Function support
+  - `ConsoleObservabilityAdapter`: Console logging for development/debugging
+  - `BatchingObservabilityAdapter`: Batches events before sending to reduce API calls
+
 - **RetryConfig**: Configurable retry behavior with exponential backoff
   - `maxAttempts`: Maximum retry attempts (default: 3)
   - `initialDelay`: First retry delay (default: 1 second)

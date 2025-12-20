@@ -11,8 +11,8 @@ Flutter ContentGenerator implementation for Claude AI, enabling Claude-powered g
 - **Streaming Support**: Real-time progressive UI rendering as Claude generates responses
 - **Type-Safe Adapters**: Convert between a2ui_claude and GenUI message formats
 - **Catalog Tool Bridge**: Automatically convert GenUI catalogs to Claude tool schemas
-- **Production Resilience**: Circuit breaker pattern, retry with exponential backoff and jitter
-- **Observability**: Built-in metrics collection with event streaming and aggregated statistics
+- **Production Resilience**: Circuit breaker pattern with SLA-based presets (99.9%, 99.99%, high availability), retry with exponential backoff and jitter
+- **Observability**: Built-in metrics collection with event streaming, aggregated statistics, and ready-to-use adapters for DataDog, Firebase Analytics, Supabase, and custom platforms
 - **Type-Safe Errors**: Sealed exception hierarchy with exhaustive pattern matching
 - **Data Binding Engine**: Two-way binding between widgets and data models with path expressions
 - **Tool Search**: Dynamic tool discovery for large catalogs with keyword-based search

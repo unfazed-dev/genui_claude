@@ -15,6 +15,27 @@ typedef DataModelSubscribe = ValueNotifier<dynamic> Function(BindingPath path);
 /// Takes a [BindingPath] and the new value to set at that path.
 typedef DataModelUpdate = void Function(BindingPath path, dynamic value);
 
+/// Bundles a transformed notifier with its source and listener for cleanup.
+///
+/// Used internally by [BindingController] to ensure listeners are properly
+/// removed from source notifiers when cached transforms are evicted.
+class _CachedTransform {
+  _CachedTransform({
+    required this.notifier,
+    required this.source,
+    required this.listener,
+  });
+
+  final ValueNotifier<dynamic> notifier;
+  final ValueNotifier<dynamic> source;
+  final VoidCallback listener;
+
+  void dispose() {
+    source.removeListener(listener);
+    notifier.dispose();
+  }
+}
+
 /// Orchestrates data binding between widgets and the data model.
 ///
 /// The controller manages the lifecycle of bindings, including:
@@ -70,7 +91,7 @@ class BindingController {
   final Map<String, dynamic> _lastWidgetValues = {};
 
   /// Cache of transformed notifiers for toWidget transformers.
-  final Map<String, ValueNotifier<dynamic>> _transformedNotifiers = {};
+  final Map<String, _CachedTransform> _transformedNotifiers = {};
 
   /// Tracks access order for LRU eviction of transformed notifiers.
   final List<String> _cacheAccessOrder = [];
@@ -135,7 +156,7 @@ class BindingController {
     if (cached != null) {
       // Update LRU access order
       _trackCacheAccess(cacheKey);
-      return cached;
+      return cached.notifier;
     }
 
     // Create transformed notifier that applies toWidget transform
@@ -154,8 +175,12 @@ class BindingController {
     // Evict oldest entries if cache is full before adding new entry
     _evictIfNeeded();
 
-    // Cache for reuse and cleanup
-    _transformedNotifiers[cacheKey] = transformed;
+    // Cache for reuse and cleanup (with listener reference for proper disposal)
+    _transformedNotifiers[cacheKey] = _CachedTransform(
+      notifier: transformed,
+      source: source,
+      listener: listener,
+    );
     _cacheAccessOrder.add(cacheKey);
 
     return transformed;
@@ -172,8 +197,8 @@ class BindingController {
     while (_transformedNotifiers.length >= _maxCacheSize &&
         _cacheAccessOrder.isNotEmpty) {
       final oldest = _cacheAccessOrder.removeAt(0);
-      final notifier = _transformedNotifiers.remove(oldest);
-      notifier?.dispose();
+      final cached = _transformedNotifiers.remove(oldest);
+      cached?.dispose(); // Removes listener from source before disposing notifier
       _lastWidgetValues.remove(oldest);
     }
   }
@@ -218,9 +243,9 @@ class BindingController {
     for (final binding in bindings) {
       final key = '${binding.widgetId}:${binding.property}';
 
-      // Dispose transformed notifier if exists
-      final transformed = _transformedNotifiers.remove(key);
-      transformed?.dispose();
+      // Dispose cached transform (removes listener from source)
+      final cached = _transformedNotifiers.remove(key);
+      cached?.dispose();
       _cacheAccessOrder.remove(key);
 
       binding.dispose();
@@ -237,9 +262,9 @@ class BindingController {
     for (final binding in bindings) {
       final key = '${binding.widgetId}:${binding.property}';
 
-      // Dispose transformed notifier if exists
-      final transformed = _transformedNotifiers.remove(key);
-      transformed?.dispose();
+      // Dispose cached transform (removes listener from source)
+      final cached = _transformedNotifiers.remove(key);
+      cached?.dispose();
       _cacheAccessOrder.remove(key);
 
       binding.dispose();
@@ -255,9 +280,9 @@ class BindingController {
     if (_isDisposed) return;
     _isDisposed = true;
 
-    // Dispose all transformed notifiers
-    for (final notifier in _transformedNotifiers.values) {
-      notifier.dispose();
+    // Dispose all cached transforms (removes listeners from sources)
+    for (final cached in _transformedNotifiers.values) {
+      cached.dispose();
     }
     _transformedNotifiers.clear();
     _cacheAccessOrder.clear();
