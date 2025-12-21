@@ -46,6 +46,7 @@ export 'package:genui/genui.dart'
         DataPath,
         GenUiConversation,
         GenUiHost,
+        GenUiSurface,
         JsonMap,
         SurfaceAdded,
         SurfaceRemoved,
