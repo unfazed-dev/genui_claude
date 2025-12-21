@@ -397,7 +397,7 @@ void main() {
       const mediaType = 'image/jpeg';
       expect(
         _parseMediaType(mediaType),
-        equals(sdk.ImageBlockSourceMediaType.imageJpeg),
+        equals(sdk.Base64ImageSourceMediaType.imageJpeg),
       );
     });
 
@@ -405,7 +405,7 @@ void main() {
       const mediaType = 'image/png';
       expect(
         _parseMediaType(mediaType),
-        equals(sdk.ImageBlockSourceMediaType.imagePng),
+        equals(sdk.Base64ImageSourceMediaType.imagePng),
       );
     });
 
@@ -413,7 +413,7 @@ void main() {
       const mediaType = 'image/gif';
       expect(
         _parseMediaType(mediaType),
-        equals(sdk.ImageBlockSourceMediaType.imageGif),
+        equals(sdk.Base64ImageSourceMediaType.imageGif),
       );
     });
 
@@ -421,7 +421,7 @@ void main() {
       const mediaType = 'image/webp';
       expect(
         _parseMediaType(mediaType),
-        equals(sdk.ImageBlockSourceMediaType.imageWebp),
+        equals(sdk.Base64ImageSourceMediaType.imageWebp),
       );
     });
 
@@ -429,19 +429,19 @@ void main() {
       const mediaType = 'image/unknown';
       expect(
         _parseMediaType(mediaType),
-        equals(sdk.ImageBlockSourceMediaType.imagePng),
+        equals(sdk.Base64ImageSourceMediaType.imagePng),
       );
     });
   });
 }
 
 /// Helper to test media type parsing (mirrors DirectModeHandler logic)
-sdk.ImageBlockSourceMediaType _parseMediaType(String mediaType) {
+sdk.Base64ImageSourceMediaType _parseMediaType(String mediaType) {
   return switch (mediaType) {
-    'image/jpeg' => sdk.ImageBlockSourceMediaType.imageJpeg,
-    'image/png' => sdk.ImageBlockSourceMediaType.imagePng,
-    'image/gif' => sdk.ImageBlockSourceMediaType.imageGif,
-    'image/webp' => sdk.ImageBlockSourceMediaType.imageWebp,
-    _ => sdk.ImageBlockSourceMediaType.imagePng,
+    'image/jpeg' => sdk.Base64ImageSourceMediaType.imageJpeg,
+    'image/png' => sdk.Base64ImageSourceMediaType.imagePng,
+    'image/gif' => sdk.Base64ImageSourceMediaType.imageGif,
+    'image/webp' => sdk.Base64ImageSourceMediaType.imageWebp,
+    _ => sdk.Base64ImageSourceMediaType.imagePng,
   };
 }

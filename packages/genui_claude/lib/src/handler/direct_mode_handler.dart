@@ -346,8 +346,8 @@ class DirectModeHandler implements ApiHandler {
       case 'image':
         final source = map['source'] as Map<String, dynamic>;
         return sdk.Block.image(
-          source: sdk.ImageBlockSource(
-            type: sdk.ImageBlockSourceType.base64,
+          source: sdk.ImageBlockSource.base64ImageSource(
+            type: 'base64',
             mediaType: _parseMediaType(source['media_type'] as String),
             data: source['data'] as String,
           ),
@@ -384,13 +384,13 @@ class DirectModeHandler implements ApiHandler {
   }
 
   /// Parses a media type string to the SDK enum.
-  sdk.ImageBlockSourceMediaType _parseMediaType(String mediaType) {
+  sdk.Base64ImageSourceMediaType _parseMediaType(String mediaType) {
     return switch (mediaType) {
-      'image/jpeg' => sdk.ImageBlockSourceMediaType.imageJpeg,
-      'image/png' => sdk.ImageBlockSourceMediaType.imagePng,
-      'image/gif' => sdk.ImageBlockSourceMediaType.imageGif,
-      'image/webp' => sdk.ImageBlockSourceMediaType.imageWebp,
-      _ => sdk.ImageBlockSourceMediaType.imagePng, // Default fallback
+      'image/jpeg' => sdk.Base64ImageSourceMediaType.imageJpeg,
+      'image/png' => sdk.Base64ImageSourceMediaType.imagePng,
+      'image/gif' => sdk.Base64ImageSourceMediaType.imageGif,
+      'image/webp' => sdk.Base64ImageSourceMediaType.imageWebp,
+      _ => sdk.Base64ImageSourceMediaType.imagePng, // Default fallback
     };
   }
 
