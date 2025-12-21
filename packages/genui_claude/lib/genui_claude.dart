@@ -7,7 +7,6 @@
 /// ## Quick Start
 ///
 /// ```dart
-/// import 'package:genui/genui.dart';
 /// import 'package:genui_claude/genui_claude.dart';
 ///
 /// // Create content generator (development mode)
@@ -23,6 +22,9 @@
 /// );
 /// ```
 ///
+/// This package re-exports core genui types (Catalog, CatalogItem, etc.)
+/// so you only need a single import.
+///
 /// See also:
 /// - [ClaudeContentGenerator] - Main content generator class
 /// - [ClaudeConfig] - Configuration for direct API mode
@@ -32,6 +34,23 @@ library genui_claude;
 
 import 'package:genui_claude/genui_claude.dart'
     show ClaudeContentGenerator, ClaudeConfig, ProxyConfig, A2uiMessageAdapter;
+
+// Re-export core genui types for single-import convenience
+export 'package:genui/genui.dart'
+    show
+        A2uiMessageProcessor,
+        Catalog,
+        CatalogItem,
+        CatalogItemContext,
+        ContentGeneratorError,
+        DataPath,
+        GenUiConversation,
+        GenUiHost,
+        JsonMap,
+        SurfaceAdded,
+        SurfaceRemoved,
+        UserActionEvent,
+        UserMessage;
 
 export 'src/adapter/a2ui_control_tools.dart';
 export 'src/adapter/catalog_tool_bridge.dart';
