@@ -7,7 +7,6 @@ library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:genui/genui.dart';
 import 'package:genui_claude/genui_claude.dart';
 
 import '../handler/mock_api_handler.dart';
