@@ -6,6 +6,7 @@ import 'package:genui/genui.dart';
 import 'package:genui_claude/src/adapter/message_adapter.dart';
 import 'package:genui_claude/src/config/claude_config.dart';
 import 'package:genui_claude/src/handler/api_handler.dart';
+import 'package:genui_claude/src/models/thinking_content.dart';
 import 'package:genui_claude/src/handler/direct_mode_handler.dart';
 import 'package:genui_claude/src/handler/proxy_mode_handler.dart';
 import 'package:genui_claude/src/search/tool_use_interceptor.dart';
@@ -116,6 +117,7 @@ class ClaudeContentGenerator implements ContentGenerator {
 
   final _a2uiController = StreamController<A2uiMessage>.broadcast();
   final _textController = StreamController<String>.broadcast();
+  final _thinkingController = StreamController<ThinkingContent>.broadcast();
   final _errorController = StreamController<ContentGeneratorError>.broadcast();
   final _isProcessing = ValueNotifier<bool>(false);
 
@@ -129,6 +131,13 @@ class ClaudeContentGenerator implements ContentGenerator {
 
   @override
   Stream<String> get textResponseStream => _textController.stream;
+
+  /// Stream of thinking content from Claude's extended thinking feature.
+  ///
+  /// Emits [ThinkingContent] objects as Claude's reasoning is streamed.
+  /// Use this to display Claude's thought process in the UI when
+  /// interleaved thinking is enabled.
+  Stream<ThinkingContent> get thinkingStream => _thinkingController.stream;
 
   @override
   Stream<ContentGeneratorError> get errorStream => _errorController.stream;
@@ -211,10 +220,12 @@ class ClaudeContentGenerator implements ContentGenerator {
             // Stream complete
             break;
 
-          case a2ui.ThinkingEvent():
-            // Thinking events from Claude 4+ models - can be exposed via
-            // dedicated stream in future iterations if needed
-            break;
+          case a2ui.ThinkingEvent(:final content, :final isComplete):
+            // Emit thinking content for UI display
+            _thinkingController.add(ThinkingContent(
+              content: content,
+              isComplete: isComplete,
+            ));
         }
       }
     } on Exception catch (e, stackTrace) {
@@ -229,6 +240,7 @@ class ClaudeContentGenerator implements ContentGenerator {
     _handler.dispose();
     _a2uiController.close();
     _textController.close();
+    _thinkingController.close();
     _errorController.close();
     _isProcessing.dispose();
     _streamHandler.dispose();

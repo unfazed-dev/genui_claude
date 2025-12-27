@@ -46,6 +46,7 @@ export 'src/config/claude_config.dart';
 export 'src/config/retry_config.dart';
 export 'src/content_generator/claude_content_generator.dart';
 export 'src/exceptions/claude_exceptions.dart';
+export 'src/models/thinking_content.dart';
 export 'src/handler/handler.dart';
 export 'src/metrics/metrics.dart';
 export 'src/resilience/circuit_breaker.dart';
