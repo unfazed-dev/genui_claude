@@ -53,15 +53,22 @@ class ClaudeContentGenerator implements ContentGenerator {
   ///
   /// This is the recommended pattern for production deployments
   /// where the API key should not be exposed to the client.
+  ///
+  /// - [authToken]: Optional static auth token (sent as Bearer token).
+  /// - [authTokenProvider]: Optional callback to get fresh token for each request.
+  ///   When provided, this is preferred over [authToken]. Use this when the token
+  ///   may change during the session (e.g., automatic refresh by Supabase).
   ClaudeContentGenerator.proxy({
     required Uri proxyEndpoint,
     String? authToken,
+    TokenProvider? authTokenProvider,
     ProxyConfig proxyConfig = ProxyConfig.defaults,
     this.tools,
     this.toolInterceptor,
   })  : _handler = ProxyModeHandler(
           endpoint: proxyEndpoint,
           authToken: authToken,
+          authTokenProvider: authTokenProvider,
           config: proxyConfig,
         ),
         _model = null,

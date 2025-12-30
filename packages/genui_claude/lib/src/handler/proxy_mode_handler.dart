@@ -14,6 +14,20 @@ import 'package:uuid/uuid.dart';
 final _log = Logger('ProxyModeHandler');
 const _uuid = Uuid();
 
+/// Callback type for providing auth tokens dynamically.
+///
+/// Called before each request to get the current valid token.
+/// Returns null if no token is available.
+///
+/// Example:
+/// ```dart
+/// final handler = ProxyModeHandler(
+///   endpoint: Uri.parse('https://api.example.com'),
+///   authTokenProvider: () => supabaseService.currentSession?.accessToken,
+/// );
+/// ```
+typedef TokenProvider = String? Function();
+
 /// Handler for backend proxy API access with production resilience.
 ///
 /// Sends requests to a backend proxy that handles Claude API calls,
@@ -52,7 +66,10 @@ class ProxyModeHandler implements ApiHandler {
   /// Creates a proxy mode handler with production resilience.
   ///
   /// - [endpoint]: The backend proxy URL (must have http or https scheme)
-  /// - [authToken]: Optional auth token (sent as Bearer token)
+  /// - [authToken]: Optional static auth token (sent as Bearer token)
+  /// - [authTokenProvider]: Optional callback to get fresh token for each request.
+  ///   When provided, this is preferred over [authToken]. Use this when the token
+  ///   may change during the session (e.g., automatic refresh).
   /// - [config]: Optional configuration for timeouts, retries, headers.
   ///   By default, a circuit breaker is enabled via [ProxyConfig.circuitBreakerConfig].
   ///   Set [ProxyConfig.disableCircuitBreaker] to true to opt-out.
@@ -66,6 +83,7 @@ class ProxyModeHandler implements ApiHandler {
   ProxyModeHandler({
     required Uri endpoint,
     String? authToken,
+    TokenProvider? authTokenProvider,
     ProxyConfig config = ProxyConfig.defaults,
     RetryConfig? retryConfig,
     CircuitBreaker? circuitBreaker,
@@ -78,6 +96,7 @@ class ProxyModeHandler implements ApiHandler {
         ),
         _endpoint = endpoint,
         _authToken = authToken,
+        _authTokenProvider = authTokenProvider,
         _config = config,
         // Use explicit retryConfig if provided, otherwise create one from ProxyConfig
         _retryConfig =
@@ -96,7 +115,14 @@ class ProxyModeHandler implements ApiHandler {
 
   final Uri _endpoint;
   final String? _authToken;
+  final TokenProvider? _authTokenProvider;
   final ProxyConfig _config;
+
+  /// Get the current auth token.
+  ///
+  /// Prefers [_authTokenProvider] over static [_authToken] to ensure
+  /// fresh tokens are used when available.
+  String? get _currentAuthToken => _authTokenProvider?.call() ?? _authToken;
   final RetryConfig _retryConfig;
   final CircuitBreaker? _circuitBreaker;
   final Duration _streamInactivityTimeout;
@@ -280,11 +306,12 @@ class ProxyModeHandler implements ApiHandler {
 
       // Create HTTP request
       final httpRequest = http.Request('POST', _endpoint);
+      final authToken = _currentAuthToken;
       httpRequest.headers.addAll({
         'Content-Type': 'application/json',
         'Accept': 'text/event-stream',
         'X-Request-ID': requestId,
-        if (_authToken != null) 'Authorization': 'Bearer $_authToken',
+        if (authToken != null) 'Authorization': 'Bearer $authToken',
         ..._config.headers ?? {},
       });
       httpRequest.body = jsonEncode(requestBody);
