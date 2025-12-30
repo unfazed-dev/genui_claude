@@ -11,9 +11,7 @@ _WidgetNode _$WidgetNodeFromJson(Map<String, dynamic> json) => _WidgetNode(
   id: json['id'] as String?,
   properties:
       json['properties'] as Map<String, dynamic>? ?? const <String, dynamic>{},
-  children: (json['children'] as List<dynamic>?)
-      ?.map((e) => WidgetNode.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  children: _childrenFromJson(json['children']),
   dataBinding: json['dataBinding'],
 );
 

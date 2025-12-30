@@ -23,7 +23,11 @@ mixin _$WidgetNode {
 /// during conversion to GenUI Component.
  String? get id;/// Configuration properties for this widget.
  Map<String, dynamic> get properties;/// Child widgets for container-type widgets.
- List<WidgetNode>? get children;/// Optional data binding specification for dynamic content.
+///
+/// Supports both:
+/// - Full widget objects (nested [WidgetNode] instances)
+/// - String ID references (converted to placeholder nodes with type='_ref')
+@JsonKey(fromJson: _childrenFromJson) List<WidgetNode>? get children;/// Optional data binding specification for dynamic content.
 ///
 /// Can be either:
 /// - A [String] path (e.g., 'form.email') for simple one-way binding
@@ -62,7 +66,7 @@ abstract mixin class $WidgetNodeCopyWith<$Res>  {
   factory $WidgetNodeCopyWith(WidgetNode value, $Res Function(WidgetNode) _then) = _$WidgetNodeCopyWithImpl;
 @useResult
 $Res call({
- String type, String? id, Map<String, dynamic> properties, List<WidgetNode>? children, Object? dataBinding
+ String type, String? id, Map<String, dynamic> properties,@JsonKey(fromJson: _childrenFromJson) List<WidgetNode>? children, Object? dataBinding
 });
 
 
@@ -170,7 +174,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String type,  String? id,  Map<String, dynamic> properties,  List<WidgetNode>? children,  Object? dataBinding)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String type,  String? id,  Map<String, dynamic> properties, @JsonKey(fromJson: _childrenFromJson)  List<WidgetNode>? children,  Object? dataBinding)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _WidgetNode() when $default != null:
 return $default(_that.type,_that.id,_that.properties,_that.children,_that.dataBinding);case _:
@@ -191,7 +195,7 @@ return $default(_that.type,_that.id,_that.properties,_that.children,_that.dataBi
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String type,  String? id,  Map<String, dynamic> properties,  List<WidgetNode>? children,  Object? dataBinding)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String type,  String? id,  Map<String, dynamic> properties, @JsonKey(fromJson: _childrenFromJson)  List<WidgetNode>? children,  Object? dataBinding)  $default,) {final _that = this;
 switch (_that) {
 case _WidgetNode():
 return $default(_that.type,_that.id,_that.properties,_that.children,_that.dataBinding);case _:
@@ -211,7 +215,7 @@ return $default(_that.type,_that.id,_that.properties,_that.children,_that.dataBi
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String type,  String? id,  Map<String, dynamic> properties,  List<WidgetNode>? children,  Object? dataBinding)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String type,  String? id,  Map<String, dynamic> properties, @JsonKey(fromJson: _childrenFromJson)  List<WidgetNode>? children,  Object? dataBinding)?  $default,) {final _that = this;
 switch (_that) {
 case _WidgetNode() when $default != null:
 return $default(_that.type,_that.id,_that.properties,_that.children,_that.dataBinding);case _:
@@ -226,7 +230,7 @@ return $default(_that.type,_that.id,_that.properties,_that.children,_that.dataBi
 @JsonSerializable()
 
 class _WidgetNode implements WidgetNode {
-  const _WidgetNode({required this.type, this.id, final  Map<String, dynamic> properties = const <String, dynamic>{}, final  List<WidgetNode>? children, this.dataBinding}): _properties = properties,_children = children;
+  const _WidgetNode({required this.type, this.id, final  Map<String, dynamic> properties = const <String, dynamic>{}, @JsonKey(fromJson: _childrenFromJson) final  List<WidgetNode>? children, this.dataBinding}): _properties = properties,_children = children;
   factory _WidgetNode.fromJson(Map<String, dynamic> json) => _$WidgetNodeFromJson(json);
 
 /// The widget type identifier (e.g., 'text', 'button', 'container').
@@ -247,9 +251,17 @@ class _WidgetNode implements WidgetNode {
 }
 
 /// Child widgets for container-type widgets.
+///
+/// Supports both:
+/// - Full widget objects (nested [WidgetNode] instances)
+/// - String ID references (converted to placeholder nodes with type='_ref')
  final  List<WidgetNode>? _children;
 /// Child widgets for container-type widgets.
-@override List<WidgetNode>? get children {
+///
+/// Supports both:
+/// - Full widget objects (nested [WidgetNode] instances)
+/// - String ID references (converted to placeholder nodes with type='_ref')
+@override@JsonKey(fromJson: _childrenFromJson) List<WidgetNode>? get children {
   final value = _children;
   if (value == null) return null;
   if (_children is EqualUnmodifiableListView) return _children;
@@ -298,7 +310,7 @@ abstract mixin class _$WidgetNodeCopyWith<$Res> implements $WidgetNodeCopyWith<$
   factory _$WidgetNodeCopyWith(_WidgetNode value, $Res Function(_WidgetNode) _then) = __$WidgetNodeCopyWithImpl;
 @override @useResult
 $Res call({
- String type, String? id, Map<String, dynamic> properties, List<WidgetNode>? children, Object? dataBinding
+ String type, String? id, Map<String, dynamic> properties,@JsonKey(fromJson: _childrenFromJson) List<WidgetNode>? children, Object? dataBinding
 });
 
 
