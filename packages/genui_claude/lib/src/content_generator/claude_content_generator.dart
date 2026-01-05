@@ -58,11 +58,15 @@ class ClaudeContentGenerator implements ContentGenerator {
   /// - [authTokenProvider]: Optional callback to get fresh token for each request.
   ///   When provided, this is preferred over [authToken]. Use this when the token
   ///   may change during the session (e.g., automatic refresh by Supabase).
+  /// - [systemInstruction]: Optional system instruction to send with requests.
+  ///   If provided, this is sent to the proxy as the 'system' field.
+  ///   If null, the proxy server should provide its own system instruction.
   ClaudeContentGenerator.proxy({
     required Uri proxyEndpoint,
     String? authToken,
     TokenProvider? authTokenProvider,
     ProxyConfig proxyConfig = ProxyConfig.defaults,
+    this.systemInstruction,
     this.tools,
     this.toolInterceptor,
   })  : _handler = ProxyModeHandler(
@@ -73,7 +77,6 @@ class ClaudeContentGenerator implements ContentGenerator {
         ),
         _model = null,
         _config = null,
-        systemInstruction = null,
         _isDirectMode = false;
 
   /// Creates a content generator with a custom handler.
