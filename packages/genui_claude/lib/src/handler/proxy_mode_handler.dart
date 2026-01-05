@@ -317,9 +317,13 @@ class ProxyModeHandler implements ApiHandler {
       httpRequest.body = jsonEncode(requestBody);
 
       _log.fine('[Request $requestId] Sending request (attempt $attempt)');
+      print('[ProxyModeHandler] Sending POST to $_endpoint');
+      print('[ProxyModeHandler] Auth token present: ${authToken != null}');
+      print('[ProxyModeHandler] Request body size: ${httpRequest.body.length} bytes');
 
       // Send request and get streamed response
       final response = await _client.send(httpRequest).timeout(_config.timeout);
+      print('[ProxyModeHandler] Response status: ${response.statusCode}');
 
       // Check for HTTP errors
       if (response.statusCode != 200) {
@@ -342,7 +346,14 @@ class ProxyModeHandler implements ApiHandler {
       }
 
       // Parse SSE stream with inactivity timeout
-      yield* _parseSSEStreamWithTimeout(response.stream, requestId);
+      print('[ProxyModeHandler] Starting SSE stream parsing...');
+      var sseEventCount = 0;
+      await for (final event in _parseSSEStreamWithTimeout(response.stream, requestId)) {
+        sseEventCount++;
+        print('[ProxyModeHandler] SSE event $sseEventCount: ${event['type']}');
+        yield event;
+      }
+      print('[ProxyModeHandler] SSE stream complete, $sseEventCount events');
     } on async.TimeoutException catch (e, stackTrace) {
       _log.warning(
         '[Request $requestId] Request timed out after ${_config.timeout}',

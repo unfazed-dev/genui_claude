@@ -176,11 +176,13 @@ class ClaudeContentGenerator implements ContentGenerator {
     // coverage:ignore-end
 
     _isProcessing.value = true;
+    debugPrint('[ClaudeContentGenerator] sendRequest started');
 
     try {
       // Convert messages to Claude API format
       final allMessages = [...?history, message];
       final claudeMessages = MessageConverter.toClaudeMessages(allMessages);
+      debugPrint('[ClaudeContentGenerator] Converted ${claudeMessages.length} messages');
 
       // Build API request
       final request = ApiRequest(
@@ -193,14 +195,20 @@ class ClaudeContentGenerator implements ContentGenerator {
         topK: _config?.topK,
         stopSequences: _config?.stopSequences,
       );
+      debugPrint('[ClaudeContentGenerator] ApiRequest built, tools: ${tools?.length ?? 0}');
+      debugPrint('[ClaudeContentGenerator] systemInstruction: ${systemInstruction?.length ?? 0} chars');
 
       // Get stream from handler
       final eventStream = _handler.createStream(request);
+      debugPrint('[ClaudeContentGenerator] Handler stream created, starting processing...');
 
+      var eventCount = 0;
       // Process through ClaudeStreamHandler
       await for (final event in _streamHandler.streamRequest(
         messageStream: eventStream,
       )) {
+        eventCount++;
+        debugPrint('[ClaudeContentGenerator] Event $eventCount: ${event.runtimeType}');
         switch (event) {
           // coverage:ignore-start
           // NOTE: A2uiMessageEvent handling requires mock stream handler setup
@@ -238,9 +246,12 @@ class ClaudeContentGenerator implements ContentGenerator {
             ));
         }
       }
+      debugPrint('[ClaudeContentGenerator] Stream complete, processed $eventCount events');
     } on Exception catch (e, stackTrace) {
+      debugPrint('[ClaudeContentGenerator] Exception: $e');
       _errorController.add(ContentGeneratorError(e, stackTrace));
     } finally {
+      debugPrint('[ClaudeContentGenerator] sendRequest finished');
       _isProcessing.value = false;
     }
   }
