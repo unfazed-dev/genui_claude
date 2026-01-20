@@ -299,28 +299,9 @@ class MyCatalog extends Catalog {
 - [README](packages/a2ui_claude/README.md) - Quick start and API overview
 - [Examples](packages/a2ui_claude/example/) - Tool conversion, parsing, streaming
 
-## Development
-
-This repository uses [Melos](https://melos.invertase.dev/) for monorepo management.
-
-```bash
-# Install melos
-dart pub global activate melos
-
-# Bootstrap (install deps, link packages)
-melos bootstrap
-
-# Run tests
-melos run test
-
-# Run analyzer
-melos run analyze
-```
-
 ## License
 
 BSD-3-Clause License - see [LICENSE](LICENSE) for details.
 
 ---
 
-Authored and orchestrated by **Evan Pierre Louis - (unfazed-dev)**, with pair programming powered by [Claude Code](https://claude.com/claude-code) from Anthropic.
